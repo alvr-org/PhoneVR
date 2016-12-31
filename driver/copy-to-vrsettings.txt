@@ -1,0 +1,12 @@
+
+  "driver_PVRServer": {
+    "device_IP": "",
+    "video_stream_port": 15243,
+    "pose_stream_port": 51423,
+    "quality": 11, // if your phone is enough powerful or it is in "high performace" profile, increase this value
+    "bitrate": 3000000, // if you have a bad wifi connection, decrease this value
+    "screed_ID": 0,
+    "enable": true,
+    "latency_correction": 0.070, //calibrate with mode 1
+    "warp_correction": 0.030 //after latency correction, calibrate with mode 2
+  },
