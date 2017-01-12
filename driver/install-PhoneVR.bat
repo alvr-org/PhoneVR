@@ -1,10 +1,10 @@
 pushd %~dp0\bin
 
-set drvpath="C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\PVRServer"
+set drvpath="C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\oculus_PVRServer"
 set dir64="ffmpeg-3.2.2-win64-shared"
 set dir32="ffmpeg-3.2.2-win32-shared"
 
-xcopy /eyi PVRServer %drvpath%
+xcopy /eyi oculus_PVRServer %drvpath%
 
 if exist %dir64%.zip del /f %dir64%.zip
 wget https://ffmpeg.zeranoe.com/builds/win64/shared/%dir64%.zip
@@ -21,10 +21,5 @@ del /f %dir32%.zip
 rmdir /s /q %dir32%
 
 popd
-
-rem does not work
-rem type nul >C:\pvrdebug.txt
-rem icacls C:\pvrdebug.txt /setowner %username%
-rem icacls C:\pvrdebug.txt /grant %username%:F
 
 pause
