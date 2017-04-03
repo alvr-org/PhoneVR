@@ -1,0 +1,8 @@
+{
+   "alwaysActivate": false,
+   "resourceOnly" : false,
+   "hmd_presence" :
+    [
+        "*.*"
+    ]
+}

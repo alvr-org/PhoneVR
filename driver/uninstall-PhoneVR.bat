@@ -27,22 +27,11 @@ if '%errorlevel%' NEQ '0' (
 :gotAdmin
     pushd "%CD%"
     CD /D "%~dp0"
-:--------------------------------------   
- 
+:--------------------------------------    
 @echo off
-set instpath="C:\Program Files\PhoneVR"
-mkdir %instpath%
-icacls %instpath% /grant:r Everyone:(OI)(CI)F
-xcopy /eyi %~dp0bin %instpath%
 
-if "%PROCESSOR_ARCHITECTURE%" == "x86" (
-  "C:\Program Files\Steam\steamapps\common\SteamVR\bin\win32\vrpathreg" adddriver %instpath%\PVRServer
-)
-if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
-  "C:\Program Files (x86)\Steam\steamapps\common\SteamVR\bin\win64\vrpathreg" adddriver %instpath%\PVRServer
-)
-
+rmdir /s /q "C:\Program Files\PhoneVR"
 echo.
-echo PhoneVR installed
+echo PhoneVR uninstalled
 echo.
 pause
