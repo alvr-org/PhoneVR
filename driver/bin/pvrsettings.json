@@ -1,19 +1,13 @@
 {
     "enable" : true,
     "game_fps" : 60,
-    "video_stream_fps" : 60,
     "video_stream_port" : 15243,
     "pose_stream_port" : 51423,
     "pairing_port" : 32415,
     "encoder" : {
         "preset" : "ultrafast",
         "tune" : "zerolatency",
-        "rc_method" : 0,
         "qp" : 20,
-        "qcomp" : 0.0,
-        "bitrate" : -1,
-        "keyint_max" : -1,
-        "intra_refresh" : false,
         "profile" : "baseline"
     }
 }

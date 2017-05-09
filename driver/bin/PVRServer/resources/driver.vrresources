@@ -1,0 +1,15 @@
+{
+  "jsonid": "vrresources",
+  "statusicons": {
+    "HMD": {
+      "Prop_NamedIconPathDeviceOff_String": "",
+      "Prop_NamedIconPathDeviceSearching_String": "",
+      "Prop_NamedIconPathDeviceSearchingAlert_String": "",
+      "Prop_NamedIconPathDeviceReady_String": "",
+      "Prop_NamedIconPathDeviceReadyAlert_String": "",
+      "Prop_NamedIconPathDeviceNotReady_String": "",
+      "Prop_NamedIconPathDeviceStandby_String": "",
+      "Prop_NamedIconPathDeviceAlertLow_String": ""
+    }
+  }
+}

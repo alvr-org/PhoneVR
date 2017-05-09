@@ -1,5 +1,7 @@
 {
    "alwaysActivate": false,
+   "name" : "PVRServer",
+   "directory" : "",
    "resourceOnly" : false,
    "hmd_presence" :
     [
