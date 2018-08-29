@@ -1,0 +1,581 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8B396BB21E1BDF7A00D9A0A1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B396BB11E1BDF7A00D9A0A1 /* AppDelegate.swift */; };
+		8B396BB71E1BDF7A00D9A0A1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B396BB51E1BDF7A00D9A0A1 /* Main.storyboard */; };
+		8B396BBC1E1BDF7A00D9A0A1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8B396BBA1E1BDF7A00D9A0A1 /* LaunchScreen.storyboard */; };
+		8B396BCA1E1BE0A500D9A0A1 /* GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B396BC71E1BE0A500D9A0A1 /* GameController.swift */; };
+		8B396BCB1E1BE0A500D9A0A1 /* IOSGlobals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B396BC81E1BE0A500D9A0A1 /* IOSGlobals.swift */; };
+		8B396BCC1E1BE0A500D9A0A1 /* MainController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B396BC91E1BE0A500D9A0A1 /* MainController.swift */; };
+		8B50CE651E4D20B700BE8E9F /* PVRMobileGlobals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8B50CE5B1E4D20B700BE8E9F /* PVRMobileGlobals.cpp */; };
+		8B50CE661E4D20B700BE8E9F /* PVRRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8B50CE5D1E4D20B700BE8E9F /* PVRRenderer.cpp */; };
+		8B50CE671E4D20B700BE8E9F /* PVRSockets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8B50CE5F1E4D20B700BE8E9F /* PVRSockets.cpp */; };
+		8B50CE681E4D20B700BE8E9F /* PVRStreamReceiver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8B50CE611E4D20B700BE8E9F /* PVRStreamReceiver.cpp */; };
+		8B50CE691E4D20B700BE8E9F /* PVRWatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8B50CE631E4D20B700BE8E9F /* PVRWatch.cpp */; };
+		8B7949F31E1C0C9D00B35DAB /* SettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7949F21E1C0C9D00B35DAB /* SettingsController.swift */; };
+		8B7949F51E1C166800B35DAB /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B7949F41E1C166800B35DAB /* Media.xcassets */; };
+		8BD088DB1E1BE32C00453E10 /* PVRConstants.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BD088B91E1BE32B00453E10 /* PVRConstants.cpp */; };
+		8BD088DC1E1BE32C00453E10 /* PVRSocketsUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BD088BB1E1BE32B00453E10 /* PVRSocketsUtils.cpp */; };
+		8BD089511E1BE37200453E10 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BD089461E1BE37200453E10 /* libavcodec.a */; };
+		8BD089521E1BE37200453E10 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BD089471E1BE37200453E10 /* libavformat.a */; };
+		8BD089531E1BE37200453E10 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BD089481E1BE37200453E10 /* libavutil.a */; };
+		8BD089541E1BE37200453E10 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BD089491E1BE37200453E10 /* libswresample.a */; };
+		8BD089551E1BE37200453E10 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BD0894A1E1BE37200453E10 /* libswscale.a */; };
+		8BD089561E1BE37200453E10 /* libavcodec.pc in Resources */ = {isa = PBXBuildFile; fileRef = 8BD0894C1E1BE37200453E10 /* libavcodec.pc */; };
+		8BD089571E1BE37200453E10 /* libavformat.pc in Resources */ = {isa = PBXBuildFile; fileRef = 8BD0894D1E1BE37200453E10 /* libavformat.pc */; };
+		8BD089581E1BE37200453E10 /* libavutil.pc in Resources */ = {isa = PBXBuildFile; fileRef = 8BD0894E1E1BE37200453E10 /* libavutil.pc */; };
+		8BD089591E1BE37200453E10 /* libswresample.pc in Resources */ = {isa = PBXBuildFile; fileRef = 8BD0894F1E1BE37200453E10 /* libswresample.pc */; };
+		8BD0895A1E1BE37200453E10 /* libswscale.pc in Resources */ = {isa = PBXBuildFile; fileRef = 8BD089501E1BE37200453E10 /* libswscale.pc */; };
+		8BD0895C1E1BE47F00453E10 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BD0895B1E1BE47F00453E10 /* libbz2.tbd */; };
+		8BD0895E1E1BE48D00453E10 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BD0895D1E1BE48D00453E10 /* libiconv.tbd */; };
+		8BD089601E1BE4A200453E10 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BD0895F1E1BE4A200453E10 /* libz.tbd */; };
+		8BD089621E1BE4BB00453E10 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BD089611E1BE4BB00453E10 /* CoreMedia.framework */; };
+		8BD089641E1BE4C500453E10 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BD089631E1BE4C500453E10 /* VideoToolbox.framework */; };
+		8C765021DE8329FCFBB57595 /* Pods_PhoneVR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E1A8E27977C0ACAF08ED25B /* Pods_PhoneVR.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		4F0E2BE8A0189E129B2A7BD3 /* Pods-PhoneVR.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PhoneVR.release.xcconfig"; path = "Pods/Target Support Files/Pods-PhoneVR/Pods-PhoneVR.release.xcconfig"; sourceTree = "<group>"; };
+		8B396BAE1E1BDF7A00D9A0A1 /* PhoneVR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhoneVR.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B396BB11E1BDF7A00D9A0A1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		8B396BB61E1BDF7A00D9A0A1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		8B396BBB1E1BDF7A00D9A0A1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		8B396BBD1E1BDF7A00D9A0A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8B396BC31E1BE00D00D9A0A1 /* PhoneVR-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PhoneVR-Bridging-Header.h"; sourceTree = "<group>"; };
+		8B396BC71E1BE0A500D9A0A1 /* GameController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
+		8B396BC81E1BE0A500D9A0A1 /* IOSGlobals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IOSGlobals.swift; sourceTree = "<group>"; };
+		8B396BC91E1BE0A500D9A0A1 /* MainController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainController.swift; sourceTree = "<group>"; };
+		8B50CE5B1E4D20B700BE8E9F /* PVRMobileGlobals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRMobileGlobals.cpp; sourceTree = "<group>"; };
+		8B50CE5C1E4D20B700BE8E9F /* PVRMobileGlobals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRMobileGlobals.h; sourceTree = "<group>"; };
+		8B50CE5D1E4D20B700BE8E9F /* PVRRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRRenderer.cpp; sourceTree = "<group>"; };
+		8B50CE5E1E4D20B700BE8E9F /* PVRRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRRenderer.h; sourceTree = "<group>"; };
+		8B50CE5F1E4D20B700BE8E9F /* PVRSockets.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRSockets.cpp; sourceTree = "<group>"; };
+		8B50CE601E4D20B700BE8E9F /* PVRSockets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRSockets.h; sourceTree = "<group>"; };
+		8B50CE611E4D20B700BE8E9F /* PVRStreamReceiver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRStreamReceiver.cpp; sourceTree = "<group>"; };
+		8B50CE621E4D20B700BE8E9F /* PVRStreamReceiver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRStreamReceiver.h; sourceTree = "<group>"; };
+		8B50CE631E4D20B700BE8E9F /* PVRWatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRWatch.cpp; sourceTree = "<group>"; };
+		8B50CE641E4D20B700BE8E9F /* PVRWatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRWatch.h; sourceTree = "<group>"; };
+		8B7949F21E1C0C9D00B35DAB /* SettingsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsController.swift; sourceTree = "<group>"; };
+		8B7949F41E1C166800B35DAB /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
+		8BD088B91E1BE32B00453E10 /* PVRConstants.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRConstants.cpp; sourceTree = "<group>"; };
+		8BD088BA1E1BE32B00453E10 /* PVRConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRConstants.h; sourceTree = "<group>"; };
+		8BD088BB1E1BE32B00453E10 /* PVRSocketsUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRSocketsUtils.cpp; sourceTree = "<group>"; };
+		8BD088BC1E1BE32B00453E10 /* PVRSocketsUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRSocketsUtils.h; sourceTree = "<group>"; };
+		8BD089461E1BE37200453E10 /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavcodec.a; sourceTree = "<group>"; };
+		8BD089471E1BE37200453E10 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavformat.a; sourceTree = "<group>"; };
+		8BD089481E1BE37200453E10 /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libavutil.a; sourceTree = "<group>"; };
+		8BD089491E1BE37200453E10 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswresample.a; sourceTree = "<group>"; };
+		8BD0894A1E1BE37200453E10 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswscale.a; sourceTree = "<group>"; };
+		8BD0894C1E1BE37200453E10 /* libavcodec.pc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = libavcodec.pc; sourceTree = "<group>"; };
+		8BD0894D1E1BE37200453E10 /* libavformat.pc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = libavformat.pc; sourceTree = "<group>"; };
+		8BD0894E1E1BE37200453E10 /* libavutil.pc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = libavutil.pc; sourceTree = "<group>"; };
+		8BD0894F1E1BE37200453E10 /* libswresample.pc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = libswresample.pc; sourceTree = "<group>"; };
+		8BD089501E1BE37200453E10 /* libswscale.pc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = libswscale.pc; sourceTree = "<group>"; };
+		8BD0895B1E1BE47F00453E10 /* libbz2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.tbd; path = usr/lib/libbz2.tbd; sourceTree = SDKROOT; };
+		8BD0895D1E1BE48D00453E10 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
+		8BD0895F1E1BE4A200453E10 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		8BD089611E1BE4BB00453E10 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		8BD089631E1BE4C500453E10 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
+		8E1A8E27977C0ACAF08ED25B /* Pods_PhoneVR.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PhoneVR.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8E2E61F361D9805F145191B9 /* Pods-PhoneVR.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PhoneVR.debug.xcconfig"; path = "Pods/Target Support Files/Pods-PhoneVR/Pods-PhoneVR.debug.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8B396BAB1E1BDF7A00D9A0A1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8BD089641E1BE4C500453E10 /* VideoToolbox.framework in Frameworks */,
+				8BD089621E1BE4BB00453E10 /* CoreMedia.framework in Frameworks */,
+				8BD089601E1BE4A200453E10 /* libz.tbd in Frameworks */,
+				8BD0895E1E1BE48D00453E10 /* libiconv.tbd in Frameworks */,
+				8BD0895C1E1BE47F00453E10 /* libbz2.tbd in Frameworks */,
+				8BD089551E1BE37200453E10 /* libswscale.a in Frameworks */,
+				8BD089521E1BE37200453E10 /* libavformat.a in Frameworks */,
+				8BD089541E1BE37200453E10 /* libswresample.a in Frameworks */,
+				8C765021DE8329FCFBB57595 /* Pods_PhoneVR.framework in Frameworks */,
+				8BD089531E1BE37200453E10 /* libavutil.a in Frameworks */,
+				8BD089511E1BE37200453E10 /* libavcodec.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		7018CA8A6420B91A990A8AA0 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				8E2E61F361D9805F145191B9 /* Pods-PhoneVR.debug.xcconfig */,
+				4F0E2BE8A0189E129B2A7BD3 /* Pods-PhoneVR.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		8B396BA51E1BDF7A00D9A0A1 = {
+			isa = PBXGroup;
+			children = (
+				8B50CE591E4D20B700BE8E9F /* mobile-common */,
+				8BD088DD1E1BE37200453E10 /* FFmpeg-iOS */,
+				8BD085B41E1BE32A00453E10 /* common */,
+				8B396BB01E1BDF7A00D9A0A1 /* PhoneVR */,
+				8B396BAF1E1BDF7A00D9A0A1 /* Products */,
+				7018CA8A6420B91A990A8AA0 /* Pods */,
+				9A4A8126CE6DEBB6D9EC47E4 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		8B396BAF1E1BDF7A00D9A0A1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8B396BAE1E1BDF7A00D9A0A1 /* PhoneVR.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8B396BB01E1BDF7A00D9A0A1 /* PhoneVR */ = {
+			isa = PBXGroup;
+			children = (
+				8B396BB11E1BDF7A00D9A0A1 /* AppDelegate.swift */,
+				8B396BC71E1BE0A500D9A0A1 /* GameController.swift */,
+				8B396BC81E1BE0A500D9A0A1 /* IOSGlobals.swift */,
+				8B396BC91E1BE0A500D9A0A1 /* MainController.swift */,
+				8B7949F21E1C0C9D00B35DAB /* SettingsController.swift */,
+				8B396BB51E1BDF7A00D9A0A1 /* Main.storyboard */,
+				8B396BBA1E1BDF7A00D9A0A1 /* LaunchScreen.storyboard */,
+				8B396BBD1E1BDF7A00D9A0A1 /* Info.plist */,
+				8B396BC31E1BE00D00D9A0A1 /* PhoneVR-Bridging-Header.h */,
+				8B7949F41E1C166800B35DAB /* Media.xcassets */,
+			);
+			path = PhoneVR;
+			sourceTree = "<group>";
+		};
+		8B50CE591E4D20B700BE8E9F /* mobile-common */ = {
+			isa = PBXGroup;
+			children = (
+				8B50CE5A1E4D20B700BE8E9F /* src */,
+			);
+			path = "mobile-common";
+			sourceTree = "<group>";
+		};
+		8B50CE5A1E4D20B700BE8E9F /* src */ = {
+			isa = PBXGroup;
+			children = (
+				8B50CE5B1E4D20B700BE8E9F /* PVRMobileGlobals.cpp */,
+				8B50CE5C1E4D20B700BE8E9F /* PVRMobileGlobals.h */,
+				8B50CE5D1E4D20B700BE8E9F /* PVRRenderer.cpp */,
+				8B50CE5E1E4D20B700BE8E9F /* PVRRenderer.h */,
+				8B50CE5F1E4D20B700BE8E9F /* PVRSockets.cpp */,
+				8B50CE601E4D20B700BE8E9F /* PVRSockets.h */,
+				8B50CE611E4D20B700BE8E9F /* PVRStreamReceiver.cpp */,
+				8B50CE621E4D20B700BE8E9F /* PVRStreamReceiver.h */,
+				8B50CE631E4D20B700BE8E9F /* PVRWatch.cpp */,
+				8B50CE641E4D20B700BE8E9F /* PVRWatch.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		8BD085B41E1BE32A00453E10 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				8BD088B81E1BE32B00453E10 /* src */,
+			);
+			name = common;
+			path = ../../../common;
+			sourceTree = "<group>";
+		};
+		8BD088B81E1BE32B00453E10 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				8BD088B91E1BE32B00453E10 /* PVRConstants.cpp */,
+				8BD088BA1E1BE32B00453E10 /* PVRConstants.h */,
+				8BD088BB1E1BE32B00453E10 /* PVRSocketsUtils.cpp */,
+				8BD088BC1E1BE32B00453E10 /* PVRSocketsUtils.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		8BD088DD1E1BE37200453E10 /* FFmpeg-iOS */ = {
+			isa = PBXGroup;
+			children = (
+				8BD089451E1BE37200453E10 /* lib */,
+			);
+			name = "FFmpeg-iOS";
+			path = "../FFmpeg-iOS";
+			sourceTree = "<group>";
+		};
+		8BD089451E1BE37200453E10 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				8BD089461E1BE37200453E10 /* libavcodec.a */,
+				8BD089471E1BE37200453E10 /* libavformat.a */,
+				8BD089481E1BE37200453E10 /* libavutil.a */,
+				8BD089491E1BE37200453E10 /* libswresample.a */,
+				8BD0894A1E1BE37200453E10 /* libswscale.a */,
+				8BD0894B1E1BE37200453E10 /* pkgconfig */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		8BD0894B1E1BE37200453E10 /* pkgconfig */ = {
+			isa = PBXGroup;
+			children = (
+				8BD0894C1E1BE37200453E10 /* libavcodec.pc */,
+				8BD0894D1E1BE37200453E10 /* libavformat.pc */,
+				8BD0894E1E1BE37200453E10 /* libavutil.pc */,
+				8BD0894F1E1BE37200453E10 /* libswresample.pc */,
+				8BD089501E1BE37200453E10 /* libswscale.pc */,
+			);
+			path = pkgconfig;
+			sourceTree = "<group>";
+		};
+		9A4A8126CE6DEBB6D9EC47E4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8BD089631E1BE4C500453E10 /* VideoToolbox.framework */,
+				8BD089611E1BE4BB00453E10 /* CoreMedia.framework */,
+				8BD0895F1E1BE4A200453E10 /* libz.tbd */,
+				8BD0895D1E1BE48D00453E10 /* libiconv.tbd */,
+				8BD0895B1E1BE47F00453E10 /* libbz2.tbd */,
+				8E1A8E27977C0ACAF08ED25B /* Pods_PhoneVR.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8B396BAD1E1BDF7A00D9A0A1 /* PhoneVR */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8B396BC01E1BDF7A00D9A0A1 /* Build configuration list for PBXNativeTarget "PhoneVR" */;
+			buildPhases = (
+				B04BA0A421B0E9758E632E83 /* [CP] Check Pods Manifest.lock */,
+				8B396BAA1E1BDF7A00D9A0A1 /* Sources */,
+				8B396BAB1E1BDF7A00D9A0A1 /* Frameworks */,
+				8B396BAC1E1BDF7A00D9A0A1 /* Resources */,
+				296365CF65EC9E6BC848A770 /* [CP] Embed Pods Frameworks */,
+				3BF5922F1DC751A9591554D1 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PhoneVR;
+			productName = PhoneVR;
+			productReference = 8B396BAE1E1BDF7A00D9A0A1 /* PhoneVR.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8B396BA61E1BDF7A00D9A0A1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0820;
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = "Riccardo Zaglia";
+				TargetAttributes = {
+					8B396BAD1E1BDF7A00D9A0A1 = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = FXGMKADF85;
+						LastSwiftMigration = 0820;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 8B396BA91E1BDF7A00D9A0A1 /* Build configuration list for PBXProject "PhoneVR" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 8B396BA51E1BDF7A00D9A0A1;
+			productRefGroup = 8B396BAF1E1BDF7A00D9A0A1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8B396BAD1E1BDF7A00D9A0A1 /* PhoneVR */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8B396BAC1E1BDF7A00D9A0A1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B396BBC1E1BDF7A00D9A0A1 /* LaunchScreen.storyboard in Resources */,
+				8BD089561E1BE37200453E10 /* libavcodec.pc in Resources */,
+				8B7949F51E1C166800B35DAB /* Media.xcassets in Resources */,
+				8BD089591E1BE37200453E10 /* libswresample.pc in Resources */,
+				8BD0895A1E1BE37200453E10 /* libswscale.pc in Resources */,
+				8BD089571E1BE37200453E10 /* libavformat.pc in Resources */,
+				8BD089581E1BE37200453E10 /* libavutil.pc in Resources */,
+				8B396BB71E1BDF7A00D9A0A1 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		296365CF65EC9E6BC848A770 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-PhoneVR/Pods-PhoneVR-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		3BF5922F1DC751A9591554D1 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-PhoneVR/Pods-PhoneVR-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B04BA0A421B0E9758E632E83 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8B396BAA1E1BDF7A00D9A0A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B7949F31E1C0C9D00B35DAB /* SettingsController.swift in Sources */,
+				8B50CE671E4D20B700BE8E9F /* PVRSockets.cpp in Sources */,
+				8B50CE651E4D20B700BE8E9F /* PVRMobileGlobals.cpp in Sources */,
+				8BD088DC1E1BE32C00453E10 /* PVRSocketsUtils.cpp in Sources */,
+				8B50CE691E4D20B700BE8E9F /* PVRWatch.cpp in Sources */,
+				8B396BCC1E1BE0A500D9A0A1 /* MainController.swift in Sources */,
+				8BD088DB1E1BE32C00453E10 /* PVRConstants.cpp in Sources */,
+				8B396BB21E1BDF7A00D9A0A1 /* AppDelegate.swift in Sources */,
+				8B50CE661E4D20B700BE8E9F /* PVRRenderer.cpp in Sources */,
+				8B50CE681E4D20B700BE8E9F /* PVRStreamReceiver.cpp in Sources */,
+				8B396BCB1E1BE0A500D9A0A1 /* IOSGlobals.swift in Sources */,
+				8B396BCA1E1BE0A500D9A0A1 /* GameController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		8B396BB51E1BDF7A00D9A0A1 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8B396BB61E1BDF7A00D9A0A1 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		8B396BBA1E1BDF7A00D9A0A1 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8B396BBB1E1BDF7A00D9A0A1 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		8B396BBE1E1BDF7A00D9A0A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		8B396BBF1E1BDF7A00D9A0A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8B396BC11E1BDF7A00D9A0A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8E2E61F361D9805F145191B9 /* Pods-PhoneVR.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = FXGMKADF85;
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = PhoneVR/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/GVRSDK/NDK/Libraries\"",
+					"$(PROJECT_DIR)/../FFmpeg-iOS/lib",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rz.PhoneVR;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "PhoneVR/PhoneVR-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../FFmpeg-iOS/include $(PROJECT_DIR)/../../../common/libs/eigen $(PROJECT_DIR)/../../../common/libs/asio";
+			};
+			name = Debug;
+		};
+		8B396BC21E1BDF7A00D9A0A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4F0E2BE8A0189E129B2A7BD3 /* Pods-PhoneVR.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = FXGMKADF85;
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = PhoneVR/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/GVRSDK/NDK/Libraries\"",
+					"$(PROJECT_DIR)/../FFmpeg-iOS/lib",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rz.PhoneVR;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "PhoneVR/PhoneVR-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../FFmpeg-iOS/include $(PROJECT_DIR)/../../../common/libs/eigen $(PROJECT_DIR)/../../../common/libs/asio";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8B396BA91E1BDF7A00D9A0A1 /* Build configuration list for PBXProject "PhoneVR" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8B396BBE1E1BDF7A00D9A0A1 /* Debug */,
+				8B396BBF1E1BDF7A00D9A0A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8B396BC01E1BDF7A00D9A0A1 /* Build configuration list for PBXNativeTarget "PhoneVR" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8B396BC11E1BDF7A00D9A0A1 /* Debug */,
+				8B396BC21E1BDF7A00D9A0A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8B396BA61E1BDF7A00D9A0A1 /* Project object */;
+}

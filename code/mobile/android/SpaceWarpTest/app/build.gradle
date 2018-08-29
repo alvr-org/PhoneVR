@@ -1,0 +1,73 @@
+apply plugin: 'com.android.model.application'
+
+model {
+    android {
+        compileSdkVersion 25
+        buildToolsVersion "25.0.3"
+        defaultConfig.with {
+            applicationId = "com.example.ricca.spacewarptest"
+            minSdkVersion.apiLevel = 21
+            targetSdkVersion.apiLevel = 25
+            versionCode = 1
+            versionName = "1.0"
+        }
+        buildTypes {
+            debug {
+                minifyEnabled false
+                proguardFiles.add(file('proguard-android.txt'))
+            }
+            release {
+                minifyEnabled true
+                proguardFiles.add(file('proguard-android.txt'))
+            }
+        }
+        ndk {
+            moduleName = "native-lib"
+            cppFlags.add('-DANDROID_PLATFORM=android-21')
+            cppFlags.add("-std=c++11")
+            cppFlags.add("-frtti") //for asio
+            cppFlags.add("-fexceptions") //for asio
+            cppFlags.add("-I" + file("src/main/cpp").absolutePath)
+            stl = "gnustl_shared"
+            ldLibs.addAll(["log", "android", "EGL", "GLESv3", "mediandk", "OpenMAXAL"])
+
+            //ldFlags.add("-L" + file("${project.rootDir}/libraries/jni/arm64-v8a").absolutePath)
+            ldFlags.add("-L" + file("${project.rootDir}/libraries/jni/armeabi-v7a").absolutePath)
+            //ldFlags.add("-L" + file("../../opencv-native/libs/armeabi-v7a").absolutePath)
+            ldFlags.add("-L" + file("src/main/jniLibs/armeabi-v7a").absolutePath)
+        }
+        sources {
+            main {
+                jni {
+                    exportedHeaders {
+                        srcDirs = ['../../../../common/libs/Eigen',
+                                   '../../../mobile-common/Utils',
+                                   '../../../../common/src/Utils']
+                    }
+                    source {
+                        srcDirs = ['../../../mobile-common/Utils', 'src/main/cpp']
+                    }
+                }
+            }
+        }
+        productFlavors {
+            create("fat") {
+                ndk.with {
+                    abiFilters.add("armeabi-v7a")
+                    //abiFilters.add("arm64-v8a")
+                    //abiFilters.add("x86")
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    testCompile 'junit:junit:4.12'
+}

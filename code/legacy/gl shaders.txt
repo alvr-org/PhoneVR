@@ -1,0 +1,31 @@
+ const char *VS_STR = R"glsl(
+    attribute vec4 vert;
+    attribute vec2 inpTexCoord;
+    varying vec2 texCoord;
+    uniform mat4 mat;
+    void main() {
+        gl_Position = mat * vert;
+        texCoord = inpTexCoord;
+    })glsl";
+
+    //todo:
+    //-check coefficients
+    //-do color distortion correction
+    const char *FS_STR = R"glsl(
+    #extension GL_OES_EGL_image_external : require
+    precision lowp float;
+    varying lowp vec2 texCoord;
+    //uniform sampler2D Y, U, V;
+    uniform samplerExternalOES inpTex;
+    //#define n 0.4545454545
+    //const lowp vec3 nvec = vec3(n, n, n);
+    void main() {
+        //lowp float y = texture2D(Y, texCoord).r;
+        //lowp float u = texture2D(U, texCoord).r - 0.5;
+        //lowp float v = texture2D(V, texCoord).r - 0.5;
+        //lowp vec3 srgb = vec3(y + 1.13983 * v, y - 0.39465 * u - 0.58060 * v, y + 2.03211 * u);
+        //gl_FragColor = vec4(pow(srgb, nvec), 1.0);
+        //gl_FragColor = vec4(texture2D(inpTex, texCoord).rgb, 1.0);
+        //gl_FragColor = vec4(pow(texture2D(inpTex, texCoord).rgb, nvec), 1.0);
+        gl_FragColor = texture2D(inpTex, texCoord);
+    })glsl";

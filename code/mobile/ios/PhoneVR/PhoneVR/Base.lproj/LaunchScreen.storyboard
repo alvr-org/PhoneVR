@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="ETx-xD-F7W">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="n5L-BS-nw6">
+            <objects>
+                <viewController id="30V-bJ-Uzs" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="KB0-bx-TIg"/>
+                        <viewControllerLayoutGuide type="bottom" id="eIo-Rt-yOp"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="x90-RK-VKk">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="PhoneVR" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9nT-p9-axv">
+                                <rect key="frame" x="45" y="288" width="285" height="92"/>
+                                <fontDescription key="fontDescription" type="system" weight="ultraLight" pointSize="77"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="9nT-p9-axv" firstAttribute="centerY" secondItem="x90-RK-VKk" secondAttribute="centerY" id="LRn-u6-Okj"/>
+                            <constraint firstItem="9nT-p9-axv" firstAttribute="centerX" secondItem="x90-RK-VKk" secondAttribute="centerX" id="vdt-y0-urv"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Epc-Hq-ZfF" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="50.625" y="373.94366197183098"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="91m-51-TGc">
+            <objects>
+                <viewController id="ETx-xD-F7W" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Ccf-6s-Bau"/>
+                        <viewControllerLayoutGuide type="bottom" id="RWJ-Wl-RWg"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="s7N-Ah-3BN">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="PhoneVR" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="slW-iS-iFr">
+                                <rect key="frame" x="45" y="288" width="285" height="92"/>
+                                <fontDescription key="fontDescription" type="system" weight="ultraLight" pointSize="77"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="slW-iS-iFr" firstAttribute="centerX" secondItem="s7N-Ah-3BN" secondAttribute="centerX" id="38m-lx-fkt"/>
+                            <constraint firstItem="slW-iS-iFr" firstAttribute="centerY" secondItem="s7N-Ah-3BN" secondAttribute="centerY" id="TNu-aL-rKa"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ddF-xn-ihp" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="50.625" y="373.94366197183098"/>
+        </scene>
+    </scenes>
+</document>

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="vop-SW-vdR">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="LkF-on-7nU">
+            <objects>
+                <navigationController id="vop-SW-vdR" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" id="s43-ul-5z2">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="N5m-RN-sNX" kind="relationship" relationship="rootViewController" id="wKZ-Kk-zRq"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="wS0-k3-aEA" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-392" y="279"/>
+        </scene>
+        <!--Main Controller-->
+        <scene sceneID="HZA-mJ-s6U">
+            <objects>
+                <viewController id="N5m-RN-sNX" userLabel="Main Controller" customClass="MainController" customModule="PhoneVR" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="FDP-RZ-BNT"/>
+                        <viewControllerLayoutGuide type="bottom" id="eza-yw-5Ot"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="xwJ-LG-oOp">
+                        <rect key="frame" x="0.0" y="0.0" width="400" height="400"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Open a SteamVR game" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NcS-HQ-NdE">
+                                <rect key="frame" x="112" y="190" width="176.5" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="NcS-HQ-NdE" firstAttribute="centerX" secondItem="xwJ-LG-oOp" secondAttribute="centerX" id="K5m-eJ-JpQ"/>
+                            <constraint firstItem="NcS-HQ-NdE" firstAttribute="centerY" secondItem="xwJ-LG-oOp" secondAttribute="centerY" id="qeO-Tc-Ieb"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="PhoneVR" id="XI7-cd-8Bo">
+                        <barButtonItem key="rightBarButtonItem" title="Settings" id="R1e-z8-2sw">
+                            <connections>
+                                <segue destination="mEM-gh-QJl" kind="show" id="pi4-Gc-kgf"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                    <size key="freeformSize" width="400" height="400"/>
+                    <connections>
+                        <outlet property="modeField" destination="Hm6-7A-99U" id="XbE-KX-or3"/>
+                        <outlet property="urlField" destination="Zm3-RF-REW" id="TFX-Fg-AZx"/>
+                        <segue destination="Tib-Ws-zhN" kind="presentation" identifier="toGameView" modalPresentationStyle="fullScreen" id="l0c-Ud-fDI"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="9lK-T9-iOK" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="534" y="279"/>
+        </scene>
+        <!--Settings-->
+        <scene sceneID="KSd-xp-L0c">
+            <objects>
+                <viewController id="mEM-gh-QJl" customClass="SettingsController" customModule="PhoneVR" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y82-NC-es6"/>
+                        <viewControllerLayoutGuide type="bottom" id="uCL-hO-TeI"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="2oj-IU-dqJ">
+                        <rect key="frame" x="0.0" y="0.0" width="400" height="400"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Zm3-RF-REW">
+                                <rect key="frame" x="20" y="158" width="360" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <action selector="updateDefaults" destination="N5m-RN-sNX" eventType="editingDidEnd" id="mkK-l1-bth"/>
+                                </connections>
+                            </textField>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="auto" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Hm6-7A-99U">
+                                <rect key="frame" x="20" y="93" width="360" height="30"/>
+                                <accessibility key="accessibilityConfiguration" hint="auto"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <action selector="updateDefaults" destination="N5m-RN-sNX" eventType="editingDidEnd" id="V8A-Re-D6M"/>
+                                </connections>
+                            </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="PC IP" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VuU-kJ-z1U">
+                                <rect key="frame" x="20" y="72" width="28.5" height="13.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="mode" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cvM-r6-AfY">
+                                <rect key="frame" x="20" y="137" width="29.5" height="13.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="VuU-kJ-z1U" firstAttribute="leading" secondItem="2oj-IU-dqJ" secondAttribute="leadingMargin" id="1lh-q6-DOs"/>
+                            <constraint firstItem="VuU-kJ-z1U" firstAttribute="top" secondItem="y82-NC-es6" secondAttribute="bottom" constant="8" id="78l-Re-t8M"/>
+                            <constraint firstItem="Zm3-RF-REW" firstAttribute="top" secondItem="cvM-r6-AfY" secondAttribute="bottom" constant="7.5" id="DhJ-QA-EkG"/>
+                            <constraint firstItem="Zm3-RF-REW" firstAttribute="leading" secondItem="2oj-IU-dqJ" secondAttribute="leadingMargin" id="Eoz-ZQ-cSF"/>
+                            <constraint firstItem="Zm3-RF-REW" firstAttribute="trailing" secondItem="2oj-IU-dqJ" secondAttribute="trailingMargin" id="Jk2-wk-twd"/>
+                            <constraint firstItem="Hm6-7A-99U" firstAttribute="top" secondItem="VuU-kJ-z1U" secondAttribute="bottom" constant="7.5" id="T9l-vL-FZb"/>
+                            <constraint firstItem="cvM-r6-AfY" firstAttribute="top" secondItem="Hm6-7A-99U" secondAttribute="bottom" constant="14" id="Xq2-Eh-KTC"/>
+                            <constraint firstItem="Hm6-7A-99U" firstAttribute="trailing" secondItem="2oj-IU-dqJ" secondAttribute="trailingMargin" id="fgJ-jE-QRn"/>
+                            <constraint firstAttribute="leadingMargin" secondItem="cvM-r6-AfY" secondAttribute="leading" id="otA-eM-w2R"/>
+                            <constraint firstItem="Hm6-7A-99U" firstAttribute="leading" secondItem="2oj-IU-dqJ" secondAttribute="leadingMargin" id="vFY-cw-mDe"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Settings" id="h74-qU-n4j"/>
+                    <connections>
+                        <outlet property="modeField" destination="Zm3-RF-REW" id="uem-fT-IJx"/>
+                        <outlet property="pcIPField" destination="Hm6-7A-99U" id="yFN-Se-O35"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="gRv-9o-NJ2" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1412.8" y="277.9610194902549"/>
+        </scene>
+        <!--GLKit View Controller-->
+        <scene sceneID="Ep6-y3-cjf">
+            <objects>
+                <glkViewController preferredFramesPerSecond="30" id="Tib-Ws-zhN" customClass="GameController" customModule="PhoneVR" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Lex-9y-RoG"/>
+                        <viewControllerLayoutGuide type="bottom" id="l67-Hm-8sx"/>
+                    </layoutGuides>
+                    <glkView key="view" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" enableSetNeedsDisplay="NO" id="DKc-Qa-AJ2">
+                        <rect key="frame" x="0.0" y="0.0" width="250" height="400"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <gestureRecognizers/>
+                        <connections>
+                            <outlet property="delegate" destination="Tib-Ws-zhN" id="oF8-VD-3Q6"/>
+                        </connections>
+                    </glkView>
+                    <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                    <size key="freeformSize" width="250" height="400"/>
+                    <connections>
+                        <segue destination="yVx-sN-8sw" kind="unwind" identifier="requestUnwind" unwindAction="goBack:" id="UXI-r3-Qla"/>
+                    </connections>
+                </glkViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="20q-ir-Gf0" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="yVx-sN-8sw" userLabel="Exit" sceneMemberID="exit"/>
+            </objects>
+            <point key="canvasLocation" x="533" y="746"/>
+        </scene>
+    </scenes>
+</document>

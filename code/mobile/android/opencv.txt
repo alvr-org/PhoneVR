@@ -1,0 +1,33 @@
+https://zami0xzami.wordpress.com/2016/03/17/building-opencv-for-android-from-source/
+
+install cmake, mingw (https://sourceforge.net/projects/mingw/)
+
+download latest opencv release source code (generic)
+download ndk
+
+cmake-gui:
+browse source: <opencv-root>
+browse build: c:/ocv-build
+
+(no configure yet)
+add entry:
+ANDROID_NDK - path - <ndk-dir>
+ANDROID_NDK_HOST_X64 - bool - true
+CMAKE_TOOLCHAIN_FILE - pathfile - <opencv-root>/platforms/android/android.toolchain.cmake
+CMAKE_MAKE_PROGRAM - pathfile - C:/MinGW/bin/mingw32-make.exe
+
+configure (mingw makefiles)
+
+modify keys:
+choose libs
+BUILD_SHARED_LIBS true
+ANDROID_NATIVE_API_LEVEL 21
+set architecture: repeat all steps for arm7, armv8, x86
+
+configure & GENERATE
+
+open c:/mingw/msys/1.0/msys.bat
+$ mingw32-make
+$ mingw32-make install
+
+output is in c:/ocv-build

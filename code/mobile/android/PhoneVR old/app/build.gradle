@@ -1,0 +1,106 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion 27
+    defaultConfig {
+        applicationId "com.rz.phonevr"
+        minSdkVersion 21
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_STL=c++_shared" // <- force libc++. todo: remove from NDK 17
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+
+    flavorDimensions "arch"
+    productFlavors {
+        arm7 {
+            dimension "arch"
+            ndk.abiFilter 'armeabi-v7a'
+        }
+        arm8 {
+            dimension "arch"
+            ndk.abiFilters 'arm64-v8a'
+        }
+        x86 {
+            dimension "arch"
+            ndk.abiFilter 'x86'
+        }
+    }
+}
+
+//apply plugin: 'com.android.application'
+//
+//android {
+//    compileSdkVersion 25
+//    buildToolsVersion "25.0.2"
+//    defaultConfig {
+//        applicationId "com.rz.phonevr"
+//        minSdkVersion 19
+//        targetSdkVersion 25
+//        versionCode 1
+//        versionName "1.0"
+//        ndk {
+//            //moduleName "native-lib"
+//            abiFilters 'armeabi-v7a'//, 'arm64-v8a', 'x86', 'x86_64', 'armeabi'
+//
+//        }
+//        externalNativeBuild {
+//            cmake {
+//                arguments '-DANDROID_PLATFORM=android-19',
+//                    '-DANDROID_TOOLCHAIN=clang', '-DANDROID_STL=gnustl_static'
+//                cppFlags "-std=c++11 -fexceptions -frtti"
+//                //ldFlags "-L" + file("${project.rootDir}/libraries/jni/armeabi-v7a").absolutePath
+//            }
+//        }
+//    }
+//
+//    buildTypes {
+//        debug {
+//            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//        }
+//        release {
+//            minifyEnabled true
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//        }
+//    }
+//    sourceSets {
+//        main {
+//            jniLibs.srcDirs = ['../libraries/jni']
+//        }
+//    }
+//    externalNativeBuild {
+//        cmake {
+//            path "CMakeLists.txt"
+//        }
+//    }
+//}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:25.4.0'
+    compile 'com.android.support:design:25.4.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.google.vr:sdk-base:1.60.1'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
+}
