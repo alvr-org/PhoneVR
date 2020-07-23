@@ -335,15 +335,24 @@ public:
 		// any exception is handled by the called method
 		PVRStartConnectionListener([&](auto ip, auto msgType) {
 			if (msgType == PVR_MSG::PAIR_HMD && !hmd) {
-				VR_INIT_SERVER_DRIVER_CONTEXT(drvCtx);
-				hmd = new HMD(ip);
-				//red = new Redirect();
-				hmdPaired = VRServerDriverHost()->TrackedDeviceAdded("0", TrackedDeviceClass_HMD, hmd);
-				//hmdPaired = VRServerDriverHost()->TrackedDeviceAdded("1", TrackedDeviceClass_DisplayRedirect, red);
-				if (!hmdPaired)
-					PVR_DB("Error: could not activate HMD");
+				//VR_INIT_SERVER_DRIVER_CONTEXT(drvCtx);
+
+				//#define VR_INIT_SERVER_DRIVER_CONTEXT( pContext ) 
+				//		{ 
+				vr::EVRInitError eError = vr::InitServerDriverContext( drvCtx ); 
+				if (eError == vr::VRInitError_None)
+				{
+					hmd = new HMD(ip);
+					//red = new Redirect();
+					hmdPaired = VRServerDriverHost()->TrackedDeviceAdded("0", TrackedDeviceClass_HMD, hmd);
+					//hmdPaired = VRServerDriverHost()->TrackedDeviceAdded("1", TrackedDeviceClass_DisplayRedirect, red);
+					if (!hmdPaired)
+						PVR_DB("Error: could not activate HMD");
+					else
+						hmdBomb.defuse();
+				}
 				else
-					hmdBomb.defuse();
+					PVR_DB("Error: could not InitServerDriverContext");
 			}
 			else if (msgType == PVR_MSG::PAIR_PHONE_CTRL) {
 				if (find(IPs.begin(), IPs.end(), ip) == IPs.end()) {
