@@ -1,22 +1,17 @@
 package viritualisres.phonevr
 
+
 import android.content.Context
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-
-import java.util.Locale
-
-
+import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_settings.*
+import java.util.*
 
 class SettingsActivity : AppCompatActivity() {
-
-    private val prefs = getSharedPreferences(pvrPrefsKey, Context.MODE_PRIVATE)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
-
         loadPrefs()
     }
 
@@ -26,6 +21,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun savePrefs() {
+        val prefs = getSharedPreferences(pvrPrefsKey, Context.MODE_PRIVATE)
         val edit = prefs.edit()
         with(edit) {
             putString(pcIpKey, pcIp.text.toString())
@@ -42,6 +38,8 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun loadPrefs() {
+        val prefs = getSharedPreferences(pvrPrefsKey, Context.MODE_PRIVATE)
+
         val l = Locale.getDefault()
         val fmt = "%1\$d"
         val fmt2 = "%1$.1f"
