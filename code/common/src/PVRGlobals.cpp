@@ -12,7 +12,7 @@ using namespace std::chrono;
 PVR_STATE pvrState = PVR_STATE_IDLE;
 
 
-#define EXPIRE_DAYS 90
+/*#define EXPIRE_DAYS 90
 bool PVRCheckIfExpired() {
 #if 0
 	typedef system_clock sClk;
@@ -25,7 +25,7 @@ bool PVRCheckIfExpired() {
 		expiredCb(); // expired
 #endif
 	return false;
-}
+}*/
 
 //void timeStart() {
 //    _time = Clk::now();

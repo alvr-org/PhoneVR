@@ -419,11 +419,11 @@ static ServerProvider server;
 
 extern "C" __declspec(dllexport)
 void *HmdDriverFactory(const char *iName, int *retCode) {
-	if (PVRCheckIfExpired()) {
+	/*if (PVRCheckIfExpired()) {
 		PVR_DB("This version of PhoneVR driver has expired. Please install a more recent version");
 		*retCode = VRInitError_Driver_Failed;
 		return nullptr;
-	}
+	}*/
 	if (!PVRProp<bool>({ ENABLE_KEY })) {
 		PVR_DB("PhoneVR server disabled!");
 		*retCode = VRInitError_Driver_Failed;
