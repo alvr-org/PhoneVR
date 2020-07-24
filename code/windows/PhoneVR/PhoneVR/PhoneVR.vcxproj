@@ -23,7 +23,7 @@
     <ProjectGuid>{EECAFA17-E17D-4D6A-898F-DA593C98D0E2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>PhoneVR</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
     <ProjectName>driver_PVRServer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -106,10 +106,9 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;PHONEVR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName);$(SolutionDir)\..\..\common\src;$(SolutionDir)\..\libs\json;$(SolutionDir)\..\libs\x264\include;$(SolutionDir)\..\..\common\libs\asio;$(SolutionDir)\..\..\common\libs\eigen;$(SolutionDir)\..\..\common\src\Utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName);$(SolutionDir)\..\..\common\src;$(SolutionDir)\..\libs\x264\include;$(SolutionDir)\..\..\common\src\Utils;$(SolutionDir)\..\libs\json;$(SolutionDir)\..\..\common\libs\eigen;$(SolutionDir)\..\..\common\libs\asio;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>

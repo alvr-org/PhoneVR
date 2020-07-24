@@ -179,7 +179,8 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 		}
 		PVRStartGraphics(vvbuf, width, height);
 
-		auto *enc = x264_encoder_open_148(&par);
+
+		auto *enc = x264_encoder_open(&par);
 
 		x264_param_t outPar;
 		x264_encoder_parameters(enc, &outPar);
