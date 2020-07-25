@@ -19,13 +19,13 @@ internal object Wrap {
     }
 
     //callbacks
-    @Keep
+    @JvmStatic
     fun segueToGame() {
         val intent = Intent(mainRef?.get(), GameActivity::class.java)
         mainRef?.get()?.startActivity(intent)
     }
 
-    @Keep
+    @JvmStatic
     fun unwindToMain() {
         gameRef?.get()?.finish()
     }
