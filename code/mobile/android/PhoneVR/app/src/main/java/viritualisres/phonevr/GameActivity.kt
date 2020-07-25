@@ -2,6 +2,7 @@ package viritualisres.phonevr
 
 import android.app.Activity
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Point
 import android.graphics.SurfaceTexture
 import android.hardware.Sensor
@@ -24,16 +25,21 @@ import javax.microedition.khronos.opengles.GL10
 
 class GameActivity : Activity(), SensorEventListener {
 
-    private val sensMgr = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-    private val prefs = getSharedPreferences(pvrPrefsKey, Context.MODE_PRIVATE)
-    private val surf = GLSurfaceView(this)
-    private val gvrLayout = GvrLayout(this)
+    private lateinit var sensMgr: SensorManager
+    private lateinit var prefs: SharedPreferences
+    private lateinit var surf: GLSurfaceView
+    private lateinit var gvrLayout: GvrLayout
 
     private var isDaydream = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+
+        sensMgr = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        prefs = getSharedPreferences(pvrPrefsKey, Context.MODE_PRIVATE)
+        surf = GLSurfaceView(this)
+        gvrLayout = GvrLayout(this)
 
         Wrap.setGameView(this)
 
@@ -50,7 +56,8 @@ class GameActivity : Activity(), SensorEventListener {
             setEGLConfigChooser(8, 8, 8, 0, 0, 0)
             preserveEGLContextOnPause = true
             setRenderer(Renderer())
-            setOnTouchListener { _, event ->
+            setOnTouchListener { _,
+            event ->
                 if (event.action == MotionEvent.ACTION_DOWN) {
                     //((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(50);
                     Wrap.onTriggerEvent()
