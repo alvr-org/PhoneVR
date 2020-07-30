@@ -20,7 +20,7 @@ using namespace PVR;
 
 namespace {
 
-    bool reproj = true;
+    bool reproj = false;
     bool debugMode = false;
     float offFov;
 
@@ -140,6 +140,7 @@ unsigned int PVRInitSystem(int maxW, int maxH, float offFov, bool reproj, bool d
 }
 
 void PVRRender(int64_t pts) {
+    PVR_DB("Rendering " + to_string(pts));
     if (pvrState == PVR_STATE_RUNNING) {
         if (pts > 0) {
             vector<float> v = DequeueQuatAtPts(pts);
