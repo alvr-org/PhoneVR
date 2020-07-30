@@ -21,7 +21,8 @@ namespace {
 
     bool announcing = false;
 
-    TimeBomb headerBomb(seconds(5), []{ pvrState = PVR_STATE_SHUTDOWN; }); // todo: error handling instead of shutdown
+    TimeBomb headerBomb(seconds(5),
+                        [] { pvrState = PVR_STATE_SHUTDOWN; }); // todo: error handling instead of shutdown
 
     //           pts       buf
     queue<pair<int64_t, vector<float>>> quatQueue;
@@ -50,7 +51,8 @@ void SendAdditionalData(vector<uint16_t> maxSize, vector<float> fov, float ipd) 
     }
 }
 
-void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(), void(*headerCb)(uint8_t *, size_t), void(*unwindSegue)()) {
+void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(),
+                       void(*headerCb)(uint8_t *, size_t), void(*unwindSegue)()) {
     pcIP = ip; //ip will become invalid afterwards, so I capture a string copy
     std::thread([=] {
         try {
@@ -100,9 +102,8 @@ void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(), void(*he
                 //usleep(1000000); // 1s
             }
         }
-        catch( exception &e )
-        {
-            cerr << e.what() << endl;
+        catch (exception &e) {
+            PVR_DB("[PVRStartAnnouncer] caught Exception: " + to_string(e.what()));
         }
     }).detach();
 }
@@ -133,24 +134,22 @@ void PVRStartSendSensorData(uint16_t port, bool(*getSensorData)(float *, float *
                 ref.wait();
             }
         }
-        catch( exception &e )
-        {
-            cerr << e.what() << endl;
+        catch (exception &e) {
+            PVR_DB("[PVRStartSendSensorData] caught Exception: " + to_string(e.what()));
         }
     }).detach();
 }
 
-bool PVRIsVidBufNeeded(){
+bool PVRIsVidBufNeeded() {
     return emptyVBufs.size() < 3;
 }
 
-void PVREnqueueVideoBuf(EmptyVidBuf eBuf){
+void PVREnqueueVideoBuf(EmptyVidBuf eBuf) {
     emptyVBufs.push(eBuf);
 }
 
-FilledVidBuf PVRPopVideoBuf(){
-    if (!filledVBufs.empty())
-    {
+FilledVidBuf PVRPopVideoBuf() {
+    if (!filledVBufs.empty()) {
         auto fbuf = filledVBufs.front();
         filledVBufs.pop();
         return fbuf;
@@ -161,6 +160,7 @@ FilledVidBuf PVRPopVideoBuf(){
 void PVRStartReceiveStreams(uint16_t port) {
     while (pvrState == PVR_STATE_SHUTDOWN)
         usleep(10000);
+    PVR_DB("[Stream Receiver] th started.. @p" + to_string(port));
     strThr = new std::thread([=] {
         try {
             io_service svc;
@@ -170,6 +170,7 @@ void PVRStartReceiveStreams(uint16_t port) {
             asio::error_code ec = error::fault;
             while (ec.value() != 0 && pvrState != PVR_STATE_SHUTDOWN)
                 skt.connect({address::from_string(pcIP), port}, ec);
+            PVR_DB("[StreamReceiver th] sock connected @p" + to_string(port));
 
             function<void(const asio::error_code &, size_t)> handler = [&](
                     const asio::error_code &err, size_t) { ec = err; };
@@ -190,6 +191,8 @@ void PVRStartReceiveStreams(uint16_t port) {
                 svc.run();
                 svc.reset();
 
+                PVR_DB("[StreamReceiver th] recvd 28maxBs with Error: " + to_string(ec.value()) +
+                       ", pts: " + to_string(*pts) + ", pktSz" + to_string(*pktSz));
                 if (ec.value() == 0) {
                     quatQueue.push({*pts, vector<float>(quatBuf, quatBuf + 4)});
 
@@ -201,8 +204,10 @@ void PVRStartReceiveStreams(uint16_t port) {
                         async_read(skt, buffer(eBuf.buf, *pktSz), handler);
                         svc.run();
                         svc.reset();
+                        PVR_DB("[StreamReceiver th] emptyVBufs.size: "+to_string(emptyVBufs.size())+", Reading sock for "+to_string(*pktSz)+"Bs" );
                         if (ec.value() == 0) {
                             filledVBufs.push({eBuf.idx, *pktSz, (uint64_t) *pts});
+                            PVR_DB("[StreamReceiver th] pushing onto filledVBufs idx: "+to_string(eBuf.idx)+", size: "+to_string(*pktSz)+", pts:"+to_string(*pts) +"...pop eVbuf " );
                             emptyVBufs.pop();
                         } else
                             break;
@@ -214,9 +219,8 @@ void PVRStartReceiveStreams(uint16_t port) {
             videoSvc = nullptr;
             delMtx.unlock();
         }
-        catch(exception &e)
-        {
-            cerr << e.what() << endl;
+        catch (exception &e) {
+            PVR_DB("[PVRStartReceiveStreams] caught Exception: " + to_string(e.what()));
         }
     });
 }

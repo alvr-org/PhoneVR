@@ -60,11 +60,12 @@ public:
 			terminate();
 		}
 		else if (msgType == PVR_MSG::ADDITIONAL_DATA) {
-			//PVR_DB("ADD DATA MSG RCV");
+			PVR_DB("[talker]: ADD DATA MSG RCV'ed.. waiting for propCont");
 			auto oldTm = Clk::now();
 			while (objId == k_unTrackedDeviceIndexInvalid && Clk::now() - oldTime < 7s) // ensure propCont is set
 				sleep_for(10ms);
 
+			PVR_DB("[talker]: ADD DATA MSG RCV'ed.. propCont seems to be set or timeout");
 			if (objId == k_unTrackedDeviceIndexInvalid)
 			{
 				auto ui16Data = reinterpret_cast<uint16_t *>(&data[0]);
@@ -126,7 +127,7 @@ public:
 	}
 
 	virtual EVRInitError Activate(uint32_t objectId) override {
-		PVR_DB("Activating HMD");
+		PVR_DB("[Activating HMD]... Setting Props");
 
 		// set properties
 		propCont = VRProperties()->TrackedDeviceToPropertyContainer(objectId);
@@ -169,25 +170,27 @@ public:
 		VRProperties()->SetStringProperty(propCont, Prop_NamedIconPathDeviceStandby_String, "{PVRServer}/icons/hmd_standby.png");
 		VRProperties()->SetStringProperty(propCont, Prop_NamedIconPathDeviceAlertLow_String, "{PVRServer}/icons/hmd_ready_low.png");
 
+		PVR_DB("[Activating HMD]: waiting for addData");
 		bool addDataRcvd = true;
 		addDataBomb.reset(new TimeBomb(5s, [&] { addDataRcvd = false; }));
 		addDataBomb->ignite(false);
-
+		
 		objId = objectId;
 
 		if (addDataRcvd) {
+			PVR_DB("[Activating HMD]: waiting for addData... bomb ended with Rcvd:true");
 			PVRStartStreamer(devIP, rdrW, rdrH, [=](auto v) {
 				talker.send(PVR_MSG::HEADER_NALS, v);
 			}, [=] { terminate(); });
 
 			PVRStartReceiveData(devIP, &pose, &objId);
 
-			PVR_DB("HMD activated with id: " + to_string(objectId));
+			PVR_DB("[Activating HMD]: HMD activated with id: " + to_string(objectId));
 
 			return VRInitError_None;
 		}
 		else {
-			PVR_DB("Timeout waiting for response");
+			PVR_DB("[Activating HMD]: Timeout waiting for response ... bomb ended with Rcvd:false");
 			return VRInitError_Unknown;
 		}
 	}
@@ -226,12 +229,14 @@ public:
 
 
 	virtual void EnterStandby() override {
-		PVR_DB("HMD enter standby");
+		PVR_DB("[Open VR EnterStandby] HMD enter standby");
 	}
 
 	// IVRDisplayComponent methods
 
 	virtual void GetWindowBounds(int32_t *x, int32_t *y, uint32_t *width, uint32_t *height) override {
+
+		PVR_DB("[Open VR GetWindowBounds] Returning w " + to_string(*width)+ " h " + to_string(*height));
 		*x = 0;
 		*y = 0;
 		*width = rdrW;
@@ -247,7 +252,8 @@ public:
 	}
 
 	virtual void GetRecommendedRenderTargetSize(uint32_t *width, uint32_t *height) override {
-		//PVR_DEBUG("get targ size");
+
+		PVR_DB("[Open VR GetRecommendedRenderTargetSize] Returning w " + to_string(*width) + " h " + to_string(*height));
 		*width = rdrW;
 		*height = rdrH;
 	}

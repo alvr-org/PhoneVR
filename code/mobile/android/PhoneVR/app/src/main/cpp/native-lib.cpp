@@ -7,12 +7,11 @@
 #include "PVRRenderer.h"
 #include "PVRSockets.h"
 
-
 #include "media/NdkMediaExtractor.h"
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 #include <queue>
-
+#include <sys/stat.h>
 
 using namespace std;
 using namespace Eigen;
@@ -49,6 +48,7 @@ namespace {
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
+    PVR_DB("JNI initiating...");
     jVM = vm;
     JNIEnv *env;
     jVM->GetEnv((void **) &env, JNI_VERS);
@@ -57,6 +57,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
 }
 
 void callJavaMethod(const char *name) {
+    PVR_DB("JNI callJavaMethod: Calling " + to_string(name));
     bool isMainThread = true;
     JNIEnv *env;
     if (jVM->GetEnv((void **) &env, JNI_VERS) != JNI_OK) {
@@ -70,6 +71,7 @@ void callJavaMethod(const char *name) {
 
 /////////////////////////////////////// discovery ////////////////////////////////////////////////
 SUB(startAnnouncer)(JNIEnv *env, jclass, jstring jIP, jint port) {
+    PVR_DB("JNI startAnnouncer: %s"+to_string(jIP)+":%d"+ to_string(port));
     auto ip = env->GetStringUTFChars(jIP, nullptr);
     PVRStartAnnouncer(ip, port, [] {
         callJavaMethod("segueToGame");
@@ -82,11 +84,14 @@ SUB(startAnnouncer)(JNIEnv *env, jclass, jstring jIP, jint port) {
 }
 
 SUB(stopAnnouncer)() {
+    PVR_DB("JNI stopAnnouncer");
     PVRStopAnnouncer();
 }
 
 ////////////////////////////////////// orientation ///////////////////////////////////////////////
 SUB(startSendSensorData)(JNIEnv *env, jclass, jint port) {
+    PVR_DB("JNI startSendSensorData %d" + to_string(port));
+
     PVRStartSendSensorData(port, [](float *quat, float *acc) {
         if (gvrApi) {
             auto gmat = gvrApi->GetHeadSpaceFromStartSpaceRotation(GvrApi::GetTimePointNow());
@@ -104,6 +109,7 @@ SUB(startSendSensorData)(JNIEnv *env, jclass, jint port) {
 }
 
 SUB(setAccData)(JNIEnv *env, jclass, jfloatArray jarr) {
+    //PVR_DB("JNI setAccData");
     auto *accArr = env->GetFloatArrayElements(jarr, nullptr);
     memcpy(newAcc, accArr, 3 * 4);
     env->ReleaseFloatArrayElements(jarr, accArr, JNI_ABORT);
@@ -111,31 +117,38 @@ SUB(setAccData)(JNIEnv *env, jclass, jfloatArray jarr) {
 
 ///////////////////////////////////// system control & events /////////////////////////////////////
 SUB(createRenderer)(JNIEnv *, jclass, jlong jGvrApi) {
+    PVR_DB("JNI createRenderer");
     PVRCreateGVR(reinterpret_cast<gvr_context *>(jGvrApi));
 }
 
 SUB(onPause)() {
+    PVR_DB("JNI onPause");
     PVRPause();
 }
 
 SUB(onTriggerEvent)() {
+    PVR_DB("JNI onTriggerEvent");
     PVRTrigger();
 }
 
 SUB(onResume)() {
+    PVR_DB("JNI onResume");
     PVRResume();
 }
 
 ///////////////////////////////////// video stream & coding //////////////////////////////////////
 SUB(setVStreamPort)(JNIEnv *, jclass, jint port) {
+    PVR_DB("JNI setVStreamPort - %d"+ to_string(port));
     vPort = (uint16_t)port;
 }
 
 SUB(startStream)() {// cannot pass parameter here or else sigabrit on getting frame (why???)
+    PVR_DB("JNI startStream");
     PVRStartReceiveStreams((uint16_t)vPort);
 }
 
 SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
+    PVR_DB("JNI startMediaCodec");
     window = ANativeWindow_fromSurface(env, surface);
 
 
@@ -155,32 +168,56 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
     m = AMediaCodec_start(codec);
     AMediaFormat_delete(fmt);
 
+    PVR_DB("JNI MCodec th Setup...");
+
     mediaThr = new thread([]{
         while (pvrState != PVR_STATE_SHUTDOWN)
         {
-            if (PVRIsVidBufNeeded())
+            if (PVRIsVidBufNeeded()) //emptyVBufs.size() < 3
             {
                 auto idx = AMediaCodec_dequeueInputBuffer(codec, 1000); // 1ms timeout
                 if (idx >= 0)
                 {
                     size_t bufSz = 0;
                     uint8_t *buf = AMediaCodec_getInputBuffer(codec, (size_t)idx, &bufSz);
-                    PVREnqueueVideoBuf({buf, idx, bufSz});
+                    PVREnqueueVideoBuf({buf, idx, bufSz}); // into emptyVbuf
+                    PVR_DB("[MediaCodec th] Getting MCInputMedia Buf[ "+ to_string(bufSz)+ "] @ idx:" + to_string(idx) + ". into emptyVbuf");
                 }
             }
 
-            auto fBuf = PVRPopVideoBuf();
+            auto fBuf = PVRPopVideoBuf(); //filledVBuf
             if (fBuf.idx != -1)
+            {
                 AMediaCodec_queueInputBuffer(codec, (size_t)fBuf.idx, 0, fBuf.pktSz, fBuf.pts, 0); //AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM
+                PVR_DB("[MediaCodec th] Getting filledVBuf Buf[ "+ to_string(fBuf.pktSz)+ "] @ idx:" + to_string(fBuf.idx) + ", pts:" + to_string(fBuf.pts) +". into MCqInputBuf");
+            }
 
             AMediaCodecBufferInfo info;
-            int outIdx = AMediaCodec_dequeueOutputBuffer(codec, &info, 1000); // 1ms timeout
+            auto outIdx = AMediaCodec_dequeueOutputBuffer(codec, &info, 1000); // 1ms timeout
             if (outIdx >= 0)
             {
+                PVR_DB("[MediaCodec th] Output: " + to_string(AMediaFormat_toString(AMediaCodec_getOutputFormat(codec))));
+
+                /*int result_code = mkdir("/data/data/viritualisres.phonevr/files/", 0777);
+                PVR_DB("[MediaCodec th] Dir path /data/data/viritualisres.phonevr/files/ " + to_string(result_code));
+
+                auto *file = fopen("/data/data/viritualisres.phonevr/files/mystream.h264","wb");
+
+                if(file) {
+                    auto buf = AMediaCodec_getOutputBuffer(codec, outIdx,
+                                                           reinterpret_cast<size_t *>(&info.size));
+                    fwrite(buf, sizeof(uint8_t), ((info.size)/sizeof(uint8_t)), file);
+                    fclose(file);
+                    PVR_DB("[MediaCodec th] Wrote stream to file /storage/emulated/0/etc/mystream.h264");
+                } else {
+                    PVR_DB("[MediaCodec th] File open failed /storage/emulated/0/etc/mystream.h264");
+                }*/
+
                 bool render = info.size != 0;
-                AMediaCodec_releaseOutputBuffer(codec, (size_t) outIdx, render);
+                auto status = AMediaCodec_releaseOutputBuffer(codec, (size_t) outIdx, render);
                 if (render)
                     vOutPts = info.presentationTimeUs;
+                PVR_DB("[MediaCodec th] MCreleaseOutputBuffer Buf @ idx:" + to_string(outIdx) + ", pts:" + (render?("Rendered "+to_string(vOutPts)):"NotRendered") + ", Status: " + to_string(status) + ", Outsize:" + to_string(info.size));
             }
         }
     });
@@ -194,6 +231,7 @@ FUNC(jlong, vFrameAvailable)(JNIEnv *) {
 }
 
 SUB(stopAll)(JNIEnv *) {
+    PVR_DB("JNI stopAll");
     pvrState = PVR_STATE_SHUTDOWN;
     PVRStopStreams();
     PVRDestroyGVR();

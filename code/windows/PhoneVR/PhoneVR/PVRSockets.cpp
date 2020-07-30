@@ -100,7 +100,7 @@ void PVRStopConnectionListener() {
 void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(vector<uint8_t>)> headerCb, function<void()> onErrCb) {
 	videoRunning = true;
 	videoThr = new std::thread([=] {
-		PVR_DB("Setting encoder");
+		PVR_DB("[PVRStartStreamer th] Setting encoder");
 		auto S = ENCODER_SECT;
 		int fps = PVRProp<int>({ GAME_FPS_KEY });
 
@@ -184,8 +184,8 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 
 		x264_param_t outPar;
 		x264_encoder_parameters(enc, &outPar);
-		PVR_DB("Render size: " + to_string(width) + "x" + to_string(height));
-		PVR_DB("Using encoding level: " + to_string(outPar.i_level_idc));
+		PVR_DB("[PVRStartStreamer th] Render size: " + to_string(width) + "x" + to_string(height));
+		PVR_DB("[PVRStartStreamer th] Using encoding level: " + to_string(outPar.i_level_idc));
 
 		x264_nal_t *nals;
 		int nNals;
@@ -212,43 +212,55 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 		auto nbuf = reinterpret_cast<int *>(&extraBuf[8 + 16]);
 
 		asio::error_code ec;
-		//ofstream outp("C:\\Users\\ricca\\mystream.h264", ofstream::binary);/////////////////////////////////////////////
+		//ofstream outp("C:\\Users\\narni\\mystream.h264", ofstream::binary);/////////////////////////////////////////////
 		while ((whichFrame == lastWhichFrame || quatQueue.size() == 0) && videoRunning) // for first frame
 			sleep_for(500us);
 		while (videoRunning)
 		{
 			//PVRUpdTexWraps();
 			if ((lastWhichFrame + 1) % nVFrames != whichFrame)
-				PVR_DB("Skipped frame! Please re-tune the encoder parameters");
+				PVR_DB("[PVRStartStreamer th] Skipped frame! Please re-tune the encoder parameters lWf:"+to_string(lastWhichFrame)+", nVfs:"+ to_string(nVFrames)+ ", wF:"+to_string(whichFrame));
 			lastWhichFrame = whichFrame;
 			whichFrameMtxs[lastWhichFrame].lock();   // LOCK
 			auto totSz = x264_encoder_encode(enc, &nals, &nNals, &vFrames[lastWhichFrame], &outPic);
 			whichFrameMtxs[lastWhichFrame].unlock(); // UNLOCK
 			if (totSz > 0)
 			{
-				while (quatQueue.front().first < outPic.i_pts) // handle skipped frames
-					quatQueue.pop();
-				auto outPts = quatQueue.front().first;
-				auto quat = quatQueue.front().second;
-				quatQueue.pop();
-				*pbuf = outPts;
-				qbuf[0] = quat.w();
-				qbuf[1] = quat.x();
-				qbuf[2] = quat.y();
-				qbuf[3] = quat.z();
-				*nbuf = totSz;
-
-				write(skt, buffer(extraBuf), ec);
-				write(skt, buffer(nals->p_payload, totSz), ec);
-				if (ec.value() != 0 && videoRunning)
-					PVR_DB("Write failed: " + ec.message() + " Code: " + to_string(ec.value()));
-				if (ec == error::connection_aborted || ec == error::connection_reset)
+				//PVR_DB("[PVRStartStreamer th] Rendering lWf:"+to_string(lastWhichFrame)+", wF:"+to_string(whichFrame));
+				whichFrameMtxs[lastWhichFrame].lock();   // LOCK
+				while ((quatQueue.size() != 0) && (quatQueue.front().first < outPic.i_pts)) // handle skipped frames
 				{
-					videoRunning = false;
-					//onErrCb();
+					PVR_DB("[PVRStartStreamer th] handle skipped frames qPts:" + to_string(quatQueue.front().first) + ", outpicPts:" + to_string(outPic.i_pts));
+					quatQueue.pop();
 				}
-				//outp.write((char*)nals->p_payload, totSz);/////////////////////////////////////////////////////////
+				whichFrameMtxs[lastWhichFrame].unlock(); // UNLOCK
 
+				if (quatQueue.size() != 0)
+				{
+					auto outPts = quatQueue.front().first;
+					auto quat = quatQueue.front().second;
+					quatQueue.pop();
+					*pbuf = outPts;
+					qbuf[0] = quat.w();
+					qbuf[1] = quat.x();
+					qbuf[2] = quat.y();
+					qbuf[3] = quat.z();
+					*nbuf = totSz;
+
+					write(skt, buffer(extraBuf), ec);
+					write(skt, buffer(nals->p_payload, totSz), ec);
+					PVR_DB("[PVRStartStreamer th] wrote render to socket: Pts:" + to_string(outPts) + ", Size: "+to_string(sizeof(extraBuf))+","+to_string(totSz));
+
+					if (ec.value() != 0 && videoRunning)
+						PVR_DB("Write failed: " + ec.message() + " Code: " + to_string(ec.value()));
+					if (ec == error::connection_aborted || ec == error::connection_reset)
+					{
+						videoRunning = false;
+						//onErrCb();
+					}
+
+					//outp.write((char*)nals->p_payload, totSz);/////////////////////////////////////////////////////////
+				}
 			}
 			while ((whichFrame == lastWhichFrame || quatQueue.size() == 0) && videoRunning)
 				sleep_for(500us);
@@ -267,6 +279,7 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 void PVRProcessFrame(uint64_t hdl, Quaternionf quat) {
 	if (videoRunning) {
 		int newWhichFrame = (whichFrame + 1) % nVFrames;
+		PVR_DB("[PVRProcessFrame] pushing frame to que nWf: " +to_string(newWhichFrame)+ ", pts: " + to_string(pts + vFrameDtUs));
 		whichFrameMtxs[newWhichFrame].lock();   // LOCK
 		pts += vFrameDtUs;
 		quatQueue.push({ pts, quat });
@@ -285,6 +298,8 @@ void PVRStopStreamer() {
 
 void PVRStartReceiveData(string ip, vr::DriverPose_t *pose, uint32_t *objId) {
 	float addLatency = 0;
+
+	PVR_DB("[PVRStartReceiveData] UDP receive started");
 
 	dataRunning = true;
 	dataThr = new std::thread([=] {
