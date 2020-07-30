@@ -53,9 +53,12 @@ void pvrdebug(T i) {
 
 void pvrdebugClear();
 
-#define PVR_DB(msg)
+#if defined _DEBUG
+	#define PVR_DB(msg) pvrdebug(msg)
+#else
+	#define PVR_DB(msg)
+#endif
 
-//#define PVR_DB(msg) pvrdebug(msg)
 #define PVR_DB_CLEAR() pvrdebugClear()
 
 #define SAFE_DEL(obj) if (obj) { delete obj; obj = nullptr; }
