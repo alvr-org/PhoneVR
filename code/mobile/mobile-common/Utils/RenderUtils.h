@@ -23,11 +23,13 @@ void setupRTS(int w, int h);
 
 class Renderer {
     GLuint prog, frmBuf, outTex;
+    //<TextureID, TextureUniformRes, True:"ExternalOES": False:"2D">
     std::vector<std::tuple<GLuint, GLint, GLenum>> inTexs;
     int width, height, size, maxLod;
     GLint matUnif;
     bool rtt;
 
+    //                             TexResource  True:"ExternalOES": False:"2D"
     void initProg(std::vector<std::pair<GLuint, bool>> inTexs, std::string vs, std::string fragBody);
 
 public:

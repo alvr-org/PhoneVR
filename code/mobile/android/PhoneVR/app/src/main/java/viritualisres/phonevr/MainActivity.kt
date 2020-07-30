@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
@@ -31,13 +32,15 @@ class MainActivity : AppCompatActivity() {
 
         // MediaCodecList.getCodecInfos();
         //Range<Integer> dsfs =  MediaCodecInfo;
-
+        //Log.d("PhoneVR", "OnCreate called");
     }
 
     override fun onResume() {
         super.onResume()
         val prefs = getSharedPreferences(pvrPrefsKey, Context.MODE_PRIVATE)
         //Wrap.startAnnouncer(prefs.getString(pcIpKey, pcIpDef), prefs.getInt(connPortKey, connPortDef))
+
+        //Log.d("PhoneVR", "OnResume called... Starting Announcer @ port :" + prefs.getInt(connPortKey, connPortDef).toString());
         prefs.getString(pcIpKey, pcIpDef)?.let { Wrap.startAnnouncer(it, prefs.getInt(connPortKey, connPortDef)) }
     }
 

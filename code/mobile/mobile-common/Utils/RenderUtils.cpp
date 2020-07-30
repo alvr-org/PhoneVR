@@ -103,7 +103,7 @@ void Renderer::initProg(vector<pair<GLuint, bool>> texs, std::string vs, string 
     }
 }
 
-
+// This is the actuall Constructor
 Renderer::Renderer(vector<pair<GLuint, bool>> texs, string frag, float xStart, float xEnd)
         : rtt(false), frmBuf(0), maxLod(0){
     char vs[512];
@@ -130,8 +130,10 @@ void Renderer::render(Eigen::Matrix4f mat) {
         glBindFramebuffer(GL_FRAMEBUFFER, frmBuf);
         glViewport(0, 0, width, height);
     }
-    else
+    else {
         glUniformMatrix4fv(matUnif, 1, GL_FALSE, mat.data());
+        //glViewport(0, 0, 1024, 768);
+    }
 
     for (int i = 0; i < inTexs.size(); i++) {
         auto t = inTexs[i];

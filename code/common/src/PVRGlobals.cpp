@@ -52,7 +52,10 @@ void pvrdebug(string msg) {
 	auto ms = system_clock::now().time_since_epoch() / 1ms;
 	string elapsed = (ms - pvrdebug_oldMs < 1000 ? to_string(ms - pvrdebug_oldMs) : "max");
 	of << t.wMinute << ":" << setfill('0') << setw(2) << t.wSecond << " " << setfill('0') << setw(3) << elapsed << "  " << msg << endl;
-	pvrdebug_oldMs = ms;
+	
+	OutputDebugStringA( ("--[PhoneVR]--"+msg+"\n").c_str() );
+
+	pvrdebug_oldMs = ms;	
 }
 
 void pvrdebugClear() {
@@ -66,7 +69,7 @@ void pvrdebugClear() {
 #include <android/log.h>
 
 void pvrdebug(string msg) {
-	__android_log_print(ANDROID_LOG_DEBUG, "pvr debugDef", "%s", msg.c_str());
+	__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "%s", msg.c_str());
 }
 
 #endif

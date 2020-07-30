@@ -11,6 +11,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.opengl.GLSurfaceView
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.view.Surface
 import android.view.View
@@ -152,7 +153,9 @@ class GameActivity : Activity(), SensorEventListener {
             }.start()
         }
 
-        override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {}
+        override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
+            //Log.d("PhoneVR", "onSurfaceChanged" + width.toString() + "x" + height.toString());
+        }
 
         override fun onDrawFrame(gl: GL10) {
             val pts = Wrap.vFrameAvailable()

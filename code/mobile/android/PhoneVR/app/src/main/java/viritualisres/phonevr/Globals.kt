@@ -26,7 +26,7 @@ val offFovKey = "offFov"
 val offFovDef = 10.0f
 
 val warpKey = "warp"
-val warpDef = true
+val warpDef = false // ReProj
 
 val debugKey = "debug"
 val debugDef = false
