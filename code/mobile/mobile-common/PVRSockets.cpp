@@ -170,6 +170,7 @@ void PVRStartReceiveStreams(uint16_t port) {
             asio::error_code ec = error::fault;
             while (ec.value() != 0 && pvrState != PVR_STATE_SHUTDOWN)
                 skt.connect({address::from_string(pcIP), port}, ec);
+
             PVR_DB("[StreamReceiver th] sock connected @p" + to_string(port));
 
             function<void(const asio::error_code &, size_t)> handler = [&](
@@ -193,6 +194,7 @@ void PVRStartReceiveStreams(uint16_t port) {
 
                 PVR_DB("[StreamReceiver th] recvd 28maxBs with Error: " + to_string(ec.value()) +
                        ", pts: " + to_string(*pts) + ", pktSz" + to_string(*pktSz));
+
                 if (ec.value() == 0) {
                     quatQueue.push({*pts, vector<float>(quatBuf, quatBuf + 4)});
 
@@ -204,6 +206,7 @@ void PVRStartReceiveStreams(uint16_t port) {
                         async_read(skt, buffer(eBuf.buf, *pktSz), handler);
                         svc.run();
                         svc.reset();
+
                         PVR_DB("[StreamReceiver th] emptyVBufs.size: "+to_string(emptyVBufs.size())+", Reading sock for "+to_string(*pktSz)+"Bs" );
                         if (ec.value() == 0) {
                             filledVBufs.push({eBuf.idx, *pktSz, (uint64_t) *pts});
