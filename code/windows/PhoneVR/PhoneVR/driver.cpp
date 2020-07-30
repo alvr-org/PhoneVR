@@ -62,7 +62,7 @@ public:
 		else if (msgType == PVR_MSG::ADDITIONAL_DATA) {
 			PVR_DB("[talker]: ADD DATA MSG RCV'ed.. waiting for propCont");
 			auto oldTm = Clk::now();
-			while (objId == k_unTrackedDeviceIndexInvalid && Clk::now() - oldTime < 7s) // ensure propCont is set
+			while (objId == k_unTrackedDeviceIndexInvalid && Clk::now() - oldTime < 3s) // 7s - ensure propCont is set
 				sleep_for(10ms);
 
 			PVR_DB("[talker]: ADD DATA MSG RCV'ed.. propCont seems to be set or timeout");
