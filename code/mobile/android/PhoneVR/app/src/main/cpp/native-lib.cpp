@@ -165,7 +165,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
                 {
                     size_t bufSz = 0;
                     uint8_t *buf = AMediaCodec_getInputBuffer(codec, (size_t)idx, &bufSz);
-                    PVREnqueueVideoBuf({buf, idx, bufSz});
+                    PVREnqueueVideoBuf({buf, static_cast<int>(idx), bufSz});
                 }
             }
 

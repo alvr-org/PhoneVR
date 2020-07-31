@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8.3)
 
 #use rtti, exceptions for asio library
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++1z -frtti -fexceptions -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++1z -frtti -fexceptions -Wc++11-narrowing -Wreorder")
 
 # find all src files
 file(GLOB_RECURSE  MY_SRC
