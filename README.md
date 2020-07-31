@@ -1,23 +1,23 @@
 # PhoneVR
 [![Build status](https://ci.appveyor.com/api/projects/status/1eyjmo51o4c86r07?svg=true)](https://ci.appveyor.com/project/ShootingKing-AM/phonevr) ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ShootingKing-AM/PhoneVR?color=orange&include_prereleases)
 
-Play SteamVR enabled games with your phone as an HMD.
-
+Play SteamVR VR-enabled games with your phone as HMD (*Head-mounted display*).
 <br/>
+
 ### Requirements
 
 A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or above* with *OpenGL-ES 3.0 or above*, Steam and some SteamVR games installed.
 
 ### Installation
 
-* Make sure you have Stean and SteamVR installed (To find SteamVR on steam, `Library -> Tools -> SteamVR`).
-* Download [`latest.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases) release of this repository.
+* Make sure you have Steam and SteamVR installed (To find SteamVR on steam, `Library -> Tools -> SteamVR`).
+* Download [`PhoneVR.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases) release of this repository.
 * Run the script `install-PhoneVR.bat`, located in the `driver` folder.
-* Copy driver_PhoneVR.dll (from latest.zip/windriver/[win64 or win32]) to you local-driver-folder)
+* Copy `driver_PhoneVR.dll` (from `[PhoneVR.zip]/windriver/[win64 or win32]`) to you local-driver-folder)
   `local-driver-folder` by default is: `C:\Program Files\PhoneVR\PVRServer\bin\[win32 or win64]\`
-* Install the Apk on your mobile from `latest.zip/android/arm64`.
+* Install the Apk on your mobile from `[PhoneVR.zip]/android/arm64`.
 
-To **play**, **first open the Phone App** then run the game of your choice on PC. (Obviously, both PC and Mobile should be on same Network, preferably Wifi 5.0)
+To **play**, **first open the Phone App**(SteamVR should also be closed), then run the game of your choice on PC. (Obviously, both PC and Mobile should be on same Network, preferably Wifi 5.0)
 
 ### Developers
 This Project is presently under testing. But, pull requests are welcome. 
@@ -29,7 +29,7 @@ This Project is presently under testing. But, pull requests are welcome.
   * For testing, this project has 2 Build Configs, Debug and Release. Debug has lots of debugging callouts to both local-driver-folder/pvrlog.txt and MSVS Debugger Output.
 
 * Android App: App folder: `<root>/code/mobile/android/PhoneVR`
-  * Compiled/Tested `Android Studio 4.0.1`
+  * Compiled/Tested on `Android Studio 4.0.1`
   * For testing, this project has 2 Build Configs, Debug and Release. Debug has lots of debugging callouts to logcat from both JAVA and JNI.
   
 * External Vendor Libraries used (all Headers included in respective Projects):
