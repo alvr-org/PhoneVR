@@ -37,6 +37,7 @@ namespace {
 	int64_t vFrameDtUs;
 	int whichFrame = 0;      // syncronize rendering and encoding
 	std::mutex whichFrameMtxs[nVFrames]; // if syncronization is out (cause lag) use as last resort to avoid crashing
+	std::mutex quatQueueMutex; // Syncronization of quatQueue among SteamVR Thread and Streamer thread.
 }
 
 
@@ -226,20 +227,23 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 			whichFrameMtxs[lastWhichFrame].unlock(); // UNLOCK
 			if (totSz > 0)
 			{
-				//PVR_DB("[PVRStartStreamer th] Rendering lWf:"+to_string(lastWhichFrame)+", wF:"+to_string(whichFrame));
-				whichFrameMtxs[lastWhichFrame].lock();   // LOCK
+				PVR_DB("[PVRStartStreamer th] Rendering lWf:"+to_string(lastWhichFrame)+", wF:"+to_string(whichFrame));
+				quatQueueMutex.lock();   // LOCK
 				while ((quatQueue.size() != 0) && (quatQueue.front().first < outPic.i_pts)) // handle skipped frames
 				{
 					PVR_DB("[PVRStartStreamer th] handle skipped frames qPts:" + to_string(quatQueue.front().first) + ", outpicPts:" + to_string(outPic.i_pts));
 					quatQueue.pop();
 				}
-				whichFrameMtxs[lastWhichFrame].unlock(); // UNLOCK
+				quatQueueMutex.unlock(); // UNLOCK
 
 				if (quatQueue.size() != 0)
 				{
+					quatQueueMutex.lock();
 					auto outPts = quatQueue.front().first;
 					auto quat = quatQueue.front().second;
 					quatQueue.pop();
+					quatQueueMutex.unlock();
+
 					*pbuf = outPts;
 					qbuf[0] = quat.w();
 					qbuf[1] = quat.x();
@@ -282,7 +286,9 @@ void PVRProcessFrame(uint64_t hdl, Quaternionf quat) {
 		PVR_DB("[PVRProcessFrame] pushing frame to que nWf: " +to_string(newWhichFrame)+ ", pts: " + to_string(pts + vFrameDtUs));
 		whichFrameMtxs[newWhichFrame].lock();   // LOCK
 		pts += vFrameDtUs;
+		quatQueueMutex.lock();	// LOCK
 		quatQueue.push({ pts, quat });
+		quatQueueMutex.unlock(); // UNLOCK
 		PVRUpdTexHdl(hdl, newWhichFrame);
 		vFrames[newWhichFrame].i_pts = pts;
 		whichFrameMtxs[newWhichFrame].unlock(); // UNLOCK
