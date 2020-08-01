@@ -32,6 +32,7 @@
 [Rr]elease/
 [Rr]eleases/
 x64/
+x86/
 bld/
 [Bb]in/
 [Oo]bj/
@@ -39,6 +40,7 @@ bld/
 
 !windows/libs/x264/lib/x64/
 !windows/libs/x264/lib/x86/
+!code/mobile/android/libraries/jni/x86
 
 # Visual Studio 2015 cache/options directory
 .vs/
