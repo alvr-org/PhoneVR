@@ -17,10 +17,12 @@ limitations under the License.
 #ifndef EIGEN_BFLOAT16_H
 #define EIGEN_BFLOAT16_H
 
+#ifndef EIGEN_EXPLICIT_CAST
 #if __cplusplus > 199711L
 #define EIGEN_EXPLICIT_CAST(tgt_type) explicit operator tgt_type()
 #else
 #define EIGEN_EXPLICIT_CAST(tgt_type) operator tgt_type()
+#endif
 #endif
 
 #define BF16_PACKET_FUNCTION(PACKET_F, PACKET_BF16, METHOD)         \
