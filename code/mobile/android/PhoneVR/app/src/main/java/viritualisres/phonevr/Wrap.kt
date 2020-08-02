@@ -1,7 +1,7 @@
 package viritualisres.phonevr
 
 import android.content.Intent
-import android.support.annotation.Keep
+import androidx.annotation.Keep
 import android.view.Surface
 import java.lang.ref.WeakReference
 

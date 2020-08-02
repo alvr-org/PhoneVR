@@ -180,7 +180,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
                 {
                     size_t bufSz = 0;
                     uint8_t *buf = AMediaCodec_getInputBuffer(codec, (size_t)idx, &bufSz);
-                    PVREnqueueVideoBuf({buf, idx, bufSz}); // into emptyVbuf
+                    PVREnqueueVideoBuf({buf, static_cast<int>(idx), bufSz}); // into emptyVbuf
                     PVR_DB("[MediaCodec th] Getting MCInputMedia Buf[ "+ to_string(bufSz)+ "] @ idx:" + to_string(idx) + ". into emptyVbuf");
                 }
             }
