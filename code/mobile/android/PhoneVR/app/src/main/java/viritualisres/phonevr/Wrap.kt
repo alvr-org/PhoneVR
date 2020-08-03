@@ -1,7 +1,8 @@
 package viritualisres.phonevr
 
 import android.content.Intent
-import android.support.annotation.Keep
+import android.support.v4.content.ContextCompat.startActivity
+import android.util.Log
 import android.view.Surface
 import java.lang.ref.WeakReference
 
@@ -21,7 +22,10 @@ internal object Wrap {
     //callbacks
     @JvmStatic
     fun segueToGame() {
+        val rotation = mainRef?.get()?.windowManager?.defaultDisplay?.rotation
+        //Log.d("--PVR-Java--", "Wrapper Class Layout Orientation : " /*+ mainLayout.rotation.toString() + ", GVR: "*/ + rotation);
         val intent = Intent(mainRef?.get(), GameActivity::class.java)
+        intent.putExtra("MAINLAYOUT_ROT", rotation)
         mainRef?.get()?.startActivity(intent)
     }
 
