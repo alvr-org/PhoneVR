@@ -3,6 +3,7 @@ package viritualisres.phonevr
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.ActivityInfo
 import android.graphics.Point
 import android.graphics.SurfaceTexture
 import android.hardware.Sensor
@@ -16,7 +17,6 @@ import android.view.MotionEvent
 import android.view.Surface
 import android.view.View
 
-//import com.google.vr.cardboard.SurfaceTextureManager;
 import com.google.vr.ndk.base.AndroidCompat
 import com.google.vr.ndk.base.GvrLayout
 
@@ -41,6 +41,11 @@ class GameActivity : Activity(), SensorEventListener {
         prefs = getSharedPreferences(pvrPrefsKey, Context.MODE_PRIVATE)
         surf = GLSurfaceView(this)
         gvrLayout = GvrLayout(this)
+
+        val mainActRot = intent.getIntExtra("MAINLAYOUT_ROT",Surface.ROTATION_0)
+        if( mainActRot == Surface.ROTATION_270) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+        }
 
         Wrap.setGameView(this)
 
@@ -80,6 +85,7 @@ class GameActivity : Activity(), SensorEventListener {
 
         Wrap.startSendSensorData(prefs.getInt(posePortKey, posePortDef))
 
+        //Log.d("--PVR-Java--", "main Layout Orientation : (" + mainActRot +")" /*+ mainLayout.rotation.toString() + ", GVR: "*/ + windowManager.defaultDisplay.rotation);
     }
 
     override fun onPause() {
@@ -97,6 +103,7 @@ class GameActivity : Activity(), SensorEventListener {
         gvrLayout.onResume()
         surf.onResume()
         Wrap.onResume()
+        //Log.d("--PVR-Java--", "Resume: main Layout Orientation : " /*+ mainLayout.rotation.toString() + ", GVR: "*/ + windowManager.defaultDisplay.rotation);
     }
 
     override fun onDestroy() {
