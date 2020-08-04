@@ -16,6 +16,12 @@ environment:
     
   APPVEYOR_API_TOKEN:
     secure: pDVnsOqWnupLrKTbz/iZlZt6CkSTZVUMtXqTlp5tgHI=
+    
+  Key:
+    secure: gNmPVYxjEBZqufnkmn7O+w==
+    
+  Store:
+    secure: xnRJSit2pSpkl1QY/ERf2iLRkItw2I7/4E+vHmbyuag=
 
   matrix:
 

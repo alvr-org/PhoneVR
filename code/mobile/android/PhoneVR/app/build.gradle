@@ -15,10 +15,10 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 android {
     signingConfigs {
         releaseconfig {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
             storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword System.getenv("Key")
+            storePassword System.getenv("Store")
         }
     }
     android.ndkVersion "21.3.6528147"
@@ -37,7 +37,7 @@ android {
         }
 
         defaultPublishConfig 'release'
-        //publishNonDefault true
+        publishNonDefault true
     }
     buildTypes {
         release {
