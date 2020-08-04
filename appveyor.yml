@@ -13,13 +13,13 @@ environment:
   ANDROID_NDK_HOME: "C:\\android-sdk-windows\ndk"
   APPVEYOR_A_TOKEN:
     secure: tx8YD3ezskZ4ZlYRUTXpQw0yjzsCByi8lujOp5NuGSqFF+ClsALp20qtsrYFIOym
-    
+
   APPVEYOR_API_TOKEN:
     secure: pDVnsOqWnupLrKTbz/iZlZt6CkSTZVUMtXqTlp5tgHI=
-    
+
   Key:
     secure: S/ndMdbuwvlwmXKNJpfhhA==
-    
+
   Store:
     secure: vooKSgloguN6KbxV+b9stA==
 
