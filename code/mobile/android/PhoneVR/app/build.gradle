@@ -16,9 +16,10 @@ android {
     signingConfigs {
         releaseconfig {
             storeFile file(keystoreProperties['storeFile'])
+            storePassword System.getenv("Store")
             keyAlias keystoreProperties['keyAlias']
             keyPassword System.getenv("Key")
-            storePassword System.getenv("Store")
+
         }
     }
     android.ndkVersion "21.3.6528147"
