@@ -1,25 +1,30 @@
-# PhoneVR
-[![Build status](https://ci.appveyor.com/api/projects/status/1eyjmo51o4c86r07?svg=true)](https://ci.appveyor.com/project/ShootingKing-AM/phonevr) ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ShootingKing-AM/PhoneVR?color=orange&include_prereleases)
+[![PhonveVR](./.github/LogoPVR.png)](https://github.com/ShootingKing-AM/PhoneVR/releases)<br/>
 
-Play SteamVR VR-enabled games with your phone as HMD (*Head-mounted display*).
+<img src="./.github/rep1.png" width="50%"><img src="./.github/rep2.jpg" width="50%">
+<sup>Pictures used for representational purposes</sup>
+
+[![Build status](https://ci.appveyor.com/api/projects/status/1eyjmo51o4c86r07?svg=true)](https://ci.appveyor.com/project/ShootingKing-AM/phonevr)
+![GitHub release](https://img.shields.io/github/v/release/ShootingKing-AM/PhoneVR?color=orange&include_prereleases)
+
+Use Steam VR-enabled applications with your phone as HMD (*Head-mounted display*). The only Open-Source solution to similar commercial packages like VRidge, Riftcat, Trinus etc etc.
 <br/>
 
-### Requirements
+## Requirements
 
 A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or above* with *OpenGL-ES 3.0 or above*, Steam and some SteamVR games installed.
 
-### Installation
+## Installation
 
 * Make sure you have Steam and SteamVR installed (To find SteamVR on steam, `Library -> Tools -> SteamVR`).
-* Download [`PhoneVR.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases) release of this repository.
-* Run the script `install-PhoneVR.bat`, located in the `driver` folder.
+* Download latest [`PhoneVR.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases) release of this repository.
+* Download the repository files. Run the script `install-PhoneVR.bat`, located in the `driver` folder.
 * Copy `driver_PhoneVR.dll` (from `[PhoneVR.zip]/windriver/[win64 or win32]`) to you local-driver-folder)
   `local-driver-folder` by default is: `C:\Program Files\PhoneVR\PVRServer\bin\[win32 or win64]\`
 * Install the Apk on your mobile from `[PhoneVR.zip]/android/arm64`.
 
 To **play**, **first open the Phone App**(SteamVR should also be closed), then run the game of your choice on PC. (Obviously, both PC and Mobile should be on same Network, preferably Wifi 5.0)
 
-### Developers
+## Development
 This Project is presently under testing. But, pull requests are welcome. 
 
 * Windows Driver: `<root>/code/windows/PhoneVR.sln`
