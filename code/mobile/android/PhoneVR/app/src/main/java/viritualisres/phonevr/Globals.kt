@@ -8,7 +8,7 @@ val pcIpKey = "pcIp"
 val pcIpDef = ""
 
 val connPortKey = "connPort"
-val connPortDef = 32415
+val connPortDef = 33333
 
 val videoPortKey = "videoPort"
 val videoPortDef = 15243
