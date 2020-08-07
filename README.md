@@ -1,4 +1,6 @@
+<br/><br/><br/>
 [![PhonveVR](./.github/LogoPVR.png)](https://github.com/ShootingKing-AM/PhoneVR/releases)<br/>
+<br/><br/><br/>
 
 <img src="./.github/rep1.png" width="50%"><img src="./.github/rep2.jpg" width="50%">
 <sup>Pictures used for representational purposes</sup>
@@ -47,8 +49,8 @@ This Project is presently under testing. But, pull requests are welcome.
 ## Troubleshooting  
 * Android App doesn’t connect to Windows Steam VR even after opening Phone App first and then SteamVR on windows
   1. Make sure that both the Windows and Android devices are in the same Local Network. (connected to the same router/wifi device)
-  2. Sometimes, the port which PhoneVR use to connect win/mobile devices, also known as `Pairing Port (default :33333)`, might be used by other services on your devices(Windows/Android). Try changing the "Pairing Port" on `Android PhoneVR App` settings and `pairing_port` in `C:\Program Files\PhoneVR\pvrsettings.json` for `Windows PVR driver` and restart SteamVR. Both Windows Paiting port and Android Pairing port needs to be same. Safe recommended port range : `30000 - 65535`
+  2. Sometimes, the port which PhoneVR use to connect win/mobile devices, also known as `Pairing Port (default :33333)`, might be used by other services on your devices(Windows/Android). Try changing the "Pairing Port" on `Android PhoneVR App` settings and `pairing_port` in `C:\Program Files\PhoneVR\pvrsettings.json` for `Windows PVR driver` and restart SteamVR. Both Windows Pairing port and Android Pairing port needs to be same. Safe recommended port range : `30000 - 65535`
   
-* Android App automatically coming back to "Discovery"(Home/AppStart) page after some VR Application usage
+* Android App automatically comes back to "Discovery"(Home/AppStart) page after some VR Application usage
   - Check if `Android System Battery saver` or similar applications are killing the app when in background. Usually can be found is `Android Setting` -> `Application Manager` or `Application Settings` according to your Android device flavour/OEM.
 
