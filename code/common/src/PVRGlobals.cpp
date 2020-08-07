@@ -42,13 +42,15 @@ bool PVRCheckIfExpired() {
 
 namespace {
 	int64_t pvrdebug_oldMs = 0;
-	const wstring logFile = L"C:\\Program Files\\PhoneVR\\pvrlog.txt";
+	int64_t pvrInfo_oldMs = 0;
+	const wstring logFileDebug = L"C:\\Program Files\\PhoneVR\\pvrDebuglog.txt";
+	const wstring logFileInfo = L"C:\\Program Files\\PhoneVR\\pvrlog.txt";
 }
 
 void pvrdebug(string msg) {
 	SYSTEMTIME t;
 	GetLocalTime(&t);
-	ofstream of(logFile, ios_base::app);
+	ofstream of(logFileDebug, ios_base::app);
 	auto ms = system_clock::now().time_since_epoch() / 1ms;
 	string elapsed = (ms - pvrdebug_oldMs < 1000 ? to_string(ms - pvrdebug_oldMs) : "max");
 	of << t.wMinute << ":" << setfill('0') << setw(2) << t.wSecond << " " << setfill('0') << setw(3) << elapsed << "  " << msg << endl;
@@ -59,7 +61,28 @@ void pvrdebug(string msg) {
 }
 
 void pvrdebugClear() {
-	ofstream(logFile, ofstream::out | ofstream::trunc);
+	ofstream(logFileDebug, ofstream::out | ofstream::trunc);
+}
+
+void pvrInfo(string msg) {
+	SYSTEMTIME t;
+	GetLocalTime(&t);
+	ofstream of(logFileInfo, ios_base::app);
+	auto ms = system_clock::now().time_since_epoch() / 1ms;
+	string elapsed = (ms - pvrInfo_oldMs < 1000 ? to_string(ms - pvrInfo_oldMs) : "max");
+	of  << setfill('0') << setw(2) << t.wHour  << ":"
+		<< setfill('0') << setw(2) << t.wMinute << ":"
+		<< setfill('0') << setw(2) << t.wSecond << "("
+		<< setfill('0') << setw(3) << t.wMilliseconds
+		<< ") - " 
+		<< setfill('0') << setw(2) << t.wDay << "."
+		<< setfill('0') << setw(2) << t.wMonth << "."
+		<< setfill('0') << setw(4) << t.wYear
+		<< " -- " 
+		<< setfill('0') << setw(2) << t.wSecond << " " 
+		<< setfill('0') << setw(3) << elapsed << "  " 
+		<< msg << endl;
+	pvrInfo_oldMs = ms;
 }
 #endif
 

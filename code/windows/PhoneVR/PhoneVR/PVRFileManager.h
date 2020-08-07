@@ -64,7 +64,7 @@ namespace {
 		}
 		catch (const std::exception& err) {
 
-			PVR_DB(std::string("Error retrieving setting: ") + err.what());
+			PVR_DB_I(std::string("Error retrieving setting: ") + err.what());
 		}
 		return nlohmann::json();
 	}
@@ -106,7 +106,7 @@ T PVRProp(std::vector<std::string> propPath) {
 		fullPath += propPath[i] + (i < propPath.size() - 1 ? "." : "");
 	}
 	T res = j;
-	PVR_DB("Using default setting value: " + fullPath + " = " + to_string(res));
+	PVR_DB_I("Using default setting value: " + fullPath + " = " + to_string(res));
 	return res;
 }
 
