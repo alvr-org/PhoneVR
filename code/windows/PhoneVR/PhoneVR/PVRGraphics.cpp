@@ -30,7 +30,7 @@ namespace {
 		LPWSTR output;
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER,
 			NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&output, 0, NULL);
-		PVR_DB(wstring(output));
+		PVR_DB_I(wstring(output));
 	}
 
 	mutex texMtx;
@@ -40,7 +40,7 @@ namespace {
 
 #define RELEASE(obj) if(obj) { obj->Release(); obj = nullptr; }
 #define OK_OR_EXEC(call, func) if(FAILED(call)) func()
-#define OK_OR_DEBUG(call) { HRESULT hr = call; OK_OR_EXEC(hr, [hr] { PVR_DB("######### DirectX Error: #########"); debugHr(hr); }); }
+#define OK_OR_DEBUG(call) { HRESULT hr = call; OK_OR_EXEC(hr, [hr] { PVR_DB_I("######### DirectX Error: #########"); debugHr(hr); }); }
 #define QUERY(from, to) OK_OR_DEBUG(from->QueryInterface(__uuidof(to), reinterpret_cast<void**>(&to)))
 //#define PARENT(child, parent) OK_OR_DEBUG(child->GetParent(__uuidof(parent), reinterpret_cast<void**>(&parent)))
 //#define OK_OR_REINIT(call) OK_OR_EXEC(call, [] { PVRReleaseDX(); PVRInitDX(outID); })

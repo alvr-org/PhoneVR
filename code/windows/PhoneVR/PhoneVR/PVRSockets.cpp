@@ -70,10 +70,10 @@ void PVRStartConnectionListener(function<void(string, PVR_MSG)> callback) {
 							if (vec2uint(&buf[4]) >= PVR_CLIENT_VERSION)
 								callback(ip, msgType);
 							else
-								PVR_DB("Device " + ip + " needs to be updated");
+								PVR_DB_I("Device " + ip + " needs to be updated");
 						}
 						else
-							PVR_DB("Invalid message from device: " + ip);
+							PVR_DB_I("Invalid message from device: " + ip);
 						buf[0] = 0;
 						skt.async_receive_from(buffer(buf), remEP, handle);
 					}
@@ -85,7 +85,7 @@ void PVRStartConnectionListener(function<void(string, PVR_MSG)> callback) {
 		}
 		catch (const std::system_error& err)
 		{
-			PVR_DB(err.what());
+			PVR_DB_I(err.what());
 		}
 
 	});
@@ -305,7 +305,7 @@ void PVRStopStreamer() {
 void PVRStartReceiveData(string ip, vr::DriverPose_t *pose, uint32_t *objId) {
 	float addLatency = 0;
 
-	PVR_DB("[PVRStartReceiveData] UDP receive started");
+	PVR_DB_I("[PVRStartReceiveData] UDP receive started");
 
 	dataRunning = true;
 	dataThr = new std::thread([=] {
@@ -341,12 +341,12 @@ void PVRStartReceiveData(string ip, vr::DriverPose_t *pose, uint32_t *objId) {
 			}
 
 
-			PVR_DB("UDP receive stopped");
+			PVR_DB_I("UDP receive stopped");
 
 		}
 		catch (const std::system_error& err)
 		{
-			PVR_DB(err.what());
+			PVR_DB_I(err.what());
 		}
 		dataSvc = nullptr;
 	});

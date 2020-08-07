@@ -56,28 +56,28 @@ public:
 	{
 		if (msgType == PVR_MSG::DISCONNECT) {
 			// TODO: send remove device event
-			PVR_DB("HMD phone disconnected, closing server");
+			PVR_DB_I("HMD phone disconnected, closing server");
 			terminate();
 		}
 		else if (msgType == PVR_MSG::ADDITIONAL_DATA) {
-			PVR_DB("[talker]: ADD DATA MSG RCV'ed.. waiting for propCont");
+			PVR_DB_I("[talker]: ADD DATA MSG RCV'ed.. waiting for propCont");
 			auto oldTm = Clk::now();
 			while (objId == k_unTrackedDeviceIndexInvalid && Clk::now() - oldTime < 3s) // 7s - ensure propCont is set
 				sleep_for(10ms);
 
-			PVR_DB("[talker]: ADD DATA MSG RCV'ed.. propCont seems to be set or timeout");
+			PVR_DB_I("[talker]: ADD DATA MSG RCV'ed.. propCont seems to be set or timeout");
 			if (objId == k_unTrackedDeviceIndexInvalid)
 			{
 				auto ui16Data = reinterpret_cast<uint16_t *>(&data[0]);
 				rdrW = ui16Data[0];
 				rdrH = ui16Data[1];
 				memcpy(projRect, &data[2 * 2], 4 * 4);
-				PVR_DB("Viewport:  left: " + to_string(projRect[0]) + "  top: " + to_string(projRect[1]) +
+				PVR_DB_I("Viewport:  left: " + to_string(projRect[0]) + "  top: " + to_string(projRect[1]) +
 					"  right: " + to_string(projRect[2]) + "  bottom: " + to_string(projRect[3]));
 				float ipd = *reinterpret_cast<float *>(&data[2 * 2 + 4 * 4]);
 
 				VRProperties()->SetFloatProperty(propCont, Prop_UserIpdMeters_Float, ipd);
-				PVR_DB("IPD: " + to_string(ipd));
+				PVR_DB_I("IPD: " + to_string(ipd));
 
 				addDataBomb->defuse();
 			}
@@ -85,14 +85,14 @@ public:
 		}
 	}, [=](error_code err)
 	{
-		PVR_DB("TCP error: " + err.message());
+		PVR_DB_I("TCP error: " + err.message());
 		if (err.value() == 104) {
 			terminate();
 		}
 	}, false, ip), devIP(ip)
 	{
 
-		PVR_DB("HMD initializing");
+		PVR_DB_I("HMD initializing");
 
 		pose.poseTimeOffset = 0;
 		pose.qWorldFromDriverRotation = { 1.0, 0.0, 0.0, 0.0 };
@@ -111,15 +111,15 @@ public:
 
 		PVRInitDX();
 
-		PVR_DB("HMD initialized");
+		PVR_DB_I("HMD initialized");
 	}
 
 	virtual ~HMD() {
-		PVR_DB("HMD destroying");
+		PVR_DB_I("HMD destroying");
 		//PVRCloseStreamer();
 		PVRReleaseDX();
 		talker.send(PVR_MSG::DISCONNECT);
-		PVR_DB("HMD destroyed");
+		PVR_DB_I("HMD destroyed");
 	}
 
 	virtual DriverPose_t GetPose() override {
@@ -127,7 +127,7 @@ public:
 	}
 
 	virtual EVRInitError Activate(uint32_t objectId) override {
-		PVR_DB("[Activating HMD]... Setting Props");
+		PVR_DB_I("[Activating HMD]... Setting Props");
 
 		// set properties
 		propCont = VRProperties()->TrackedDeviceToPropertyContainer(objectId);
@@ -170,7 +170,7 @@ public:
 		VRProperties()->SetStringProperty(propCont, Prop_NamedIconPathDeviceStandby_String, "{PVRServer}/icons/hmd_standby.png");
 		VRProperties()->SetStringProperty(propCont, Prop_NamedIconPathDeviceAlertLow_String, "{PVRServer}/icons/hmd_ready_low.png");
 
-		PVR_DB("[Activating HMD]: waiting for addData");
+		PVR_DB_I("[Activating HMD]: waiting for addData");
 		bool addDataRcvd = true;
 		addDataBomb.reset(new TimeBomb(5s, [&] { addDataRcvd = false; }));
 		addDataBomb->ignite(false);
@@ -178,37 +178,37 @@ public:
 		objId = objectId;
 
 		if (addDataRcvd) {
-			PVR_DB("[Activating HMD]: waiting for addData... bomb ended with Rcvd:true");
+			PVR_DB_I("[Activating HMD]: waiting for addData... bomb ended with Rcvd:true");
 			PVRStartStreamer(devIP, rdrW, rdrH, [=](auto v) {
 				talker.send(PVR_MSG::HEADER_NALS, v);
 			}, [=] { terminate(); });
 
 			PVRStartReceiveData(devIP, &pose, &objId);
 
-			PVR_DB("[Activating HMD]: HMD activated with id: " + to_string(objectId));
+			PVR_DB_I("[Activating HMD]: HMD activated with id: " + to_string(objectId));
 
 			return VRInitError_None;
 		}
 		else {
-			PVR_DB("[Activating HMD]: Timeout waiting for response ... bomb ended with Rcvd:false");
+			PVR_DB_I("[Activating HMD]: Timeout waiting for response ... bomb ended with Rcvd:false");
 			return VRInitError_Unknown;
 		}
 	}
 
 	virtual void Deactivate() override {
-		PVR_DB("HMD deactivating");
+		PVR_DB_I("HMD deactivating");
 
 		rdrW = 0;
 		rdrH = 0;
 		objId = k_unTrackedDeviceIndexInvalid;
 
-		PVR_DB("Closing data thread");
+		PVR_DB_I("Closing data thread");
 		PVRStopReceiveData();
 
-		PVR_DB("Closing video thread");
+		PVR_DB_I("Closing video thread");
 		PVRStopStreamer();
 
-		PVR_DB("HMD deactivated");
+		PVR_DB_I("HMD deactivated");
 	}
 
 	virtual void *GetComponent(const char *compNameAndVersion) override {
@@ -222,21 +222,21 @@ public:
 	}
 
 	virtual void DebugRequest(const char * /*pchRequest*/, char *pchResponseBuffer, uint32_t unResponseBufferSize) override {
-		PVR_DB("debug request");
+		PVR_DB_I("debug request");
 		if (unResponseBufferSize > 0)
 			pchResponseBuffer[0] = 0;
 	}
 
 
 	virtual void EnterStandby() override {
-		PVR_DB("[Open VR EnterStandby] HMD enter standby");
+		PVR_DB_I("[Open VR EnterStandby] HMD enter standby");
 	}
 
 	// IVRDisplayComponent methods
 
 	virtual void GetWindowBounds(int32_t *x, int32_t *y, uint32_t *width, uint32_t *height) override {
 
-		PVR_DB("[Open VR GetWindowBounds] Returning w " + to_string(*width)+ " h " + to_string(*height));
+		PVR_DB_I("[Open VR GetWindowBounds] Returning w " + to_string(*width)+ " h " + to_string(*height));
 		*x = 0;
 		*y = 0;
 		*width = rdrW;
@@ -253,7 +253,7 @@ public:
 
 	virtual void GetRecommendedRenderTargetSize(uint32_t *width, uint32_t *height) override {
 
-		PVR_DB("[Open VR GetRecommendedRenderTargetSize] Returning w " + to_string(*width) + " h " + to_string(*height));
+		PVR_DB_I("[Open VR GetRecommendedRenderTargetSize] Returning w " + to_string(*width) + " h " + to_string(*height));
 		*width = rdrW;
 		*height = rdrH;
 	}
@@ -333,7 +333,7 @@ class ServerProvider : public IServerTrackedDeviceProvider {
 
 public:
 	virtual EVRInitError Init(IVRDriverContext *drvCtx) override {
-		PVR_DB("Initializing server");
+		PVR_DB_I("Initializing server");
 
 		bool hmdPaired = false;
 		TimeBomb hmdBomb(5s);
@@ -353,12 +353,16 @@ public:
 					hmdPaired = VRServerDriverHost()->TrackedDeviceAdded("0", TrackedDeviceClass_HMD, hmd);
 					//hmdPaired = VRServerDriverHost()->TrackedDeviceAdded("1", TrackedDeviceClass_DisplayRedirect, red);
 					if (!hmdPaired)
-						PVR_DB("Error: could not activate HMD");
+					{
+						PVR_DB_I("Error: could not activate HMD");
+					}
 					else
 						hmdBomb.defuse();
 				}
 				else
-					PVR_DB("Error: could not InitServerDriverContext");
+				{
+					PVR_DB_I("Error: could not InitServerDriverContext");
+				}
 			}
 			else if (msgType == PVR_MSG::PAIR_PHONE_CTRL) {
 				if (find(IPs.begin(), IPs.end(), ip) == IPs.end()) {
@@ -374,11 +378,11 @@ public:
 
 		if (!hmdPaired) {
 			PVRStopConnectionListener();
-			PVR_DB("Pairing failed! Cause: timeout");
+			PVR_DB_I("Pairing failed! Cause: timeout");
 			return VRInitError_Init_HmdNotFound;
 		}
 
-		PVR_DB("Server initialized");
+		PVR_DB_I("Server initialized");
 		return VRInitError_None;
 	}
 
@@ -394,7 +398,7 @@ public:
 
 		VR_CLEANUP_SERVER_DRIVER_CONTEXT();
 
-		PVR_DB("Server cleanup");
+		PVR_DB_I("Server cleanup");
 	}
 
 	virtual const char *const *GetInterfaceVersions() override { return k_InterfaceVersions; }
@@ -413,11 +417,11 @@ public:
 	}
 
 	virtual void EnterStandby() override {
-		PVR_DB("Server enter standby");
+		PVR_DB_I("Server enter standby");
 	}
 
 	virtual void LeaveStandby() override {
-		PVR_DB("Server leave standby");
+		PVR_DB_I("Server leave standby");
 	}
 };
 
@@ -431,22 +435,22 @@ void *HmdDriverFactory(const char *iName, int *retCode) {
 		return nullptr;
 	}*/
 	if (!PVRProp<bool>({ ENABLE_KEY })) {
-		PVR_DB("PhoneVR server disabled!");
+		PVR_DB_I("PhoneVR server disabled!");
 		*retCode = VRInitError_Driver_Failed;
 		return nullptr;
 	}
 
 	if (strcmp(iName, IServerTrackedDeviceProvider_Version) == 0) {
 		//PVR_DB_CLEAR();
-		PVR_DB("------------------------------------");
-		PVR_DB("Getting server");
+		PVR_DB_I("------------------------------------");
+		PVR_DB_I("Getting server");
 		return &server;
 	}
 	if (strcmp(iName, IVRWatchdogProvider_Version) == 0) {
 		//PVR_DB("Watchdog not supported");
 		return nullptr;
 	}
-	PVR_DB("Interface not found: "s + iName);
+	PVR_DB_I("Interface not found: "s + iName);
 	if (retCode)
 		*retCode = VRInitError_Init_InterfaceNotFound;
 	return nullptr;

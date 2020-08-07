@@ -51,12 +51,31 @@ void pvrdebug(T i) {
 	pvrdebug(std::to_string(i));
 }
 
+//////// Info //////////
+void pvrInfo(std::string msg);
+
+inline void pvrInfo(std::wstring msg) {
+	pvrInfo(std::string(msg.begin(), msg.end()));
+}
+
+template<typename T>
+void pvrInfo(T i) {
+	pvrInfo(std::to_string(i));
+}
+
 void pvrdebugClear();
 
+// PVR_DB only to Debug Log file, PVR_DB_I both to Log file and Info file
 #if defined _DEBUG
 	#define PVR_DB(msg) pvrdebug(msg)
 #else
 	#define PVR_DB(msg)
+#endif
+
+#if defined _DEBUG
+#define PVR_DB_I(msg) {pvrdebug(msg);pvrInfo(msg);}
+#else
+	#define PVR_DB_I(msg) pvrInfo(msg);
 #endif
 
 #define PVR_DB_CLEAR() pvrdebugClear()
@@ -65,7 +84,7 @@ void pvrdebugClear();
 
 
 // if a version of this program get hacked or cracked, it will eventually expire and quit on start
-bool PVRCheckIfExpired();
+//bool PVRCheckIfExpired();
 
 inline uint32_t vec2uint(uint8_t *v) {
 	uint32_t i;
