@@ -88,11 +88,32 @@ void pvrInfo(string msg) {
 
 //////// only android //////
 #ifdef __ANDROID__
-
+#include <sys/stat.h>
 #include <android/log.h>
+
+using namespace std;
+
+void pvrInfo(string msg) {
+
+	auto result_code = mkdir("/storage/emulated/0/PVR/", 0777);
+	auto *file = fopen("/storage/emulated/0/PVR/pvrlog.txt", "a");
+
+	if (file) {
+		fprintf(file, "PVR-JNI-I : %s\n", msg.c_str());
+		fclose(file);
+	}
+}
 
 void pvrdebug(string msg) {
 	__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "%s", msg.c_str());
+
+	auto result_code = mkdir("/storage/emulated/0/PVR/", 0777);
+	auto *file = fopen("/storage/emulated/0/PVR/pvrDebuglog.txt", "a");
+
+	if (file) {
+		fprintf(file, "PVR-JNI-D : %s\n", msg.c_str());
+		fclose(file);
+	}
 }
 
 #endif

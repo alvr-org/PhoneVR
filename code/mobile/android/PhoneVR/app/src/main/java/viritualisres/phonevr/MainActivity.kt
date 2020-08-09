@@ -1,7 +1,10 @@
 package viritualisres.phonevr
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -9,8 +12,13 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
+
+    private val REQUEST_CODE: Int = 52142;
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -22,6 +30,13 @@ class MainActivity : AppCompatActivity() {
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            when (PackageManager.PERMISSION_DENIED) {
+                checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
+                    requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE), REQUEST_CODE)
+                }
+            }
+        }
 
         //        MediaCodecInfo[] dmsadas = (new MediaCodecList(MediaCodecList.REGULAR_CODECS)).getCodecInfos();
         //        for (MediaCodecInfo mci : dmsadas){
@@ -33,6 +48,25 @@ class MainActivity : AppCompatActivity() {
         // MediaCodecList.getCodecInfos();
         //Range<Integer> dsfs =  MediaCodecInfo;
         //Log.d("PhoneVR", "OnCreate called");
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            REQUEST_CODE -> {
+                if ((grantResults.isEmpty() ||
+                        grantResults[0] != PackageManager.PERMISSION_GRANTED) ||
+                        grantResults[1] != PackageManager.PERMISSION_GRANTED) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE), REQUEST_CODE)
+                    }
+                }
+                return
+            }
+            else -> {
+                // Ignore all other requests.
+            }
+        }
     }
 
     override fun onResume() {
