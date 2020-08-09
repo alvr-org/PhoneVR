@@ -20,7 +20,12 @@ A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or abov
 * Make sure you have Steam and SteamVR installed (To find SteamVR on steam, `Library -> Tools -> SteamVR`).
 * Download latest [`PhoneVR.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases) release of this repository.
 * Download the repository files. Run the script `install-PhoneVR.bat`, located in the `driver` folder.
-* Copy `driver_PhoneVR.dll` (from `[PhoneVR.zip]/windriver/[win64 or win32]`) to you local-driver-folder)
+  - **Note**: The batch file assumes that "Steam" is installed in Default path, if have installed Steam in a different path you might have to have edit the batch file `Ln39 (Win32)` or `Ln41 (Win64)` respecitively. <br/>
+    *Eg*. If you have installed Steam in different driver altogether, now, If your Steam Location is `I:\Program Files\Steam` and you are on `Win64`,
+        you would change the `Ln41` from <br/>
+        `  "C:\Program Files (x86)\Steam\steamapps\common\SteamVR\bin\win64\vrpathreg" adddriver %instpath%\PVRServer` to <br/>
+        `  "I:\Program Files\Steam\steamapps\common\SteamVR\bin\win32\vrpathreg" adddriver %instpath%\PVRServer`
+* Copy `driver_PVRServer.dll` (from `[PhoneVR.zip]/windriver/[win64 or win32]`) to you local-driver-folder)
   `local-driver-folder` by default is: `C:\Program Files\PhoneVR\PVRServer\bin\[win32 or win64]\`
 * Install the Apk on your mobile from `[PhoneVR.zip]/android/arm64`.
 
@@ -53,4 +58,13 @@ This Project is presently under testing. But, pull requests are welcome.
   
 * Android App automatically comes back to "Discovery"(Home/AppStart) page after some VR Application usage
   - Check if `Android System Battery saver` or similar applications are killing the app when in background. Usually can be found is `Android Setting` -> `Application Manager` or `Application Settings` according to your Android device flavour/OEM.
+
+## Issues
+You can use the `Github Issues` to sumbit any issues related to working of this Solution.
+For quick resolution you may want to add the following data along with your issue,
+* `steamvr.vrsettings` file in default location `C:\Program Files (x86)\Steam\config\steamvr.vrsettings`
+* `vrserver.txt` file in default location `C:\Program Files (x86)\Steam\logs\vrserver.txt`
+* `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default location `C:\Program Files\PhoneVR`
+* Open a `cmd` in the follow default directory and copy paste output of the `vrcmd` command. `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\bin\win64\vrccmd.exe`
+* And ofcourse, how to reproduce the issue :)
 

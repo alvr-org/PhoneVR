@@ -447,7 +447,7 @@ void *HmdDriverFactory(const char *iName, int *retCode) {
 		return &server;
 	}
 	if (strcmp(iName, IVRWatchdogProvider_Version) == 0) {
-		//PVR_DB("Watchdog not supported");
+		PVR_DB_I("Watchdog not supported");
 		return nullptr;
 	}
 	PVR_DB_I("Interface not found: "s + iName);
