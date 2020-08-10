@@ -54,7 +54,7 @@ This Project is presently under testing. But, pull requests are welcome.
 ## Troubleshooting  
 * Android App doesn’t connect to Windows Steam VR even after opening Phone App first and then SteamVR on windows
   1. Make sure that both the Windows and Android devices are in the same Local Network. (connected to the same router/wifi device)
-  2. Sometimes, the port which PhoneVR use to connect win/mobile devices, also known as `Pairing Port (default :33333)`, might be used by other services on your devices(Windows/Android). Try changing the "Pairing Port" on `Android PhoneVR App` settings and `pairing_port` in `C:\Program Files\PhoneVR\pvrsettings.json` for `Windows PVR driver` and restart SteamVR. Both Windows Pairing port and Android Pairing port needs to be same. Safe recommended port range : `30000 - 65535`
+  2. Sometimes, the port which PhoneVR use to connect win/mobile devices, also known as `Pairing Port (default :33333)`, might be used by other services on your devices(Windows/Android). Try changing the "Pairing Port" on `Android PhoneVR App` settings and `pairing_port` in `C:\Program Files\PhoneVR\pvrsettings.json` for `Windows PVR driver` and restart SteamVR. **Both Windows Pairing port and Android Pairing port should be the same**. Safe recommended port range : `30000 - 65535`
   
 * Android App automatically comes back to "Discovery"(Home/AppStart) page after some VR Application usage
   - Check if `Android System Battery saver` or similar applications are killing the app when in background. Usually can be found is `Android Setting` -> `Application Manager` or `Application Settings` according to your Android device flavour/OEM.
@@ -64,7 +64,8 @@ You can use the `Github Issues` to sumbit any issues related to working of this 
 For quick resolution you may want to add the following data along with your issue,
 * `steamvr.vrsettings` file in default location `C:\Program Files (x86)\Steam\config\steamvr.vrsettings`
 * `vrserver.txt` file in default location `C:\Program Files (x86)\Steam\logs\vrserver.txt`
-* `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default location `C:\Program Files\PhoneVR`
+* `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default windows location `C:\Program Files\PhoneVR`
+* `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default android location `.../Android/data/virtualis.phonevr/files/PVR/` and/or `Log` from your `Settings page` on the app.
 * Open a `cmd` in the follow default directory and copy paste output of the `vrcmd` command. `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\bin\win64\vrccmd.exe`
 * And ofcourse, how to reproduce the issue :)
 

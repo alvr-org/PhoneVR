@@ -88,11 +88,40 @@ void pvrInfo(string msg) {
 
 //////// only android //////
 #ifdef __ANDROID__
-
+#include <sys/stat.h>
 #include <android/log.h>
+
+using namespace std;
+extern char* ExtDirectory;
+
+void pvrInfo(string msg) {
+
+	auto *file = fopen(string(string(ExtDirectory).c_str() + string("/PVR/pvrlog.txt")).c_str(),
+					   "a");
+	if (file) {
+		fprintf(file, "PVR-JNI-I : %s\n", msg.c_str());
+		fclose(file);
+	}
+}
 
 void pvrdebug(string msg) {
 	__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "%s", msg.c_str());
+
+	auto *file = fopen(string(string(ExtDirectory) +"/PVR/pvrDebuglog.txt").c_str(), "a");
+
+	if (file) {
+		fprintf(file, "PVR-JNI-D : %s\n", msg.c_str());
+		fclose(file);
+        //__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "Wrote in File: %s - %s",	string(ExtDirectory).c_str(), string(string(ExtDirectory) + string("/PVR/pvrlog.txt")).c_str());
+	}
+    else {
+        __android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "File Error %d (%s): %s - %s",
+                            errno,
+                            string(ExtDirectory).c_str(),
+                            string(string(ExtDirectory) + string("/PVR/pvrlog.txt")).c_str(),
+                            strerror(errno));
+    }
 }
+
 
 #endif

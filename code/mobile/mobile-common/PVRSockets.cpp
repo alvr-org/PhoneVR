@@ -72,7 +72,7 @@ void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(),
                     unwindSegue();
                 }
             }, [](std::error_code err) {
-                PVR_DB("TCP error: " + err.message());
+                PVR_DB_I("TCP error: " + err.message());
             }, true, pcIP);
 
             io_service svc;
@@ -103,7 +103,7 @@ void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(),
             }
         }
         catch (exception &e) {
-            PVR_DB("[PVRStartAnnouncer] caught Exception: " + to_string(e.what()));
+            PVR_DB_I("[PVRStartAnnouncer] caught Exception: " + to_string(e.what()));
         }
     }).detach();
 }
@@ -135,7 +135,7 @@ void PVRStartSendSensorData(uint16_t port, bool(*getSensorData)(float *, float *
             }
         }
         catch (exception &e) {
-            PVR_DB("[PVRStartSendSensorData] caught Exception: " + to_string(e.what()));
+            PVR_DB_I("[PVRStartSendSensorData] caught Exception: " + to_string(e.what()));
         }
     }).detach();
 }
@@ -160,7 +160,7 @@ FilledVidBuf PVRPopVideoBuf() {
 void PVRStartReceiveStreams(uint16_t port) {
     while (pvrState == PVR_STATE_SHUTDOWN)
         usleep(10000);
-    PVR_DB("[Stream Receiver] th started.. @p" + to_string(port));
+    PVR_DB_I("[Stream Receiver] th started.. @p" + to_string(port));
     strThr = new std::thread([=] {
         try {
             io_service svc;
@@ -223,7 +223,7 @@ void PVRStartReceiveStreams(uint16_t port) {
             delMtx.unlock();
         }
         catch (exception &e) {
-            PVR_DB("[PVRStartReceiveStreams] caught Exception: " + to_string(e.what()));
+            PVR_DB_I("[PVRStartReceiveStreams] caught Exception: " + to_string(e.what()));
         }
     });
 }

@@ -73,7 +73,7 @@ void pvrdebugClear();
 #endif
 
 #if defined _DEBUG
-#define PVR_DB_I(msg) {pvrdebug(msg);pvrInfo(msg);}
+    #define PVR_DB_I(msg) {pvrdebug(msg);pvrInfo(msg);}
 #else
 	#define PVR_DB_I(msg) pvrInfo(msg);
 #endif

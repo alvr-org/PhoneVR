@@ -12,6 +12,7 @@
 #include <android/asset_manager_jni.h>
 #include <queue>
 #include <sys/stat.h>
+#include <android/log.h>
 
 using namespace std;
 using namespace Eigen;
@@ -47,8 +48,10 @@ namespace {
     int64_t vOutPts = -1;
 }
 
+extern char* ExtDirectory = nullptr;
+
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
-    PVR_DB("JNI initiating...");
+    //PVR_DB_I("JNI initiating...");
     jVM = vm;
     JNIEnv *env;
     jVM->GetEnv((void **) &env, JNI_VERS);
@@ -57,7 +60,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
 }
 
 void callJavaMethod(const char *name) {
-    PVR_DB("JNI callJavaMethod: Calling " + to_string(name));
+    PVR_DB_I("JNI callJavaMethod: Calling " + to_string(name));
     bool isMainThread = true;
     JNIEnv *env;
     if (jVM->GetEnv((void **) &env, JNI_VERS) != JNI_OK) {
@@ -69,10 +72,30 @@ void callJavaMethod(const char *name) {
         jVM->DetachCurrentThread();
 }
 
+SUB(setExtDirectory)(JNIEnv *env, jclass, jstring jExtDir, jint len) {
+    auto dir = env->GetStringUTFChars(jExtDir, nullptr);
+    ExtDirectory = new char[len];
+    memcpy(ExtDirectory, dir, len);
+    ExtDirectory[len] = '\0';
+
+    env->ReleaseStringUTFChars(jExtDir, dir);
+
+    if( mkdir(string(string(ExtDirectory) + string("/PVR/")).c_str(), 0777) ) {
+        __android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "Directory Error %d (%s): %s - %s",
+							errno,
+							string(ExtDirectory).c_str(),
+							string(string(ExtDirectory) + string("/PVR/")).c_str(),
+							strerror(errno));
+    }
+
+    PVR_DB_I("--------------------------------------------------------------------------------");
+    PVR_DB_I("JNI setExtDirectory: len: "+to_string(len)+", copdstr: "+ExtDirectory);
+}
+
 /////////////////////////////////////// discovery ////////////////////////////////////////////////
 SUB(startAnnouncer)(JNIEnv *env, jclass, jstring jIP, jint port) {
-    PVR_DB("JNI startAnnouncer: %s"+to_string(jIP)+":%d"+ to_string(port));
     auto ip = env->GetStringUTFChars(jIP, nullptr);
+    PVR_DB_I("JNI startAnnouncer: "+to_string(ip)+":"+ to_string(port));
     PVRStartAnnouncer(ip, port, [] {
         callJavaMethod("segueToGame");
     }, [](uint8_t *headerBuf, size_t len) {
@@ -84,13 +107,13 @@ SUB(startAnnouncer)(JNIEnv *env, jclass, jstring jIP, jint port) {
 }
 
 SUB(stopAnnouncer)() {
-    PVR_DB("JNI stopAnnouncer");
+    PVR_DB_I("JNI stopAnnouncer");
     PVRStopAnnouncer();
 }
 
 ////////////////////////////////////// orientation ///////////////////////////////////////////////
 SUB(startSendSensorData)(JNIEnv *env, jclass, jint port) {
-    PVR_DB("JNI startSendSensorData %d" + to_string(port));
+    PVR_DB_I("JNI startSendSensorData " + to_string(port));
 
     PVRStartSendSensorData(port, [](float *quat, float *acc) {
         if (gvrApi) {
@@ -117,38 +140,38 @@ SUB(setAccData)(JNIEnv *env, jclass, jfloatArray jarr) {
 
 ///////////////////////////////////// system control & events /////////////////////////////////////
 SUB(createRenderer)(JNIEnv *, jclass, jlong jGvrApi) {
-    PVR_DB("JNI createRenderer");
+    PVR_DB_I("JNI createRenderer");
     PVRCreateGVR(reinterpret_cast<gvr_context *>(jGvrApi));
 }
 
 SUB(onPause)() {
-    PVR_DB("JNI onPause");
+    PVR_DB_I("JNI onPause");
     PVRPause();
 }
 
 SUB(onTriggerEvent)() {
-    PVR_DB("JNI onTriggerEvent");
+    PVR_DB_I("JNI onTriggerEvent");
     PVRTrigger();
 }
 
 SUB(onResume)() {
-    PVR_DB("JNI onResume");
+    PVR_DB_I("JNI onResume");
     PVRResume();
 }
 
 ///////////////////////////////////// video stream & coding //////////////////////////////////////
 SUB(setVStreamPort)(JNIEnv *, jclass, jint port) {
-    PVR_DB("JNI setVStreamPort - %d"+ to_string(port));
+    PVR_DB_I("JNI setVStreamPort - "+ to_string(port));
     vPort = (uint16_t)port;
 }
 
 SUB(startStream)() {// cannot pass parameter here or else sigabrit on getting frame (why???)
-    PVR_DB("JNI startStream");
+    PVR_DB_I("JNI startStream");
     PVRStartReceiveStreams((uint16_t)vPort);
 }
 
 SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
-    PVR_DB("JNI startMediaCodec");
+    PVR_DB_I("JNI startMediaCodec");
     window = ANativeWindow_fromSurface(env, surface);
 
 
@@ -168,7 +191,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
     m = AMediaCodec_start(codec);
     AMediaFormat_delete(fmt);
 
-    PVR_DB("JNI MCodec th Setup...");
+    PVR_DB_I("JNI MCodec th Setup...");
 
     mediaThr = new thread([]{
         while (pvrState != PVR_STATE_SHUTDOWN)
@@ -231,7 +254,7 @@ FUNC(jlong, vFrameAvailable)(JNIEnv *) {
 }
 
 SUB(stopAll)(JNIEnv *) {
-    PVR_DB("JNI stopAll");
+    PVR_DB_I("JNI stopAll");
     pvrState = PVR_STATE_SHUTDOWN;
     PVRStopStreams();
     PVRDestroyGVR();
