@@ -92,12 +92,12 @@ void pvrInfo(string msg) {
 #include <android/log.h>
 
 using namespace std;
+extern char* ExtDirectory;
 
 void pvrInfo(string msg) {
 
-	auto result_code = mkdir("/storage/emulated/0/PVR/", 0777);
-	auto *file = fopen("/storage/emulated/0/PVR/pvrlog.txt", "a");
-
+	auto *file = fopen(string(string(ExtDirectory).c_str() + string("/PVR/pvrlog.txt")).c_str(),
+					   "a");
 	if (file) {
 		fprintf(file, "PVR-JNI-I : %s\n", msg.c_str());
 		fclose(file);
@@ -107,13 +107,21 @@ void pvrInfo(string msg) {
 void pvrdebug(string msg) {
 	__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "%s", msg.c_str());
 
-	auto result_code = mkdir("/storage/emulated/0/PVR/", 0777);
-	auto *file = fopen("/storage/emulated/0/PVR/pvrDebuglog.txt", "a");
+	auto *file = fopen(string(string(ExtDirectory) +"/PVR/pvrDebuglog.txt").c_str(), "a");
 
 	if (file) {
 		fprintf(file, "PVR-JNI-D : %s\n", msg.c_str());
 		fclose(file);
+        //__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "Wrote in File: %s - %s",	string(ExtDirectory).c_str(), string(string(ExtDirectory) + string("/PVR/pvrlog.txt")).c_str());
 	}
+    else {
+        __android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "File Error %d (%s): %s - %s",
+                            errno,
+                            string(ExtDirectory).c_str(),
+                            string(string(ExtDirectory) + string("/PVR/pvrlog.txt")).c_str(),
+                            strerror(errno));
+    }
 }
+
 
 #endif

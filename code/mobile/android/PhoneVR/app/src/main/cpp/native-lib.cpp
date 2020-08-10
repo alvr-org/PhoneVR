@@ -12,6 +12,7 @@
 #include <android/asset_manager_jni.h>
 #include <queue>
 #include <sys/stat.h>
+#include <android/log.h>
 
 using namespace std;
 using namespace Eigen;
@@ -47,9 +48,10 @@ namespace {
     int64_t vOutPts = -1;
 }
 
+extern char* ExtDirectory = nullptr;
+
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
-    PVR_DB_I("--------------------------------------------------------------------------------");
-    PVR_DB_I("JNI initiating...");
+    //PVR_DB_I("JNI initiating...");
     jVM = vm;
     JNIEnv *env;
     jVM->GetEnv((void **) &env, JNI_VERS);
@@ -70,10 +72,30 @@ void callJavaMethod(const char *name) {
         jVM->DetachCurrentThread();
 }
 
+SUB(setExtDirectory)(JNIEnv *env, jclass, jstring jExtDir, jint len) {
+    auto dir = env->GetStringUTFChars(jExtDir, nullptr);
+    ExtDirectory = new char[len];
+    memcpy(ExtDirectory, dir, len);
+    ExtDirectory[len] = '\0';
+
+    env->ReleaseStringUTFChars(jExtDir, dir);
+
+    if( mkdir(string(string(ExtDirectory) + string("/PVR/")).c_str(), 0777) ) {
+        __android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "Directory Error %d (%s): %s - %s",
+							errno,
+							string(ExtDirectory).c_str(),
+							string(string(ExtDirectory) + string("/PVR/")).c_str(),
+							strerror(errno));
+    }
+
+    PVR_DB_I("--------------------------------------------------------------------------------");
+    PVR_DB_I("JNI setExtDirectory: len: "+to_string(len)+", copdstr: "+ExtDirectory);
+}
+
 /////////////////////////////////////// discovery ////////////////////////////////////////////////
 SUB(startAnnouncer)(JNIEnv *env, jclass, jstring jIP, jint port) {
-    PVR_DB_I("JNI startAnnouncer: "+to_string(jIP)+":"+ to_string(port));
     auto ip = env->GetStringUTFChars(jIP, nullptr);
+    PVR_DB_I("JNI startAnnouncer: "+to_string(ip)+":"+ to_string(port));
     PVRStartAnnouncer(ip, port, [] {
         callJavaMethod("segueToGame");
     }, [](uint8_t *headerBuf, size_t len) {

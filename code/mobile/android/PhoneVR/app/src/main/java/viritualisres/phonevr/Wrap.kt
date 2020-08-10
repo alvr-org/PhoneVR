@@ -65,4 +65,5 @@ internal object Wrap {
 
     external fun vFrameAvailable(): Long
 
+    external fun setExtDirectory(dir: String, len: Int)
 }

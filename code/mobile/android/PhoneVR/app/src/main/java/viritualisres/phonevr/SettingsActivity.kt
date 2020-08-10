@@ -3,8 +3,15 @@ package viritualisres.phonevr
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Environment.getExternalStorageDirectory
+import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_settings.*
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.io.RandomAccessFile
 import java.util.*
 
 class SettingsActivity : AppCompatActivity() {
@@ -13,6 +20,53 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
         loadPrefs()
+
+        setTextToLogger(findViewById<EditText>(R.id.etLogView))
+    }
+
+    private fun setTextToLogger(et: EditText){
+        val file: File = File(getExternalFilesDir(null).toString() + "/PVR/pvrlog.txt")
+        et.setText(tail2(file, 100))
+    }
+
+    fun tail2(file: File, lines: Int): String {
+        var fileHandler: RandomAccessFile? = null
+        return try {
+            fileHandler = RandomAccessFile(file, "r")
+            val fileLength = fileHandler.length() - 1
+            val sb = java.lang.StringBuilder()
+            var line = 0
+            for (filePointer in fileLength downTo -1 + 1) {
+                fileHandler.seek(filePointer)
+                val readByte = fileHandler.readByte().toInt()
+                if (readByte == 0xA) {
+                    if (filePointer < fileLength) {
+                        line += 1
+                    }
+                } else if (readByte == 0xD) {
+                    if (filePointer < fileLength - 1) {
+                        line += 1
+                    }
+                }
+                if (line >= lines) {
+                    break
+                }
+                sb.append(readByte.toChar())
+            }
+            val toString = sb.reverse().toString()
+            toString
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+            ""
+        } catch (e: IOException) {
+            e.printStackTrace()
+            ""
+        } finally {
+            if (fileHandler != null) try {
+                fileHandler.close()
+            } catch (e: IOException) {
+            }
+        }
     }
 
     override fun onPause() {
