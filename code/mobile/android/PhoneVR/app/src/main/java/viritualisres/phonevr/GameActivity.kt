@@ -11,11 +11,13 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.opengl.GLSurfaceView
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.view.Surface
 import android.view.View
+import android.view.WindowInsets
 
 import com.google.vr.ndk.base.AndroidCompat
 import com.google.vr.ndk.base.GvrLayout
@@ -50,9 +52,19 @@ class GameActivity : Activity(), SensorEventListener {
         Wrap.setGameView(this)
 
         setImmersiveSticky()
-        window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
-            if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0)
-                setImmersiveSticky()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.decorView.setOnApplyWindowInsetsListener { _, insets ->
+                if (insets.isVisible(0))
+                    setImmersiveSticky()
+                insets
+            }
+        }
+        else {
+            window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
+                if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0)
+                    setImmersiveSticky()
+            }
         }
 
         Wrap.createRenderer(gvrLayout.gvrApi.nativeGvrContext)
@@ -62,11 +74,11 @@ class GameActivity : Activity(), SensorEventListener {
             setEGLConfigChooser(8, 8, 8, 0, 0, 0)
             preserveEGLContextOnPause = true
             setRenderer(Renderer())
-            setOnTouchListener { _,
-            event ->
+            setOnTouchListener { v, event ->
                 if (event.action == MotionEvent.ACTION_DOWN) {
                     //((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(50);
                     Wrap.onTriggerEvent()
+                    v.performClick()
                     return@setOnTouchListener true
                 }
                 false
@@ -119,13 +131,19 @@ class GameActivity : Activity(), SensorEventListener {
     }
 
     private fun setImmersiveSticky() {
-        window.decorView.systemUiVisibility =
-                (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+            window.insetsController?.hide(WindowInsets.Type.ime())
+        }
+        else {
+            window.decorView.systemUiVisibility =
+                    (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+        }
     }
 
     //SensorEventListener methods
