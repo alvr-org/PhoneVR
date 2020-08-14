@@ -11,9 +11,17 @@
 Use Steam VR-enabled applications with your phone as HMD (*Head-mounted display*). The only Open-Source solution to similar commercial packages like VRidge, Riftcat, Trinus etc etc.
 <br/>
 
+## Contents
+* [Requirements](#requirements)
+* [Installation](#installation)
+* [Advanced Configuration](#advanced-configuration)
+* [Development](#development)
+* [Troubleshooting](#troubleshooting)
+* [Issues](#issues)
+
 ## Requirements
 
-A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or above* with *OpenGL-ES 3.0 or above*, Steam and some SteamVR games installed.
+A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or above* with *OpenGL-ES 3.0 or above*, Steam and some SteamVR applications installed.
 
 ## Installation
 
@@ -30,6 +38,55 @@ A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or abov
 * Install the Apk on your mobile from `[PhoneVR.zip]/android/arm64`.
 
 To **play**, **first open the Phone App**(SteamVR should also be closed), then run the game of your choice on PC. (Obviously, both PC and Mobile should be on same Network, preferably Wifi 5.0)
+
+## Advanced Configuration
+
+* **Windows Driver Settings**
+
+  Windows SteamVR Driver, auto loads with SteamVR, and gets `FrameTextures` from VRApplication(like SteamVR Home, VRChat, etc.) via SteamVR. These Textures are then Encoded and Streamed, at specified `game_fps`, to Mobile device using x264 Encoder. Some configurations of this encoder can be adjusted via, `pvrsettings.json` in default installation location `C:\Program Files\PhoneVR`.<br/>
+  **Default Settings :**
+    ```json
+    {
+        "enable" : true,
+        "game_fps" : 65,
+        "video_stream_port" : 15243,
+        "pose_stream_port" : 51423,
+        "pairing_port" : 33333,
+        "encoder" : {
+            "preset" : "ultrafast",
+            "tune" : "zerolatency",
+            "qp" : 20,
+            "profile" : "baseline"
+        }
+    }
+    ```
+    Most settings are self-explanatory. Any change in settings will require SteamVR to be restarted for application.
+    * *"encoder"* : Encoder x264 Settings
+      - *"preset"* : Can be set to "ultrafast", "superfast", "veryfast", "faster", "fast", "medium", "slow", "slower", "veryslow" or "placebo"
+        Warning: the speed of these presets scales dramatically.  Ultrafast is a full 100 times faster than placebo!
+        These presets affect the encoding speed. Using a slower preset gives you better compression, or quality per filesize, whereas faster presets give you worse compression. In general, you should just use the preset you can afford to wait for. 
+        
+      - *"tune"* : Can be set to "film", "animation", "grain", "stillimage", "psnr", "ssim", "fastdecode", "zerolatency"
+      Tune affects the video quality(and size), film being the best quality and gradually decreasing to the right
+      
+      - *"profile"* :  Can be set to  "baseline", "main", "high", "high10", "high422", "high444"
+      Applies the restrictions of the given profile. Currently available profiles are specified above, from most to least restrictive. Does NOT guarantee that the given profile will be used: if the restrictions of "High" are applied to settings that are already Baseline-compatible, the stream will remain baseline.  In short, it does not increase settings, only decrease them.
+      
+      - *"qp"* : Quantization packet constant, Range 0-51, 0-Lossless 
+      
+      - *"rc_method"* : Rate Control Method, 1/2/3
+      Constant QP (CQP) - 0; 
+      Constant Rate factor (CRF) - 1; 
+      Average Bitrate (ABR) - 2;
+      Default is 1 i.e., CRF with rf 24 (and rf_max 26)
+      
+      Other standard x264 settings,
+      - *"qcomp"* : Default : 0
+      - *"keyint_max"* : Default : -1
+      - *"intra_refresh"* : Default : False
+      - *"bitrate"* : Default : -1 (min 1000)
+      
+  Do only adjust when required, and keep a eye on `pvrlog.txt` file in default installation location `C:\Program Files\PhoneVR` for "*Skipped frame! Please re-tune the encoder parameters*" messages. If you are getting these messages in excess, you may wish to downgrade settings since windows does not seems to have enough processing power and resources to render with existing settings.
 
 ## Development
 This Project is presently under testing. But, pull requests are welcome. 
@@ -60,7 +117,7 @@ This Project is presently under testing. But, pull requests are welcome.
   - Check if `Android System Battery saver` or similar applications are killing the app when in background. Usually can be found is `Android Setting` -> `Application Manager` or `Application Settings` according to your Android device flavour/OEM.
 
 ## Issues
-You can use the `Github Issues` to sumbit any issues related to working of this Solution.
+You can use the `Github Issues` to submit any issues related to working of this Solution.
 For quick resolution you may want to add the following data along with your issue,
 * `steamvr.vrsettings` file in default location `C:\Program Files (x86)\Steam\config\steamvr.vrsettings`
 * `vrserver.txt` file in default location `C:\Program Files (x86)\Steam\logs\vrserver.txt`
