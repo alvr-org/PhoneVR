@@ -1,5 +1,6 @@
-<br/><br/><br/>
-[![PhonveVR](./.github/LogoPVR.png)](https://github.com/ShootingKing-AM/PhoneVR/releases)<br/>
+<br/><br/>
+[![PhonveVR](./.github/LogoPVR.png)](https://github.com/ShootingKing-AM/PhoneVR/releases)<br/><br/>
+[![PhonveVR](./.github/LogoPVRCotent.png)](https://github.com/ShootingKing-AM/PhoneVR/releases)<br/>
 <br/><br/><br/>
 
 <img src="./.github/rep1.png" width="50%"><img src="./.github/rep2.jpg" width="50%">
