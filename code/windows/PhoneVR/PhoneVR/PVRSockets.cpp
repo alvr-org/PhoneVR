@@ -220,7 +220,7 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 		{
 			//PVRUpdTexWraps();
 			if ((lastWhichFrame + 1) % nVFrames != whichFrame)
-				PVR_DB("[PVRStartStreamer th] Skipped frame! Please re-tune the encoder parameters lWf:"+to_string(lastWhichFrame)+", nVfs:"+ to_string(nVFrames)+ ", wF:"+to_string(whichFrame));
+				PVR_DB_I("[PVRStartStreamer th] Skipped frame! Please re-tune the encoder parameters lWf:"+to_string(lastWhichFrame)+", nVfs:"+ to_string(nVFrames)+ ", wF:"+to_string(whichFrame));
 			lastWhichFrame = whichFrame;
 			whichFrameMtxs[lastWhichFrame].lock();   // LOCK
 			auto totSz = x264_encoder_encode(enc, &nals, &nNals, &vFrames[lastWhichFrame], &outPic);
