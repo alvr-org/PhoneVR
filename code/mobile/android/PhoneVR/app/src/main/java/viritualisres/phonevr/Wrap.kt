@@ -33,6 +33,12 @@ internal object Wrap {
         gameRef?.get()?.finish()
     }
 
+    @JvmStatic
+    fun updateTextViewFPS(fpsStreamRecv : Float, fpsDecoder : Float, fpsRenderer: Float,
+                          cfpsSteamVRApp : Float, cfpsEncoder : Float, cfpsStreamer: Float) {
+        //Log.d("--PVR-Java--", "updateTextViewFPS Wrapper : $fpsStreamRecv $fpsDecoder $fpsRenderer")
+        gameRef?.get()?.updateFPS(fpsStreamRecv,fpsDecoder,fpsRenderer, cfpsSteamVRApp, cfpsEncoder, cfpsStreamer)
+    }
 
     external fun createRenderer(gvrCtx: Long)
 

@@ -19,9 +19,12 @@ import android.view.Surface
 import android.view.View
 import android.view.WindowInsets
 
+import android.widget.FrameLayout
+import android.widget.TextView
 import com.google.vr.ndk.base.AndroidCompat
 import com.google.vr.ndk.base.GvrLayout
 
+import java.util.concurrent.locks.ReentrantLock
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -32,6 +35,18 @@ class GameActivity : Activity(), SensorEventListener {
     private lateinit var prefs: SharedPreferences
     private lateinit var surf: GLSurfaceView
     private lateinit var gvrLayout: GvrLayout
+    private var uiFPSTextViewUpdatethread: Thread? = null
+    private var fpsMutex: ReentrantLock = ReentrantLock()
+    private var fpsResumeMutex: ReentrantLock = ReentrantLock()
+
+    // Mobile FPSs
+    var fpsStreamRecv: Float = 0.0f
+    var fpsDecoder: Float = 0.0f
+    var fpsRenderer: Float = 0.0f
+    // CPU FPSs
+    var cfpsSteamVRApp: Float = 0.0f
+    var cfpsEncoder: Float = 0.0f
+    var cfpsStreamer: Float = 0.0f
 
     private var isDaydream = false
 
@@ -86,7 +101,12 @@ class GameActivity : Activity(), SensorEventListener {
         }
         gvrLayout.setPresentationView(surf)
         gvrLayout.uiLayout.setCloseButtonListener { onBackPressed() }
-        setContentView(gvrLayout)
+        //setContentView(gvrLayout)
+
+        setContentView(R.layout.activity_game)
+        val gameActivityLayout =  findViewById<FrameLayout>(R.id.gvrRootLayout)
+        gameActivityLayout.addView(gvrLayout)
+
         if (gvrLayout.setAsyncReprojectionEnabled(true))
             AndroidCompat.setSustainedPerformanceMode(this, true)
 
@@ -98,6 +118,31 @@ class GameActivity : Activity(), SensorEventListener {
         Wrap.startSendSensorData(prefs.getInt(posePortKey, posePortDef))
 
         //Log.d("--PVR-Java--", "main Layout Orientation : (" + mainActRot +")" /*+ mainLayout.rotation.toString() + ", GVR: "*/ + windowManager.defaultDisplay.rotation);
+
+        if(prefs.getBoolean(debugKey, debugDef)) {
+            uiFPSTextViewUpdatethread = object : Thread() {
+                override fun run() {
+                    try {
+                        while (!this.isInterrupted) {
+                            sleep(500)
+                            runOnUiThread {
+                                val tv = findViewById<TextView>(R.id.textViewFPS)
+                                fpsResumeMutex.lock()
+                                fpsMutex.lock()
+                                tv.text = String.format("---FPS---\nM| SR: %5.1f D: %5.1f R  : %5.1f\nC| SS: %5.1f E: %5.1f VRa: %5.1f",
+                                        fpsStreamRecv, fpsDecoder, fpsRenderer,
+                                        cfpsStreamer, cfpsEncoder, cfpsSteamVRApp)
+                                fpsMutex.unlock()
+                                fpsResumeMutex.unlock()
+                            }
+                        }
+                    } catch (e: InterruptedException) {
+                        e.message?.let { Log.d("PVR-Java", it) }
+                    }
+                }
+            }
+            uiFPSTextViewUpdatethread?.start()
+        }
     }
 
     override fun onPause() {
@@ -105,6 +150,8 @@ class GameActivity : Activity(), SensorEventListener {
         surf.onPause()
         gvrLayout.onPause()
         sensMgr.unregisterListener(this)
+        if(uiFPSTextViewUpdatethread != null)
+            fpsResumeMutex.lock()
         super.onPause()
     }
 
@@ -115,6 +162,11 @@ class GameActivity : Activity(), SensorEventListener {
         gvrLayout.onResume()
         surf.onResume()
         Wrap.onResume()
+
+        // FPS Update Thread exits ? Yes ? It must be Paused by onPause(). Resume it
+        if( (uiFPSTextViewUpdatethread != null) && fpsResumeMutex.isLocked )
+            fpsResumeMutex.unlock()
+
         //Log.d("--PVR-Java--", "Resume: main Layout Orientation : " /*+ mainLayout.rotation.toString() + ", GVR: "*/ + windowManager.defaultDisplay.rotation);
     }
 
@@ -153,6 +205,20 @@ class GameActivity : Activity(), SensorEventListener {
         Wrap.setAccData(event.values)
     }
 
+    fun updateFPS(fpsStreamRecvJNI: Float, fpsDecoderJNI: Float, fpsRendererJNI: Float,
+                          cfpsSteamVRAppJNI : Float, cfpsEncoderJNI : Float, cfpsStreamerJNI: Float) {
+        fpsMutex.lock()
+
+        fpsStreamRecv = fpsStreamRecvJNI
+        fpsDecoder = fpsDecoderJNI
+        fpsRenderer = fpsRendererJNI
+
+        cfpsSteamVRApp = cfpsSteamVRAppJNI
+        cfpsEncoder = cfpsEncoderJNI
+        cfpsStreamer = cfpsStreamerJNI
+
+        fpsMutex.unlock()
+    }
 
     private inner class Renderer : GLSurfaceView.Renderer/*, SurfaceTexture.OnFrameAvailableListener*/ {
         private var surfTex: SurfaceTexture? = null

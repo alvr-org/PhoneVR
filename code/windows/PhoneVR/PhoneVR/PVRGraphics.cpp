@@ -38,6 +38,8 @@ namespace {
 	thread *gThr;
 }
 
+extern float fpsEncoder;
+
 #define RELEASE(obj) if(obj) { obj->Release(); obj = nullptr; }
 #define OK_OR_EXEC(call, func) if(FAILED(call)) func()
 #define OK_OR_DEBUG(call) { HRESULT hr = call; OK_OR_EXEC(hr, [hr] { PVR_DB_I("######### DirectX Error: #########"); debugHr(hr); }); }
@@ -99,6 +101,9 @@ void PVRStartGraphics(vector<vector<uint8_t *>> vvbuf, uint32_t inpWidth, uint32
 		while (curHdl == 0 && gRunning)
 			sleep_for(500us);
 		while (gRunning) {
+			
+			static Clk::time_point oldtime = Clk::now();
+
 			texMtx.lock();
 
 			if (!dxDev) {
@@ -176,6 +181,10 @@ void PVRStartGraphics(vector<vector<uint8_t *>> vvbuf, uint32_t inpWidth, uint32
 			texMtx.unlock();
 			while (curHdl == 0 && gRunning)
 				sleep_for(500us);
+			
+			fpsEncoder = (1000000000.0 / (Clk::now() - oldtime).count());
+			//PVR_DB("[PVRGraphics th] Encoding @ FPS: " + to_string(fpsEncoder) );
+			oldtime = Clk::now();
 		}
 		RELEASE(stagingTex);
 	});
