@@ -142,6 +142,9 @@ unsigned int PVRInitSystem(int maxW, int maxH, float offFov, bool reproj, bool d
 void PVRRender(int64_t pts) {
     PVR_DB("Rendering " + to_string(pts));
     if (pvrState == PVR_STATE_RUNNING) {
+
+        static Clk::time_point oldtime = Clk::now();
+
         if (pts > 0) {
             vector<float> v = DequeueQuatAtPts(pts);
             if (v.size() == 4)
@@ -184,6 +187,9 @@ void PVRRender(int64_t pts) {
 
         frame.Unbind();
         frame.Submit(*vps, gvrHeadMat);
+
+        fpsRenderer = (1000000000.0 / (Clk::now() - oldtime).count());
+        oldtime = Clk::now();
     }
 }
 

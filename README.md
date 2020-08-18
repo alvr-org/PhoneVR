@@ -1,5 +1,5 @@
 <br/><br/>
-[![PhonveVR](./.github/LogoPVR.png)](https://github.com/ShootingKing-AM/PhoneVR/releases)<br/><br/>
+[![PhonveVR](./.github/LogoPVR.png)](https://github.com/ShootingKing-AM/PhoneVR/releases)<br/><br/><br/>
 [![PhonveVR](./.github/LogoPVRCotent.png)](https://github.com/ShootingKing-AM/PhoneVR/releases)<br/>
 <br/><br/><br/>
 
@@ -116,6 +116,20 @@ This Project is presently under testing. But, pull requests are welcome.
   
 * Android App automatically comes back to "Discovery"(Home/AppStart) page after some VR Application usage
   - Check if `Android System Battery saver` or similar applications are killing the app when in background. Usually can be found is `Android Setting` -> `Application Manager` or `Application Settings` according to your Android device flavour/OEM.
+
+* Lag while using VR App on mobile
+  - All relevant component's FPS are displayed on Mobile device when `Settings -> Debug` is checked. You can find out what the bottleneck component in the whole chain from VRApplication on windows to GoogleVR SDK renderer on Android is and resolve it.
+  
+  FPS Nomenclature (in order from VRAppFrameCreation to MobileFrameDisplay:
+  * `C |` - CPU (Windows) Components
+    * `VRa` - Actual VRApplication Rendering FPS (SteamVR Home, VRChat, . etc etc)
+    * `E` - Media Encoder (x264) FPS
+    * `SS` - Network Stream Sender FPS
+  * `M |` - Mobile Components
+    * `SR` - Network Stream Receiver FPS
+    * `D` - Media Decoder FPS
+    * `R` - OpenGL Renderer FPS - Final on mobile screen FPS<br/><br/>
+  ![PhonveVR FPS](./.github/fps.jpg)
 
 ## Issues
 You can use the `Github Issues` to submit any issues related to working of this Solution.

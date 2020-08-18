@@ -38,8 +38,12 @@ namespace {
 	int whichFrame = 0;      // syncronize rendering and encoding
 	std::mutex whichFrameMtxs[nVFrames]; // if syncronization is out (cause lag) use as last resort to avoid crashing
 	std::mutex quatQueueMutex; // Syncronization of quatQueue among SteamVR Thread and Streamer thread.
+
+	float fpsSteamVRApp = 0.0;
+	float fpsStreamer = 0.0;
 }
 
+extern float fpsEncoder = 0.0;
 
 //prePEQ.enqueue(Quaternionf(quatBuf[0], quatBuf[1], quatBuf[2], quatBuf[3]),
    // (float)(tmBuf[0] - lastNanos) / 1'000'000'000.f);// difference first -> avoid losing accuracy
@@ -207,10 +211,11 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 
 		int lastWhichFrame = 0;
 		//uint8_t buf[256 * 256];
-		uint8_t extraBuf[8 + 16 + 4];
+		uint8_t extraBuf[8 + 16 + 4 + 12];
 		auto pbuf = reinterpret_cast<int64_t *>(&extraBuf[0]); // pts buf ref
 		auto qbuf = reinterpret_cast<float *>(&extraBuf[8]); // quat buf ref
 		auto nbuf = reinterpret_cast<int *>(&extraBuf[8 + 16]);
+		auto fpsbuf = reinterpret_cast<float *>(&extraBuf[8 + 16 + 4]);
 
 		asio::error_code ec;
 		//ofstream outp("C:\\Users\\narni\\mystream.h264", ofstream::binary);/////////////////////////////////////////////
@@ -219,6 +224,8 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 		while (videoRunning)
 		{
 			//PVRUpdTexWraps();
+			static Clk::time_point oldtime = Clk::now();
+
 			if ((lastWhichFrame + 1) % nVFrames != whichFrame)
 				PVR_DB_I("[PVRStartStreamer th] Skipped frame! Please re-tune the encoder parameters lWf:"+to_string(lastWhichFrame)+", nVfs:"+ to_string(nVFrames)+ ", wF:"+to_string(whichFrame));
 			lastWhichFrame = whichFrame;
@@ -250,6 +257,9 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 					qbuf[2] = quat.y();
 					qbuf[3] = quat.z();
 					*nbuf = totSz;
+					fpsbuf[0] = fpsSteamVRApp;
+					fpsbuf[1] = fpsEncoder;
+					fpsbuf[2] = fpsStreamer;
 
 					write(skt, buffer(extraBuf), ec);
 					write(skt, buffer(nals->p_payload, totSz), ec);
@@ -268,6 +278,10 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 			}
 			while ((whichFrame == lastWhichFrame || quatQueue.size() == 0) && videoRunning)
 				sleep_for(500us);
+
+			fpsStreamer = (1000000000.0 / (Clk::now() - oldtime).count());
+			PVR_DB("[PVRStartStreamer th] ------------------- Streaming @ FPS: " + to_string(fpsStreamer) + " Encoding @ FPS : " + to_string(fpsEncoder) + " VRApp Running @ FPS : " + to_string(fpsSteamVRApp));
+			oldtime = Clk::now();
 		}
 		x264_encoder_close(enc);
 
@@ -282,6 +296,8 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 
 void PVRProcessFrame(uint64_t hdl, Quaternionf quat) {
 	if (videoRunning) {
+		static Clk::time_point oldtime = Clk::now();
+		
 		int newWhichFrame = (whichFrame + 1) % nVFrames;
 		PVR_DB("[PVRProcessFrame] pushing frame to que nWf: " +to_string(newWhichFrame)+ ", pts: " + to_string(pts + vFrameDtUs));
 		whichFrameMtxs[newWhichFrame].lock();   // LOCK
@@ -293,6 +309,10 @@ void PVRProcessFrame(uint64_t hdl, Quaternionf quat) {
 		vFrames[newWhichFrame].i_pts = pts;
 		whichFrameMtxs[newWhichFrame].unlock(); // UNLOCK
 		whichFrame = newWhichFrame;
+
+		fpsSteamVRApp = (1000000000.0 / (Clk::now() - oldtime).count());
+		//PVR_DB("[PVRProcessFrame] SteamVR-App FPS: "+ to_string(fpsSteamVRApp) +" pushing frame to que nWf: " + to_string(newWhichFrame) + ", pts: " + to_string(pts));
+		oldtime = Clk::now();
 	}
 }
 

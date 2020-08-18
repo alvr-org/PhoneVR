@@ -11,6 +11,8 @@ namespace PVR {
 extern "C" {
 #endif
 
+extern float fpsRenderer;
+
 unsigned int PVRInitSystem(int maxWidth, int maxHeight, float offFov, bool reproj, bool debug); // return render texture id
 void PVRRender(int64_t pts);
 void PVRTrigger();

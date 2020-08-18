@@ -1,4 +1,5 @@
 #include "PVRSockets.h"
+#include "PVRRenderer.h"
 
 #include <queue>
 #include <iostream>
@@ -29,7 +30,12 @@ namespace {
 
     queue<EmptyVidBuf> emptyVBufs;
     queue<FilledVidBuf> filledVBufs;
+
+    float fpsStreamRecver = 0.0;
 }
+
+extern float fpsStreamDecoder = 0.0;
+extern float fpsRenderer = 0.0;
 
 vector<float> DequeueQuatAtPts(int64_t pts) {
     vector<float> quat;
@@ -176,11 +182,11 @@ void PVRStartReceiveStreams(uint16_t port) {
             function<void(const asio::error_code &, size_t)> handler = [&](
                     const asio::error_code &err, size_t) { ec = err; };
 
-            uint8_t extraBuf[28];
+            uint8_t extraBuf[28 + 12];
             auto pts = reinterpret_cast<int64_t *>(extraBuf);              // these values are automatically updated
-            auto quatBuf = reinterpret_cast<float *>(extraBuf +
-                                                     8);        // when extraBuf is updated
+            auto quatBuf = reinterpret_cast<float *>(extraBuf + 8);        // when extraBuf is updated
             auto pktSz = reinterpret_cast<uint32_t *>(extraBuf + 8 + 16);
+            auto fpsBuf = reinterpret_cast<float *>(extraBuf + 8 + 16 + 4);
 
             // reinit queues
             quatQueue = queue<pair<int64_t, vector<float>>>();
@@ -188,7 +194,10 @@ void PVRStartReceiveStreams(uint16_t port) {
             filledVBufs = queue<FilledVidBuf>();
 
             while (pvrState != PVR_STATE_SHUTDOWN) {
-                async_read(skt, buffer(extraBuf, 28), handler);
+
+                static Clk::time_point oldtime = Clk::now();
+
+                async_read(skt, buffer(extraBuf, sizeof(extraBuf)), handler);
                 svc.run();
                 svc.reset();
 
@@ -217,6 +226,12 @@ void PVRStartReceiveStreams(uint16_t port) {
                     }
                 } else
                     break;
+
+                fpsStreamRecver = (1000000000.0 / (Clk::now() - oldtime).count());
+                PVR_DB("[StreamReceiver th] ------------------- Stream Receiving @ FPS: " + to_string(fpsStreamRecver) + " De-coding @ FPS : " + to_string(fpsStreamDecoder) + " Rendering @ FPS : " + to_string(fpsRenderer));
+                oldtime = Clk::now();
+
+                updateJavaTextViewFPS(fpsStreamRecver, fpsStreamDecoder, fpsRenderer, fpsBuf[0], fpsBuf[1], fpsBuf[2]);
             }
             delMtx.lock();
             videoSvc = nullptr;

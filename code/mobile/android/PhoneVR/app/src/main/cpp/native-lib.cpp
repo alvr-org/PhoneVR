@@ -49,6 +49,7 @@ namespace {
 }
 
 extern char* ExtDirectory = nullptr;
+extern float fpsStreamDecoder;
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     //PVR_DB_I("JNI initiating...");
@@ -68,6 +69,28 @@ void callJavaMethod(const char *name) {
         jVM->AttachCurrentThread(&env, nullptr);
     }
     env->CallStaticVoidMethod(javaWrap, env->GetStaticMethodID(javaWrap, name, "()V"));
+    if (!isMainThread)
+        jVM->DetachCurrentThread();
+}
+
+extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3, float cf1, float cf2, float cf3)
+{
+    PVR_DB("JNI Calling updataJavaTextViewFPS: " + to_string(f1) + " " + to_string(f2) + " " + to_string(f3)+ " " + to_string(cf1) + " " + to_string(cf2)+ " " + to_string(cf3));
+    bool isMainThread = true;
+    JNIEnv *env;
+    if (jVM->GetEnv((void **) &env, JNI_VERS) != JNI_OK) {
+        isMainThread = false;
+        jVM->AttachCurrentThread(&env, nullptr);
+    }
+    jfloat jf1 = f1;
+    jfloat jf2 = f2;
+    jfloat jf3 = f3;
+    jfloat jcf1 = cf1;
+    jfloat jcf2 = cf2;
+    jfloat jcf3 = cf3;
+
+    env->CallStaticVoidMethod(javaWrap, env->GetStaticMethodID(javaWrap, "updateTextViewFPS",
+                                                               "(FFFFFF)V"), jf1, jf2, jf3, jcf1, jcf2, jcf3);
     if (!isMainThread)
         jVM->DetachCurrentThread();
 }
@@ -209,6 +232,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
             }
 
             auto fBuf = PVRPopVideoBuf(); //filledVBuf
+            static Clk::time_point oldtime = Clk::now();
             if (fBuf.idx != -1)
             {
                 AMediaCodec_queueInputBuffer(codec, (size_t)fBuf.idx, 0, fBuf.pktSz, fBuf.pts, 0); //AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM
@@ -240,6 +264,9 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
                 auto status = AMediaCodec_releaseOutputBuffer(codec, (size_t) outIdx, render);
                 if (render)
                     vOutPts = info.presentationTimeUs;
+
+                fpsStreamDecoder = (1000000000.0 / (Clk::now() - oldtime).count());
+                oldtime = Clk::now();
                 PVR_DB("[MediaCodec th] MCreleaseOutputBuffer Buf @ idx:" + to_string(outIdx) + ", pts:" + (render?("Rendered "+to_string(vOutPts)):"NotRendered") + ", Status: " + to_string(status) + ", Outsize:" + to_string(info.size));
             }
         }
