@@ -8,6 +8,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/1eyjmo51o4c86r07?svg=true)](https://ci.appveyor.com/project/ShootingKing-AM/phonevr)
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ShootingKing-AM/PhoneVR?color=orange&include_prereleases)
+[![Discord](https://img.shields.io/discord/745688786410930296?label=Discuss&logo=Discord&logoColor=white)](https://discord.gg/pNYtBNk)
 
 Use Steam VR-enabled applications with your phone as HMD (*Head-mounted display*). The only Open-Source solution to similar commercial packages like VRidge, Riftcat, Trinus etc etc.
 <br/>
