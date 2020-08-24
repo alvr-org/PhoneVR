@@ -43,10 +43,19 @@ class GameActivity : Activity(), SensorEventListener {
     var fpsStreamRecv: Float = 0.0f
     var fpsDecoder: Float = 0.0f
     var fpsRenderer: Float = 0.0f
+    var lastfpsVals : Array<Array<Float>> = arrayOf(arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), //StreamRecv
+                                                    arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), //Decoder
+                                                    arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f)) //Renderer
+
     // CPU FPSs
     var cfpsSteamVRApp: Float = 0.0f
     var cfpsEncoder: Float = 0.0f
     var cfpsStreamer: Float = 0.0f
+    var clastfpsVals: Array<Array<Float>> = arrayOf(arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), //VRApp
+                                                    arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), //Encoder
+                                                    arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f)) //Streamer
+
+    var fpsCounter : Int = 0 // For storing previous 5 Fps Values
 
     private var isDaydream = false
 
@@ -130,8 +139,10 @@ class GameActivity : Activity(), SensorEventListener {
                                 fpsResumeMutex.lock()
                                 fpsMutex.lock()
                                 tv.text = String.format("---FPS---\nM| SR: %5.1f D: %5.1f R  : %5.1f\nC| SS: %5.1f E: %5.1f VRa: %5.1f",
-                                        fpsStreamRecv, fpsDecoder, fpsRenderer,
-                                        cfpsStreamer, cfpsEncoder, cfpsSteamVRApp)
+                                        lastfpsVals[0].average(), lastfpsVals[1].average(), lastfpsVals[2].average(),
+                                        clastfpsVals[2].average(), clastfpsVals[1].average(), clastfpsVals[0].average())
+                                        //fpsStreamRecv, fpsDecoder, fpsRenderer,
+                                        //cfpsStreamer, cfpsEncoder, cfpsSteamVRApp)
                                 fpsMutex.unlock()
                                 fpsResumeMutex.unlock()
                             }
@@ -212,11 +223,18 @@ class GameActivity : Activity(), SensorEventListener {
         fpsStreamRecv = fpsStreamRecvJNI
         fpsDecoder = fpsDecoderJNI
         fpsRenderer = fpsRendererJNI
+        lastfpsVals[0][fpsCounter] = fpsStreamRecvJNI
+        lastfpsVals[1][fpsCounter] = fpsDecoderJNI
+        lastfpsVals[2][fpsCounter] = fpsRendererJNI
 
         cfpsSteamVRApp = cfpsSteamVRAppJNI
         cfpsEncoder = cfpsEncoderJNI
         cfpsStreamer = cfpsStreamerJNI
+        clastfpsVals[0][fpsCounter] = cfpsSteamVRAppJNI
+        clastfpsVals[1][fpsCounter] = cfpsEncoderJNI
+        clastfpsVals[2][fpsCounter] = cfpsStreamerJNI
 
+        fpsCounter = (++fpsCounter) % 5
         fpsMutex.unlock()
     }
 
