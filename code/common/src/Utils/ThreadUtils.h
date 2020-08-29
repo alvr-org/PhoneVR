@@ -134,7 +134,10 @@ class RefWhistle
 	std::mutex mtx;
 
 public:
-	RefWhistle(std::chrono::microseconds loopTime) : lt(loopTime) {}
+	RefWhistle(std::chrono::microseconds loopTime) : lt(loopTime) {
+        tp = Clk::now();
+        pert = std::chrono::microseconds::zero();
+	}
 
 	void wait()
 	{
