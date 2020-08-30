@@ -14,6 +14,8 @@ using namespace std::chrono;
 TCPTalker::TCPTalker(uint16_t port, function<void(PVR_MSG, vector<uint8_t>)> recCb,
 	function<void(std::error_code)> errCb, bool isServer, string ip) {
 	bool initted = false;
+	PVR_DB_I("[TCPTalker::TCPTalker] Init'ed with p:" + to_string(port) + " isServer:" + to_string(isServer) + " ip:" + to_string(ip))
+
 	thr = new std::thread([=, &initted] {
 		try {
 			io_service svc;
@@ -81,7 +83,7 @@ TCPTalker::TCPTalker(uint16_t port, function<void(PVR_MSG, vector<uint8_t>)> rec
 		}
 		catch(exception &e)
 		{
-			cerr << e.what() << endl;
+			PVR_DB_I( "[TCPTalker::TCPTalker] Exception caught: " + string(e.what()));
 		}
 	});
 	while (!initted)
@@ -89,17 +91,24 @@ TCPTalker::TCPTalker(uint16_t port, function<void(PVR_MSG, vector<uint8_t>)> rec
 }
 
 void TCPTalker::safeDispatch(function<void()> hdl) {
-	sktMtx.lock();
-	if (_skt) {
-		bool done = false;
-		_skt->get_io_service().dispatch([&] {
-			hdl();
-			done = true;
-		});
-		while (!done)
-			sleep_for(milliseconds(10));
+	try
+	{
+		sktMtx.lock();
+		if (_skt) {
+			bool done = false;
+			_skt->get_io_service().dispatch([&] {
+				hdl();
+				done = true;
+			});
+			while (!done)
+				sleep_for(milliseconds(10));
+		}
+		sktMtx.unlock();
 	}
-	sktMtx.unlock();
+	catch(exception &e)
+	{
+		PVR_DB_I( "[TCPTalker::safeDispatch] Exception caught: " + string(e.what()));
+	}
 }
 
 bool TCPTalker::send(PVR_MSG msgType, vector<uint8_t> data) {
@@ -114,8 +123,8 @@ bool TCPTalker::send(PVR_MSG msgType, vector<uint8_t> data) {
 			asio::error_code ec;
 			write(*_skt, buffer(buf), ec);
 			success = ec.value() == 0;
-		}
-		else {
+			if( ec.value() )
+				PVR_DB_I("[TCPTalker::send] Error Sending EC("+ to_string(ec.value()) +"): " + ec.message())
 		}
 	});
 	return success;

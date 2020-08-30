@@ -52,7 +52,9 @@ void SendAdditionalData(vector<uint16_t> maxSize, vector<float> fov, float ipd) 
         memcpy(&v[0], &maxSize[0], 2 * 2);
         memcpy(&v[2 * 2], &fov[0], 4 * 4);
         memcpy(&v[2 * 2 + 4 * 4], &ipd, 4);
-        talker->send(PVR_MSG::ADDITIONAL_DATA, v);
+        if(!talker->send(PVR_MSG::ADDITIONAL_DATA, v))
+            PVR_DB_I("[PVRSockets::SendAdditionalData] Failed to send AddData");
+
         headerBomb.ignite(false);
     }
 }
@@ -78,7 +80,7 @@ void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(),
                     unwindSegue();
                 }
             }, [](std::error_code err) {
-                PVR_DB_I("TCP error: " + err.message());
+                PVR_DB_I("[PVRSockets::PVRStartAnnouncer] TCP error: " + err.message());
             }, true, pcIP);
 
             io_service svc;
@@ -101,6 +103,9 @@ void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(),
             while (announcing) {
                 skt.send_to(buffer(buf, 8), remEP);
                 auto ec = asio::error_code();
+                if(ec.value())
+                    PVR_DB_I("[PVRSockets::PVRStartAnnouncer] Error(" + to_string(ec.value()) + "): " + ec.message());
+
                 size_t pktSz = 0;
                 //TimeBomb bomb(milliseconds());
 
@@ -109,7 +114,7 @@ void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(),
             }
         }
         catch (exception &e) {
-            PVR_DB_I("[PVRStartAnnouncer] caught Exception: " + to_string(e.what()));
+            PVR_DB_I("[PVRSockets::PVRStartAnnouncer] caught Exception: " + to_string(e.what()));
         }
     }).detach();
 }
