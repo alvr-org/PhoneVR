@@ -60,24 +60,24 @@ public:
 			terminate();
 		}
 		else if (msgType == PVR_MSG::ADDITIONAL_DATA) {
-			PVR_DB_I("[talker]: ADD DATA MSG RCV'ed.. waiting for propCont");
+			PVR_DB_I("[HMD::talker]: ADD DATA MSG RCV'ed.. waiting for propCont");
 			auto oldTm = Clk::now();
 			while (objId == k_unTrackedDeviceIndexInvalid && Clk::now() - oldTime < 3s) // 7s - ensure propCont is set
 				sleep_for(10ms);
 
-			PVR_DB_I("[talker]: ADD DATA MSG RCV'ed.. propCont seems to be set or timeout");
+			PVR_DB_I("[HMD::talker]: ADD DATA MSG RCV'ed.. propCont seems to be set or timeout");
 			if (objId == k_unTrackedDeviceIndexInvalid)
 			{
 				auto ui16Data = reinterpret_cast<uint16_t *>(&data[0]);
 				rdrW = ui16Data[0];
 				rdrH = ui16Data[1];
 				memcpy(projRect, &data[2 * 2], 4 * 4);
-				PVR_DB_I("Viewport:  left: " + to_string(projRect[0]) + "  top: " + to_string(projRect[1]) +
+				PVR_DB_I("[HMD::talker]: Viewport:  left: " + to_string(projRect[0]) + "  top: " + to_string(projRect[1]) +
 					"  right: " + to_string(projRect[2]) + "  bottom: " + to_string(projRect[3]));
 				float ipd = *reinterpret_cast<float *>(&data[2 * 2 + 4 * 4]);
 
 				VRProperties()->SetFloatProperty(propCont, Prop_UserIpdMeters_Float, ipd);
-				PVR_DB_I("IPD: " + to_string(ipd));
+				PVR_DB_I("[HMD::talker]: IPD: " + to_string(ipd));
 
 				addDataBomb->defuse();
 			}
@@ -85,7 +85,7 @@ public:
 		}
 	}, [=](error_code err)
 	{
-		PVR_DB_I("TCP error: " + err.message());
+		PVR_DB_I("[HMD::talker]: TCP error: " + err.message());
 		if (err.value() == 104) {
 			terminate();
 		}
@@ -333,7 +333,7 @@ class ServerProvider : public IServerTrackedDeviceProvider {
 
 public:
 	virtual EVRInitError Init(IVRDriverContext *drvCtx) override {
-		PVR_DB_I("Initializing server");
+		PVR_DB_I("[ServerProvider::Init] Initializing server");
 
 		bool hmdPaired = false;
 		TimeBomb hmdBomb(5s);
@@ -345,7 +345,8 @@ public:
 
 				//#define VR_INIT_SERVER_DRIVER_CONTEXT( pContext ) 
 				//		{ 
-				vr::EVRInitError eError = vr::InitServerDriverContext( drvCtx ); 
+				vr::EVRInitError eError = vr::InitServerDriverContext( drvCtx );
+				PVR_DB_I("[ServerProvider::Init::PVRStartConnectionListener] recvd PAIR_HMD Msg from ip: " + to_string(ip));
 				if (eError == vr::VRInitError_None)
 				{
 					hmd = new HMD(ip);
@@ -354,19 +355,20 @@ public:
 					//hmdPaired = VRServerDriverHost()->TrackedDeviceAdded("1", TrackedDeviceClass_DisplayRedirect, red);
 					if (!hmdPaired)
 					{
-						PVR_DB_I("Error: could not activate HMD");
+						PVR_DB_I("[ServerProvider::Init::PVRStartConnectionListener] Error: could not activate HMD");
 					}
 					else
 						hmdBomb.defuse();
 				}
 				else
 				{
-					PVR_DB_I("Error: could not InitServerDriverContext");
+					PVR_DB_I("[ServerProvider::Init::PVRStartConnectionListener] Error: could not InitServerDriverContext");
 				}
 			}
 			else if (msgType == PVR_MSG::PAIR_PHONE_CTRL) {
 				if (find(IPs.begin(), IPs.end(), ip) == IPs.end()) {
 					IPs.insert(ip);
+					PVR_DB_I("[ServerProvider::Init::PVRStartConnectionListener] Recvd PAIR_PHONE_CTRL from ip: " + to_string(ip));
 					// init controller
 					//VRServerDriverHost()->TrackedDeviceAdded(to_string(ctrls.size()).c_str(), TrackedDeviceClass_Controller, ctrl);
 					//ctrls.insert(ctrl)
@@ -378,11 +380,11 @@ public:
 
 		if (!hmdPaired) {
 			PVRStopConnectionListener();
-			PVR_DB_I("Pairing failed! Cause: timeout");
+			PVR_DB_I("[ServerProvider::Init] Pairing failed! Cause: timeout");
 			return VRInitError_Init_HmdNotFound;
 		}
 
-		PVR_DB_I("Server initialized");
+		PVR_DB_I("[ServerProvider::Init] Server initialized");
 		return VRInitError_None;
 	}
 
