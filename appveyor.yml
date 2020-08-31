@@ -89,6 +89,20 @@ for:
         yes | sdkmanager --licenses > null
         
         cd %APPVEYOR_BUILD_FOLDER%
+    - ps: >-
+        if ((Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER))
+        {
+            echo "================== This is a PR, Setting Up gradle for PR =================="
+            
+            cd code\mobile\android\PhoneVR\app
+            
+            rm build.gradle
+            
+            Rename-Item build-pr.gradle build.gradle
+            
+        }
+        
+        cd $env:APPVEYOR_BUILD_FOLDER
 
     build_script:
     - cmd : >-
