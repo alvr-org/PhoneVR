@@ -11,7 +11,8 @@ environment:
   APPVEYOR_PVR_TAG: '0.1-beta'
   ANDROID_HOME: "C:\\android-sdk-windows"
   ANDROID_NDK_HOME: "C:\\android-sdk-windows\ndk"
-  APPVEYOR_A_TOKEN:
+  GITHUB_USERNAME: "ShootingKing-AM"
+  APPVEYOR_GITHUB_TOKEN:
     secure: tx8YD3ezskZ4ZlYRUTXpQw0yjzsCByi8lujOp5NuGSqFF+ClsALp20qtsrYFIOym
 
   APPVEYOR_API_TOKEN:
@@ -94,15 +95,14 @@ for:
     - cmd : >-
         cd code\mobile\android\PhoneVR
         
-        gradlew.bat :app:assembleArm7Release
+        gradlew.bat assemble
+        
+        7z a PhonevrApk.zip %APPVEYOR_BUILD_FOLDER%\code\mobile\android\PhoneVR\app\build\outputs\apk\**\**\*.apk
+
+        appveyor PushArtifact PhonevrApk.zip
         
         cd "%APPVEYOR_BUILD_FOLDER%"
-
-    artifacts:
-    - path: code\mobile\android\PhoneVR\app\build\outputs\apk\arm7\release\*.apk
-      name: PhonevrApk
-      type: file
-
+        
   -
     matrix:
       only:
@@ -113,13 +113,13 @@ for:
 
     after_build:
     - ps: >-
-        mkdir artifact\android\arm64
-        
-        mkdir artifact\android\x86
+        mkdir artifact\android
         
         mkdir artifact\windriver\win32
         
         mkdir artifact\windriver\win64
+        
+        copy-item 'driver' -Recurse -Destination 'artifact'
         
         $apiUrl = 'https://ci.appveyor.com/api'
 
@@ -127,7 +127,7 @@ for:
 
         $headers = @{ "Authorization" = "Bearer $token"; "Content-type" = "application/json" }
         
-        $accountName = 'ShootingKing-AM'
+        $accountName = $env:GITHUB_USERNAME
         
         $projectSlug = $env:APPVEYOR_PROJECT_SLUG
 
@@ -163,7 +163,9 @@ for:
 
             $artifactFileName = $artifacts[0].fileName
 
-            Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobAndroidId/artifacts/$artifactFileName" -OutFile artifact\android\arm64\PhoneVR.apk -Headers @{ "Authorization" = "Bearer $token" }
+            Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobAndroidId/artifacts/$artifactFileName" -OutFile PhonevrApk.zip -Headers @{ "Authorization" = "Bearer $token" }
+            
+            7z x PhonevrApk.zip -Oartifact\android
         }
 
     artifacts:
@@ -173,11 +175,11 @@ for:
 
     before_deploy:
     - ps: >-    
-          $token = "token " + $env:APPVEYOR_A_TOKEN
+          $token = "token " + $env:APPVEYOR_GITHUB_TOKEN
           
-          $releaseUrl = "https://api.github.com/repos/ShootingKing-AM/$env:APPVEYOR_PROJECT_NAME/releases"
+          $releaseUrl = "https://api.github.com/repos/$env:GITHUB_USERNAME/$env:APPVEYOR_PROJECT_NAME/releases"
           
-          $releaseLatestUrl = "https://api.github.com/repos/ShootingKing-AM/$env:APPVEYOR_PROJECT_NAME/releases/latest"
+          $releaseLatestUrl = "https://api.github.com/repos/$env:GITHUB_USERNAME/$env:APPVEYOR_PROJECT_NAME/releases/latest"
           
           $releasebyTag =  $releaseUrl+"/tags/"+$env:APPVEYOR_PVR_TAG
           
@@ -204,8 +206,7 @@ for:
       tag: $(APPVEYOR_PVR_TAG)
       release: PhoneVR-$(APPVEYOR_PVR_TAG)_$(APPVEYOR_BUILD_NUMBER)
       description: AppVeyor build\nBranch - $(APPVEYOR_REPO_BRANCH)\nOn Commit - $(APPVEYOR_REPO_COMMIT)\nDate - $(APPVEYOR_REPO_COMMIT_TIMESTAMP)
-      auth_token:
-        secure: tx8YD3ezskZ4ZlYRUTXpQw0yjzsCByi8lujOp5NuGSqFF+ClsALp20qtsrYFIOym
+      auth_token: $(APPVEYOR_GITHUB_TOKEN)
       artifact: PhoneVR-$(APPVEYOR_PVR_TAG)_$(APPVEYOR_BUILD_NUMBER)-$(APPVEYOR_REPO_BRANCH)
       force_update: true
       on:
