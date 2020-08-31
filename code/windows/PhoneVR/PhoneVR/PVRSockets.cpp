@@ -66,7 +66,10 @@ void PVRStartConnectionListener(function<void(string, PVR_MSG)> callback) {
 
 			uint8_t buf[256];
 			while (connRunning) {
-				function<void(const asio::error_code &, size_t)> handle = [&](auto, auto pktSz) {
+				function<void(const asio::error_code &, size_t)> handle = [&](auto err, auto pktSz) {
+					if ( err.value() )
+						PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Error listening (" + to_string(err.value()) + "): " + err.message());
+
 					if (pktSz == 8 && string(buf, buf + 3) == "pvr") {
 						auto ip = remEP.address().to_string();
 						auto msgType = (PVR_MSG)buf[3];
@@ -74,10 +77,10 @@ void PVRStartConnectionListener(function<void(string, PVR_MSG)> callback) {
 							if (vec2uint(&buf[4]) >= PVR_CLIENT_VERSION)
 								callback(ip, msgType);
 							else
-								PVR_DB_I("Device " + ip + " needs to be updated");
+								PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Device " + ip + " needs to be updated");
 						}
 						else
-							PVR_DB_I("Invalid message from device: " + ip);
+							PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Invalid message from device: " + ip);
 						buf[0] = 0;
 						skt.async_receive_from(buffer(buf), remEP, handle);
 					}
@@ -89,9 +92,8 @@ void PVRStartConnectionListener(function<void(string, PVR_MSG)> callback) {
 		}
 		catch (const std::system_error& err)
 		{
-			PVR_DB_I(err.what());
+			PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Caught exception: " + string(err.what()));
 		}
-
 	});
 }
 
