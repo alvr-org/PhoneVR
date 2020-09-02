@@ -90,16 +90,23 @@ for:
         yes | sdkmanager --licenses > null
         
         cd %APPVEYOR_BUILD_FOLDER%
+        
+    - ps: >-
+        if ((Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER))
+        {
+            echo "================== This is a PR, Setting Up gradle for PR =================="
+            
+            cd code\mobile\android\PhoneVR\app
+            
+            rm build.gradle
+            
+            Rename-Item build-pr.gradle build.gradle
+            
+        }
 
     build_script:
-    - ps : >-
+    - cmd : >-
         cd code\mobile\android\PhoneVR
-        
-        IF ($env:APPVEYOR_PULL_REQUEST_NUMBER){
-            .\gradlew.bat assembleDebug
-        } else {
-            .\gradlew.bat assemble
-        }
         
         7z a PhonevrApk.zip $env:APPVEYOR_BUILD_FOLDER\code\mobile\android\PhoneVR\app\build\outputs\apk\**\**\*.apk
 

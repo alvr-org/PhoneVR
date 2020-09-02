@@ -28,14 +28,14 @@ A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or abov
 ## Installation
 
 * Make sure you have Steam and SteamVR installed (To find SteamVR on steam, `Library -> Tools -> SteamVR`).
-* Download latest release build [`PhoneVR-0.1-beta_41-master.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases/latest) release of this repository.
+* Download latest release build [`PhoneVR.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases/latest) release of this repository.
 * Download the repository files. Run the script `install-PhoneVR.bat`, located in the `driver` folder.
   - **Note**: The batch file assumes that "Steam" is installed in Default path, if have installed Steam in a different path you might have to have edit the batch file `Ln39 (Win32)` or `Ln41 (Win64)` respecitively. <br/>
     *Eg*. If you have installed Steam in different driver altogether, now, If your Steam Location is `I:\Program Files\Steam` and you are on `Win64`,
         you would change the `Ln41` from <br/>
         `  "C:\Program Files (x86)\Steam\steamapps\common\SteamVR\bin\win64\vrpathreg" adddriver %instpath%\PVRServer` to <br/>
         `  "I:\Program Files\Steam\steamapps\common\SteamVR\bin\win32\vrpathreg" adddriver %instpath%\PVRServer`
-* Install the Release varaint of Apk on your mobile from `[PhoneVR-0.1-beta_41-master.zip]/android/arm7/release`.
+* Install the Release varaint of Apk on your mobile from `[PhoneVR.zip]/android/arm7/release`.
 
 To **play**, **first open the Phone App**(SteamVR should also be closed), then run the game of your choice on PC. (Obviously, both PC and Mobile should be on same Network, preferably Wifi 5.0)
 
@@ -112,7 +112,6 @@ This Project is presently under testing. But, pull requests are welcome.
 * Android App doesn’t connect to Windows Steam VR even after opening Phone App first and then SteamVR on windows
   1. Make sure that both the Windows and Android devices are in the same Local Network. (connected to the same router/wifi device)
   2. Sometimes, the port which PhoneVR use to connect win/mobile devices, also known as `Pairing Port (default :33333)`, might be used by other services on your devices(Windows/Android). Try changing the "Pairing Port" on `Android PhoneVR App` settings and `pairing_port` in `C:\Program Files\PhoneVR\pvrsettings.json` for `Windows PVR driver` and restart SteamVR. **Both Windows Pairing port and Android Pairing port should be the same**. Safe recommended port range : `30000 - 65535`
-  3. Incase above mentioned things have not been helpful to you, then you might want to **Install Debug variant of APK** from `[PhoneVR-0.1-beta_41-master.zip]/android/arm7/debug` which can help you/us to get more detailed logs.
   
 * Android App automatically comes back to "Discovery"(Home/AppStart) page after some VR Application usage
   - Check if `Android System Battery saver` or similar applications are killing the app when in background. Usually can be found is `Android Setting` -> `Application Manager` or `Application Settings` according to your Android device flavour/OEM.
@@ -120,6 +119,8 @@ This Project is presently under testing. But, pull requests are welcome.
 * Lag while using VR App on mobile
   - Make sure you are not using debug variant of APK(unless you really want to).
   - All relevant component's FPS are displayed on Mobile device when `Settings -> Debug` is checked. You can find out what the bottleneck component in the whole chain from VRApplication on windows to GoogleVR SDK renderer on Android is and resolve it.
+  
+* Incase above mentioned things have not been helpful to you, then you might want to **Install Debug variant of APK** from `[PhoneVR.zip]/android/arm7/debug` which can help you/us to get more detailed logs.
   
   FPS Nomenclature (in order from VRAppFrameCreation to MobileFrameDisplay:
   * `C |` - CPU (Windows) Components
