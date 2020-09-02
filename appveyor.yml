@@ -107,7 +107,7 @@ for:
         cd $env:APPVEYOR_BUILD_FOLDER
 
     build_script:
-    - cmd : >-
+    - ps : >-
         cd code\mobile\android\PhoneVR
         
         gradlew.bat assemble
