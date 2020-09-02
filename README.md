@@ -28,8 +28,8 @@ A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or abov
 ## Installation
 
 * Make sure you have Steam and SteamVR installed (To find SteamVR on steam, `Library -> Tools -> SteamVR`).
-* Download latest release build [`PhoneVR.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases/latest) release of this repository.
-* Download the repository files. Run the script `install-PhoneVR.bat`, located in the `driver` folder.
+* Download latest release [`PhoneVR.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases/latest) of this repository.
+* Run the script `install-PhoneVR.bat`, located in the `driver` folder.
   - **Note**: The batch file assumes that "Steam" is installed in Default path, if have installed Steam in a different path you might have to have edit the batch file `Ln39 (Win32)` or `Ln41 (Win64)` respecitively. <br/>
     *Eg*. If you have installed Steam in different driver altogether, now, If your Steam Location is `I:\Program Files\Steam` and you are on `Win64`,
         you would change the `Ln41` from <br/>
@@ -140,5 +140,5 @@ For quick resolution you may want to add the following data along with your issu
 * `vrserver.txt` file in default location `C:\Program Files (x86)\Steam\logs\vrserver.txt`
 * `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default windows location `C:\Program Files\PhoneVR`
 * `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default android location `.../Android/data/virtualis.phonevr/files/PVR/` and/or `Log` from your `Settings page` on the app.
-* Open a `cmd` in the follow default directory and copy paste output of the `vrcmd` command. `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\bin\win64\vrccmd.exe`
+* Open a `cmd` in the follow default directory and copy paste output of the `vrcmd` command. `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\bin\win64\vrcmd.exe`
 * And ofcourse, how to reproduce the issue :)
