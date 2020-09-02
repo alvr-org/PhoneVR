@@ -103,7 +103,7 @@ for:
             Rename-Item build-pr.gradle build.gradle
             
         }
-
+        
         cd $env:APPVEYOR_BUILD_FOLDER
 
     build_script:
@@ -113,7 +113,7 @@ for:
         gradlew.bat assemble
         
         7z a PhonevrApk.zip $env:APPVEYOR_BUILD_FOLDER\code\mobile\android\PhoneVR\app\build\outputs\apk\**\**\*.apk
-
+        
         appveyor PushArtifact PhonevrApk.zip
         
         cd "$env:APPVEYOR_BUILD_FOLDER"
@@ -137,29 +137,29 @@ for:
         copy-item 'driver' -Recurse -Destination 'artifact'
         
         $apiUrl = 'https://ci.appveyor.com/api'
-
+        
         $token = $env:APPVEYOR_API_TOKEN
-
+        
         $headers = @{ "Authorization" = "Bearer $token"; "Content-type" = "application/json" }
         
         $accountName = $env:GITHUB_USERNAME
         
         $projectSlug = $env:APPVEYOR_PROJECT_SLUG
-
+        
         $project = Invoke-RestMethod -Method Get -Uri "$apiUrl/projects/$accountName/$projectSlug" -Headers $headers
-
+        
         $jobWin86Id = $project.build.jobs[0].jobId
-
+        
         $jobWin64Id = $project.build.jobs[1].jobId
-
+        
         $jobAndroidId = $project.build.jobs[2].jobId
-
+        
         if( $project.build.jobs[0].artifactsCount -gt 0 )
         {
             $artifacts = Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobWin86Id/artifacts" -Headers $headers
-
+            
             $artifactFileName = $artifacts[0].fileName
-
+            
             Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobWin86Id/artifacts/$artifactFileName" -OutFile artifact\windriver\win32\driver_PVRServer.dll -Headers @{ "Authorization" = "Bearer $token" }
             
             copy-item 'artifact\windriver\win32\driver_PVRServer.dll' -Recurse -Destination 'artifact\driver\bin\PVRServer\bin\win32'
@@ -168,20 +168,20 @@ for:
         if( $project.build.jobs[1].artifactsCount -gt 0 )
         {
             $artifacts = Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobWin64Id/artifacts" -Headers $headers
-
+            
             $artifactFileName = $artifacts[0].fileName
-
+            
             Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobWin64Id/artifacts/$artifactFileName" -OutFile artifact\windriver\win64\driver_PVRServer.dll -Headers @{ "Authorization" = "Bearer $token" }
             
             copy-item 'artifact\windriver\win64\driver_PVRServer.dll' -Recurse -Destination 'artifact\driver\bin\PVRServer\bin\win64'
         }
-
+        
         if( $project.build.jobs[2].artifactsCount -gt 0 )
         {
             $artifacts = Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobAndroidId/artifacts" -Headers $headers
-
+            
             $artifactFileName = $artifacts[0].fileName
-
+            
             Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobAndroidId/artifacts/$artifactFileName" -OutFile PhonevrApk.zip -Headers @{ "Authorization" = "Bearer $token" }
             
             7z x PhonevrApk.zip -Oartifact\android
