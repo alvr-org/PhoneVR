@@ -90,7 +90,7 @@ for:
         yes | sdkmanager --licenses > null
         
         cd %APPVEYOR_BUILD_FOLDER%
-        
+
     - ps: >-
         if ((Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER))
         {
@@ -103,6 +103,8 @@ for:
             Rename-Item build-pr.gradle build.gradle
             
         }
+
+        cd $env:APPVEYOR_BUILD_FOLDER
 
     build_script:
     - cmd : >-
