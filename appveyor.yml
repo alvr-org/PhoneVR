@@ -110,7 +110,7 @@ for:
     - ps : >-
         cd code\mobile\android\PhoneVR
         
-        gradlew.bat assemble
+        .\gradlew.bat assemble
         
         7z a PhonevrApk.zip $env:APPVEYOR_BUILD_FOLDER\code\mobile\android\PhoneVR\app\build\outputs\apk\**\**\*.apk
         
