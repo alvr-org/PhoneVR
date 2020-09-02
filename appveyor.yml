@@ -92,16 +92,20 @@ for:
         cd %APPVEYOR_BUILD_FOLDER%
 
     build_script:
-    - cmd : >-
+    - ps : >-
         cd code\mobile\android\PhoneVR
         
-        gradlew.bat assemble
+        IF ($env:APPVEYOR_PULL_REQUEST_NUMBER){
+            .\gradlew.bat assembleDebug
+        } else {
+            .\gradlew.bat assemble
+        }
         
-        7z a PhonevrApk.zip %APPVEYOR_BUILD_FOLDER%\code\mobile\android\PhoneVR\app\build\outputs\apk\**\**\*.apk
+        7z a PhonevrApk.zip $env:APPVEYOR_BUILD_FOLDER\code\mobile\android\PhoneVR\app\build\outputs\apk\**\**\*.apk
 
         appveyor PushArtifact PhonevrApk.zip
         
-        cd "%APPVEYOR_BUILD_FOLDER%"
+        cd "$env:APPVEYOR_BUILD_FOLDER"
         
   -
     matrix:
@@ -146,6 +150,8 @@ for:
             $artifactFileName = $artifacts[0].fileName
 
             Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobWin86Id/artifacts/$artifactFileName" -OutFile artifact\windriver\win32\driver_PVRServer.dll -Headers @{ "Authorization" = "Bearer $token" }
+            
+            copy-item 'artifact\windriver\win32\driver_PVRServer.dll' -Recurse -Destination 'artifact\driver\bin\PVRServer\bin\win32'
         }
         
         if( $project.build.jobs[1].artifactsCount -gt 0 )
@@ -155,6 +161,8 @@ for:
             $artifactFileName = $artifacts[0].fileName
 
             Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobWin64Id/artifacts/$artifactFileName" -OutFile artifact\windriver\win64\driver_PVRServer.dll -Headers @{ "Authorization" = "Bearer $token" }
+            
+            copy-item 'artifact\windriver\win64\driver_PVRServer.dll' -Recurse -Destination 'artifact\driver\bin\PVRServer\bin\win64'
         }
 
         if( $project.build.jobs[2].artifactsCount -gt 0 )
