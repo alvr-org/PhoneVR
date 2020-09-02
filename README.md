@@ -28,16 +28,14 @@ A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or abov
 ## Installation
 
 * Make sure you have Steam and SteamVR installed (To find SteamVR on steam, `Library -> Tools -> SteamVR`).
-* Download latest [`PhoneVR.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases) release of this repository.
+* Download latest release build [`PhoneVR.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases/latest) release of this repository.
 * Download the repository files. Run the script `install-PhoneVR.bat`, located in the `driver` folder.
   - **Note**: The batch file assumes that "Steam" is installed in Default path, if have installed Steam in a different path you might have to have edit the batch file `Ln39 (Win32)` or `Ln41 (Win64)` respecitively. <br/>
     *Eg*. If you have installed Steam in different driver altogether, now, If your Steam Location is `I:\Program Files\Steam` and you are on `Win64`,
         you would change the `Ln41` from <br/>
         `  "C:\Program Files (x86)\Steam\steamapps\common\SteamVR\bin\win64\vrpathreg" adddriver %instpath%\PVRServer` to <br/>
         `  "I:\Program Files\Steam\steamapps\common\SteamVR\bin\win32\vrpathreg" adddriver %instpath%\PVRServer`
-* Copy `driver_PVRServer.dll` (from `[PhoneVR.zip]/windriver/[win64 or win32]`) to you local-driver-folder)
-  `local-driver-folder` by default is: `C:\Program Files\PhoneVR\PVRServer\bin\[win32 or win64]\`
-* Install the Apk on your mobile from `[PhoneVR.zip]/android/arm64`.
+* Install the Release varaint of Apk on your mobile from `[PhoneVR.zip]/android/arm7/release`.
 
 To **play**, **first open the Phone App**(SteamVR should also be closed), then run the game of your choice on PC. (Obviously, both PC and Mobile should be on same Network, preferably Wifi 5.0)
 
@@ -119,7 +117,10 @@ This Project is presently under testing. But, pull requests are welcome.
   - Check if `Android System Battery saver` or similar applications are killing the app when in background. Usually can be found is `Android Setting` -> `Application Manager` or `Application Settings` according to your Android device flavour/OEM.
 
 * Lag while using VR App on mobile
+  - Make sure you are not using debug variant of APK(unless you really want to).
   - All relevant component's FPS are displayed on Mobile device when `Settings -> Debug` is checked. You can find out what the bottleneck component in the whole chain from VRApplication on windows to GoogleVR SDK renderer on Android is and resolve it.
+  
+* Incase above mentioned things have not been helpful to you, then you might want to **Install Debug variant of APK** from `[PhoneVR.zip]/android/arm7/debug` which can help you/us to get more detailed logs.
   
   FPS Nomenclature (in order from VRAppFrameCreation to MobileFrameDisplay:
   * `C |` - CPU (Windows) Components
@@ -141,4 +142,3 @@ For quick resolution you may want to add the following data along with your issu
 * `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default android location `.../Android/data/virtualis.phonevr/files/PVR/` and/or `Log` from your `Settings page` on the app.
 * Open a `cmd` in the follow default directory and copy paste output of the `vrcmd` command. `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\bin\win64\vrccmd.exe`
 * And ofcourse, how to reproduce the issue :)
-

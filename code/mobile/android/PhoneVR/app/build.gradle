@@ -39,6 +39,8 @@ android {
 
         defaultPublishConfig 'release'
         publishNonDefault true
+
+        archivesBaseName = "PhoneVR-v$versionCode($versionName)"
     }
     buildTypes {
         release {
