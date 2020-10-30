@@ -78,6 +78,12 @@ android {
             ndk.abiFilter 'x86'
         }
     }
+    // CompileOptions required for ARCA
+    compileOptions
+    {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -93,4 +99,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     implementation 'com.google.vr:sdk-base:1.101.0'
+
+    def acraVersion = '5.7.0'
+    implementation "ch.acra:acra-mail:$acraVersion"
+    implementation "ch.acra:acra-toast:$acraVersion"
 }
