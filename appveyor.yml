@@ -13,7 +13,7 @@ environment:
   ANDROID_NDK_HOME: "C:\\android-sdk-windows\ndk"
   GITHUB_USERNAME: "ShootingKing-AM"
   APPVEYOR_GITHUB_TOKEN:
-    secure: tx8YD3ezskZ4ZlYRUTXpQw0yjzsCByi8lujOp5NuGSqFF+ClsALp20qtsrYFIOym
+    secure: LHFaEeGFp9XsG6gjw8+pGVS0zKO79rNvZPALuHcDAsP886KA/wYf/WJNuL6nKEj5
 
   APPVEYOR_API_TOKEN:
     secure: pDVnsOqWnupLrKTbz/iZlZt6CkSTZVUMtXqTlp5tgHI=
