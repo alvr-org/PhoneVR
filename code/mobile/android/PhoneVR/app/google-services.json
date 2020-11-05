@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "823110488087",
+    "firebase_url": "https://phonevr-1a7fb.firebaseio.com",
+    "project_id": "phonevr-1a7fb",
+    "storage_bucket": "phonevr-1a7fb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:823110488087:android:5042a2b6df250322c5cc52",
+        "android_client_info": {
+          "package_name": "viritualisres.phonevr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "823110488087-246mgipllpep6nlcrp6jvefc4i1jn1sl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDg00sUSqqQc27myjY67kgMg3eHr3tNibU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "823110488087-246mgipllpep6nlcrp6jvefc4i1jn1sl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
