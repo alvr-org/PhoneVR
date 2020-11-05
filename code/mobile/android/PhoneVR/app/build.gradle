@@ -2,14 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
-// Create a variable called keystorePropertiesFile, and initialize it to your
-// keystore.properties file, in the rootProject folder.
 def keystorePropertiesFile = rootProject.file("keystore.properties")
-
-// Initialize a new Properties() object called keystoreProperties.
 def keystoreProperties = new Properties()
-
-// Load your keystore.properties file into the keystoreProperties object.
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
@@ -19,7 +13,6 @@ android {
             storePassword System.getenv("Store")
             keyAlias keystoreProperties['keyAlias']
             keyPassword System.getenv("Key")
-
         }
     }
     android.ndkVersion "21.3.6528147"
@@ -28,8 +21,8 @@ android {
         applicationId "viritualisres.phonevr"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 2
-        versionName "0.1-beta"
+        versionCode Integer.valueOf(System.env.APPVEYOR_BUILD_NUMBER ?: 0)
+        versionName System.getenv("APPVEYOR_PVR_TAG")
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         externalNativeBuild {
             cmake {
@@ -39,7 +32,6 @@ android {
 
         defaultPublishConfig 'release'
         publishNonDefault true
-
         archivesBaseName = "PhoneVR-v$versionCode($versionName)"
     }
     buildTypes {
@@ -50,6 +42,10 @@ android {
             signingConfig signingConfigs.releaseconfig
         }
         debug {
+            jniDebuggable true
+            renderscriptDebuggable true
+            minifyEnabled false
+            useProguard false
             externalNativeBuild {
                 cmake {
                     cppFlags += "-D_DEBUG=1"

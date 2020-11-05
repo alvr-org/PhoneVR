@@ -36,6 +36,7 @@ A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or abov
         `  "C:\Program Files (x86)\Steam\steamapps\common\SteamVR\bin\win64\vrpathreg" adddriver %instpath%\PVRServer` to <br/>
         `  "I:\Program Files\Steam\steamapps\common\SteamVR\bin\win32\vrpathreg" adddriver %instpath%\PVRServer`
 * Install the Release varaint of Apk on your mobile from `[PhoneVR.zip]/android/arm7/release`.
+* Make sure that "Run in Background", "Auto Start"(Restart on Crash) permissions are given. Also make sure that any kind of 3rd party battery saver app dosen't kill PhoneVR when in background.
 
 To **play**, **first open the Phone App**(SteamVR should also be closed), then run the game of your choice on PC. (Obviously, both PC and Mobile should be on same Network, preferably Wifi 5.0)
 

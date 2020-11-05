@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PhoneVR</string>
+    <string name="app_crash_toast">Oh no :( PVR has unfortunately crashed. Dev team will be notified. You can create an issue on Github or Discord.</string>
 </resources>
