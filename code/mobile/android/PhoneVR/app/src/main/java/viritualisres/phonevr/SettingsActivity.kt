@@ -4,6 +4,7 @@ package viritualisres.phonevr
 import android.content.Context
 import android.os.Bundle
 import android.os.Environment.getExternalStorageDirectory
+import android.util.Log
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.RandomAccessFile
+import java.lang.Exception
 import java.util.*
 
 class SettingsActivity : AppCompatActivity() {
@@ -75,19 +77,26 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun savePrefs() {
-        val prefs = getSharedPreferences(pvrPrefsKey, Context.MODE_PRIVATE)
-        val edit = prefs.edit()
-        with(edit) {
-            putString(pcIpKey, pcIp.text.toString())
-            putInt(connPortKey, connPort.text.toString().toInt())
-            putInt(videoPortKey, videoPort.text.toString().toInt())
-            putInt(posePortKey, posePort.text.toString().toInt())
-            putInt(resMulKey, resMul.text.toString().toInt())
-            putFloat(mt2phKey, mt2ph.text.toString().toFloat())
-            putFloat(offFovKey, offFov.text.toString().toFloat())
-            putBoolean(warpKey, warp.isChecked)
-            putBoolean(debugKey, debug.isChecked)
-            apply()
+        try {
+            val prefs = getSharedPreferences(pvrPrefsKey, Context.MODE_PRIVATE)
+            val edit = prefs.edit()
+            with(edit) {
+                putString(pcIpKey, pcIp.text.toString())
+                if(Util_IsVaildPort(connPort.text.toString().toInt())) putInt(connPortKey, connPort.text.toString().toInt())
+                if(Util_IsVaildPort(videoPort.text.toString().toInt())) putInt(videoPortKey, videoPort.text.toString().toInt())
+                if(Util_IsVaildPort(posePort.text.toString().toInt())) putInt(posePortKey, posePort.text.toString().toInt())
+                putInt(resMulKey, resMul.text.toString().toInt())
+                putFloat(mt2phKey, mt2ph.text.toString().toFloat())
+                putFloat(offFovKey, offFov.text.toString().toFloat())
+                putBoolean(warpKey, warp.isChecked)
+                putBoolean(debugKey, debug.isChecked)
+                apply()
+            }
+        }
+        catch(e : Exception)
+        {
+            Log.d("PVR-Java", "Exception caught in savePrefs.SettingsActivity : " + e.message);
+            e.printStackTrace();
         }
     }
 
@@ -107,5 +116,10 @@ class SettingsActivity : AppCompatActivity() {
         offFov.setText(String.format(l, fmt2, prefs.getFloat(offFovKey, offFovDef)))
         warp.isChecked = prefs.getBoolean(warpKey, warpDef)
         debug.isChecked = prefs.getBoolean(debugKey, debugDef)
+    }
+
+    private fun Util_IsVaildPort(port : Int) : Boolean
+    {
+        return ((port > 0)  && (port <= 65536));
     }
 }
