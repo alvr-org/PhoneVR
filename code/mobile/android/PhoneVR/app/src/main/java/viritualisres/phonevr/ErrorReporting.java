@@ -5,7 +5,7 @@ import android.content.Context;
 
 import org.acra.ACRA;
 import org.acra.annotation.AcraCore;
-import org.acra.annotation.AcraToast;
+import org.acra.annotation.AcraDialog;
 import org.acra.config.CoreConfigurationBuilder;
 import org.acra.data.StringFormat;
 
@@ -56,7 +56,7 @@ import static org.acra.ReportField.*;
             reportSenderFactoryClasses = DiscordReportSenderFactory.class)
 
 //@AcraMailSender(mailTo = "phonevr.crash@gmail.com")
-@AcraToast(resText = R.string.app_crash_toast)
+@AcraDialog( reportDialogClass = ErrorReportingDialog.class )
 
 public class ErrorReporting extends Application {
     @Override
