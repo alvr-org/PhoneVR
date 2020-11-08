@@ -38,7 +38,7 @@ public class ErrorReportingDialog extends Activity {
 
             AlertDialog builder = new AlertDialog.Builder(this)
                 .setTitle("PVR Crash Handler")
-                //.setIcon(R.drawable.ic_launcher_foreground)
+                .setIcon(R.mipmap.ic_launcher)
                 .setMessage(Html.fromHtml("Unfortunately, PhoneVR has been crashed recently. Developers will be notified.<br/><br/>" +
                         "<b>Exception Message:</b><p style=\"color:red\">" + ExceptionMsg +
                         "</p><br/>You can help us by making an issue in Github's " +
