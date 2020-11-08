@@ -100,7 +100,7 @@ dependencies {
 
     def acraVersion = '5.7.0'
     implementation "ch.acra:acra-mail:$acraVersion"
-    implementation "ch.acra:acra-toast:$acraVersion"
+    implementation "ch.acra:acra-dialog:$acraVersion"
 
     implementation platform('com.google.firebase:firebase-bom:26.0.0')
     implementation 'com.google.firebase:firebase-analytics-ktx'
