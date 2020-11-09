@@ -31,8 +31,10 @@ ccc I_REFRESH_KEY = "intra_refresh";
 ccc BITRATE_KEY = "bitrate";
 ccc PROFILE_KEY = "profile";
 
-namespace {
-	const nlohmann::json defSets = {
+namespace 
+{
+	const nlohmann::json defSets = 
+	{
 		{ENABLE_KEY, true},
 		{GAME_FPS_KEY, 60},
 		//{STREAM_FPS_KEY, 60},
@@ -41,7 +43,7 @@ namespace {
 		//{BLUR_KEY, true},
 		{VIDEO_PORT_KEY, 15243},
 		{POSE_PORT_KEY, 51423},
-		{CONN_PORT_KEY, 32415},
+		{CONN_PORT_KEY, 33333},
 		{ENCODER_SECT, {
 			{PRESET_KEY, "ultrafast"},
 			{TUNE_KEY, "zerolatency"},
@@ -52,32 +54,39 @@ namespace {
 			{I_REFRESH_KEY, false},
 			{BITRATE_KEY, -1},
 			{PROFILE_KEY, "baseline"},
-		}}
+						}
+		}
 	};
 
-	const wchar_t *const setsFile = L"C:\\Program Files\\PhoneVR\\pvrsettings.json";
-
-
-	nlohmann::json PVRGetSets() {
-		try {
-			return nlohmann::json::parse(std::ifstream(setsFile));
+	//const wchar_t *const setsFile = L"C:\\Program Files\\PhoneVR\\pvrsettings.json";
+	const wchar_t *const setsFile = L"\\..\\..\\drivers\\pvr\\pvrsettings.json";
+	
+	nlohmann::json PVRGetSets() 
+	{
+		try 
+		{
+			return nlohmann::json::parse(std::ifstream( std::wstring(_GetExePath() + std::wstring(setsFile)).c_str() ));
 		}
-		catch (const std::exception& err) {
-
-			PVR_DB_I(std::string("Error retrieving setting: ") + err.what());
+		catch (const std::exception& err)
+		{
+			PVR_DB_I( std::string("Error retrieving Setting: ") + err.what() );
+			if (_wfopen( std::wstring(_GetExePath()+std::wstring(setsFile)).c_str() , L"r")) { PVR_DB_I("\t\tFile Exists !") }
+			else { PVR_DB_I("\t\tFile does NOT Exist !"); }
+			PVR_DB_I( std::wstring(L"\t\tSettingsFile @ ") + std::wstring(setsFile) );
+			PVR_DB_I( std::wstring(L"\t\tCurrentDirectory @ ")+_GetExePath() );
 		}
 		return nlohmann::json();
 	}
 
-	void PVRSaveSets(nlohmann::json j) {
+	void PVRSaveSets(nlohmann::json j) 
+	{
 		std::ofstream(setsFile) << j.dump(4);
 	}
 }
 
-
-
 template <typename T>
-void PVRSetProp(std::vector<std::string> propPath, T value) {
+void PVRSetProp(std::vector<std::string> propPath, T value) 
+{
 	auto j = PVRGetSets();
 	auto *pj = &j;
 	for (size_t i = 0; i < propPath.size(); i++)
@@ -87,11 +96,14 @@ void PVRSetProp(std::vector<std::string> propPath, T value) {
 }
 
 template<typename T>
-T PVRProp(std::vector<std::string> propPath) {
+T PVRProp(std::vector<std::string> propPath) 
+{
 	auto j = PVRGetSets();
 
-	for (size_t i = 0; i < propPath.size(); i++) {
-		if (j.find(propPath[i]) != j.end()) {
+	for (size_t i = 0; i < propPath.size(); i++) 
+	{
+		if (j.find(propPath[i]) != j.end()) 
+		{
 			j = j[propPath[i]];
 			if (i == propPath.size() - 1)
 				return j;
@@ -101,7 +113,8 @@ T PVRProp(std::vector<std::string> propPath) {
 	}
 	std::string fullPath;
 	j = defSets;
-	for (size_t i = 0; i < propPath.size(); i++) {
+	for (size_t i = 0; i < propPath.size(); i++) 
+	{
 		j = j[propPath[i]];
 		fullPath += propPath[i] + (i < propPath.size() - 1 ? "." : "");
 	}

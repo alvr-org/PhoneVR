@@ -40,6 +40,7 @@ extern PVR_STATE pvrState;
 
 
 //////// DEBUG //////////
+
 void pvrdebug(std::string msg);
 
 inline void pvrdebug(std::wstring msg) {
@@ -82,10 +83,6 @@ void pvrdebugClear();
 
 #define SAFE_DEL(obj) if (obj) { delete obj; obj = nullptr; }
 
-
-// if a version of this program get hacked or cracked, it will eventually expire and quit on start
-//bool PVRCheckIfExpired();
-
 inline uint32_t vec2uint(uint8_t *v) {
 	uint32_t i;
 	memcpy(&i, v, 4);
@@ -98,5 +95,7 @@ inline uint32_t vers2uint(uint8_t rel, uint8_t sub, uint16_t patch) {
 
 #define PVR_SERVER_VERSION vers2uint(0, 6, 0)
 #define PVR_CLIENT_VERSION vers2uint(0, 6, 0)
+
+std::wstring _GetExePath(void);
 
 #endif //__cplusplus

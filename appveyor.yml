@@ -156,7 +156,7 @@ for:
             
             $artifactFileName = $artifacts[0].fileName
             
-            Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobWin86Id/artifacts/$artifactFileName" -OutFile artifact\driver\bin\PVRServer\bin\win32\driver_PVRServer.dll -Headers @{ "Authorization" = "Bearer $token" }
+            Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobWin86Id/artifacts/$artifactFileName" -OutFile artifact\driver\PVRServer\bin\win32\driver_PVRServer.dll -Headers @{ "Authorization" = "Bearer $token" }
 
         }
         
@@ -166,7 +166,7 @@ for:
             
             $artifactFileName = $artifacts[0].fileName
             
-            Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobWin64Id/artifacts/$artifactFileName" -OutFile artifact\driver\bin\PVRServer\bin\win64\driver_PVRServer.dll -Headers @{ "Authorization" = "Bearer $token" }
+            Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobWin64Id/artifacts/$artifactFileName" -OutFile artifact\driver\PVRServer\bin\win64\driver_PVRServer.dll -Headers @{ "Authorization" = "Bearer $token" }
             
         }
         

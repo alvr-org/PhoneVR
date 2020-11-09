@@ -29,12 +29,7 @@ A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or abov
 
 * Make sure you have Steam and SteamVR installed (To find SteamVR on steam, `Library -> Tools -> SteamVR`).
 * Download latest release [`PhoneVR.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases/latest) of this repository.
-* Run the script `install-PhoneVR.bat`, located in the `driver` folder.
-  - **Note**: The batch file assumes that "Steam" is installed in Default path, if have installed Steam in a different path you might have to have edit the batch file `Ln39 (Win32)` or `Ln41 (Win64)` respecitively. <br/>
-    *Eg*. If you have installed Steam in different driver altogether, now, If your Steam Location is `I:\Program Files\Steam` and you are on `Win64`,
-        you would change the `Ln41` from <br/>
-        `  "C:\Program Files (x86)\Steam\steamapps\common\SteamVR\bin\win64\vrpathreg" adddriver %instpath%\PVRServer` to <br/>
-        `  "I:\Program Files\Steam\steamapps\common\SteamVR\bin\win32\vrpathreg" adddriver %instpath%\PVRServer`
+* Copy the whole folder `PVRServer` in `driver` folder of zip file into your `SteamVR/drivers` folder. (Default Path: `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers`.
 * Install the Release varaint of Apk on your mobile from `[PhoneVR.zip]/android/arm7/release`.
 * Make sure that "Run in Background", "Auto Start"(Restart on Crash) permissions are given. Also make sure that any kind of 3rd party battery saver app dosen't kill PhoneVR when in background.
 
@@ -44,7 +39,7 @@ To **play**, **first open the Phone App**(SteamVR should also be closed), then r
 
 * **Windows Driver Settings**
 
-  Windows SteamVR Driver, auto loads with SteamVR, and gets `FrameTextures` from VRApplication(like SteamVR Home, VRChat, etc.) via SteamVR. These Textures are then Encoded and Streamed, at specified `game_fps`, to Mobile device using x264 Encoder. Some configurations of this encoder can be adjusted via, `pvrsettings.json` in default installation location `C:\Program Files\PhoneVR`.<br/>
+  Windows SteamVR Driver, auto loads with SteamVR, and gets `FrameTextures` from VRApplication(like SteamVR Home, VRChat, etc.) via SteamVR. These Textures are then Encoded and Streamed, at specified `game_fps`, to Mobile device using x264 Encoder. Some configurations of this encoder can be adjusted via, `pvrsettings.json` in default installation location `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\PVRServer\`.<br/>
   **Default Settings :**
     ```json
     {
@@ -87,7 +82,7 @@ To **play**, **first open the Phone App**(SteamVR should also be closed), then r
       - *"intra_refresh"* : Default : False
       - *"bitrate"* : Default : -1 (min 1000)
       
-  Do only adjust when required, and keep a eye on `pvrlog.txt` file in default installation location `C:\Program Files\PhoneVR` for "*Skipped frame! Please re-tune the encoder parameters*" messages. If you are getting these messages in excess, you may wish to downgrade settings since windows does not seems to have enough processing power and resources to render with existing settings.
+  Do only adjust when required, and keep a eye on `pvrlog.txt` file in default installation location `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\PVRServer\logs\` for "*Skipped frame! Please re-tune the encoder parameters*" messages. If you are getting these messages in excess, you may wish to downgrade settings since windows does not seems to have enough processing power and resources to render with existing settings.
 
 ## Development
 This Project is presently under testing. But, pull requests are welcome. 
@@ -108,6 +103,7 @@ This Project is presently under testing. But, pull requests are welcome.
   * Asio v1.12.2 (https://sourceforge.net/projects/asio/files/asio/1.12.2%20%28Stable%29/) (code\common\libs\asio)
   * x264 0.161.r3015 MSVS15(2017) (https://github.com/ShiftMediaProject/x264)
   * GoogleVR 1.200 (https://github.com/googlevr/gvr-android-sdk) (code\mobile\android\libraries\jni)
+  * ACRA v5.7 (https://github.com/ACRA/acra)
 
 ## Troubleshooting  
 * Android App doesn’t connect to Windows Steam VR even after opening Phone App first and then SteamVR on windows
@@ -135,11 +131,11 @@ This Project is presently under testing. But, pull requests are welcome.
   ![PhonveVR FPS](./.github/fps.jpg)
 
 ## Issues
-You can use the `Github Issues` to submit any issues related to working of this Solution.
+You can use the [`Github Issues`](https://github.com/ShootingKing-AM/PhoneVR/issues) or [`Discord`](https://discord.gg/pNYtBNk) to submit any issues related to working of this Project or for any query.
 For quick resolution you may want to add the following data along with your issue,
 * `steamvr.vrsettings` file in default location `C:\Program Files (x86)\Steam\config\steamvr.vrsettings`
 * `vrserver.txt` file in default location `C:\Program Files (x86)\Steam\logs\vrserver.txt`
-* `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default windows location `C:\Program Files\PhoneVR`
+* `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default windows location `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\PVRServer\logs`
 * `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default android location `.../Android/data/virtualis.phonevr/files/PVR/` and/or `Log` from your `Settings page` on the app.
 * Open a `cmd` in the follow default directory and copy paste output of the `vrcmd` command. `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\bin\win64\vrcmd.exe`
 * And ofcourse, how to reproduce the issue :)
