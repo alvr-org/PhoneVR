@@ -11,22 +11,6 @@ using namespace std::chrono;
 
 PVR_STATE pvrState = PVR_STATE_IDLE;
 
-
-/*#define EXPIRE_DAYS 90
-bool PVRCheckIfExpired() {
-#if 0
-	typedef system_clock sClk;
-	tm tm = {};
-	stringstream ss(XorString(__DATE__));
-	ss >> get_time(&tm, XorString("%b %d %Y"));
-
-	auto tp = sClk::from_time_t(mktime(&tm));
-	if (duration_cast<hours>(sClk::now() - tp).count() / 24 > EXPIRE_DAYS)
-		expiredCb(); // expired
-#endif
-	return false;
-}*/
-
 //void timeStart() {
 //    _time = Clk::now();
 //}
@@ -40,17 +24,28 @@ bool PVRCheckIfExpired() {
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-namespace {
+namespace 
+{
 	int64_t pvrdebug_oldMs = 0;
 	int64_t pvrInfo_oldMs = 0;
-	const wstring logFileDebug = L"C:\\Program Files\\PhoneVR\\pvrDebuglog.txt";
-	const wstring logFileInfo = L"C:\\Program Files\\PhoneVR\\pvrlog.txt";
+
+	const wstring logFileDebug = L"\\..\\..\\drivers\\pvr\\logs\\pvrDebuglog.txt";
+	const wstring logFileInfo = L"\\..\\..\\drivers\\pvr\\logs\\pvrlog.txt";
 }
 
-void pvrdebug(string msg) {
+std::wstring _GetExePath(void)
+{
+	TCHAR buffer[MAX_PATH] = { 0 };
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+	std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
+	return std::wstring(buffer).substr(0, pos);
+}
+
+void pvrdebug(string msg) 
+{
 	SYSTEMTIME t;
 	GetLocalTime(&t);
-	ofstream of(logFileDebug, ios_base::app);
+	ofstream of(std::wstring(_GetExePath() + logFileDebug).c_str(), ios_base::app);
 	auto ms = system_clock::now().time_since_epoch() / 1ms;
 	string elapsed = (ms - pvrdebug_oldMs < 1000 ? to_string(ms - pvrdebug_oldMs) : "max");
 	of << t.wMinute << ":" << setfill('0') << setw(2) << t.wSecond << " " << setfill('0') << setw(3) << elapsed << "  " << msg << endl;
@@ -60,14 +55,16 @@ void pvrdebug(string msg) {
 	pvrdebug_oldMs = ms;	
 }
 
-void pvrdebugClear() {
-	ofstream(logFileDebug, ofstream::out | ofstream::trunc);
+void pvrdebugClear() 
+{
+	ofstream(std::wstring(_GetExePath() + logFileDebug).c_str(), ofstream::out | ofstream::trunc);
 }
 
-void pvrInfo(string msg) {
+void pvrInfo(string msg)
+{
 	SYSTEMTIME t;
 	GetLocalTime(&t);
-	ofstream of(logFileInfo, ios_base::app);
+	ofstream of(std::wstring(_GetExePath() + logFileInfo).c_str(), ios_base::app);
 	auto ms = system_clock::now().time_since_epoch() / 1ms;
 	string elapsed = (ms - pvrInfo_oldMs < 1000 ? to_string(ms - pvrInfo_oldMs) : "max");
 	of  << setfill('0') << setw(2) << t.wHour  << ":"
