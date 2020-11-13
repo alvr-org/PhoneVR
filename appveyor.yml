@@ -5,6 +5,8 @@ branches:
   only:
   - master
 
+skip_tags: true
+
 max_jobs: 3
 
 environment:
@@ -23,6 +25,12 @@ environment:
 
   Store:
     secure: vooKSgloguN6KbxV+b9stA==
+
+  DISCORD_ALL_WEBHOOK_URL:
+    secure: PcLqJfTQPUDzruHpN2yG+40D0ceoTnVh6Mprl7incWXKGljhsRZikX4yZhMurNo9bAvNZslUn4mXaRHTjxegxTeOp+sML0xubuf3/MQCkFgsVMATKJGpM7jcKfYUmIGVBuFyN/Hn8YsKtYtAIqQKYg2B64iRRtkKUIVSbQMOwIA=
+
+  DISCORD_RELEASE_WEBHOOK_URL:
+    secure: PcLqJfTQPUDzruHpN2yG+40D0ceoTnVh6Mprl7incWU6NVOY8jVIz4CVtCdz+dFGJhMGoaQFxiTG9vgKN1IMdGFUIBWOTrmkXzhtr/O+RhAImnlXTTzspeobf/4SMxhqmDmCLMBcj1mJ3AfxtQdDy77JBHBLfDVj8h/g8DEdBvo=
 
   matrix:
 
@@ -188,6 +196,14 @@ for:
 
     before_deploy:
     - ps: >-    
+          $arm7ReleaseApk = "artifact\android\arm7\release\PhoneVR-v" + $env:APPVEYOR_BUILD_NUMBER + "(" + $env:APPVEYOR_PVR_TAG + ")-arm7-release.apk"
+          
+          $arm7ReleaseApkDeployFileName = "PhoneVR-v" + $env:APPVEYOR_PVR_TAG + "_" + $env:APPVEYOR_BUILD_NUMBER + ".apk"
+          
+          Copy-Item $arm7ReleaseApk -Destination $arm7ReleaseApkDeployFileName
+          
+          Push-AppveyorArtifact $arm7ReleaseApkDeployFileName
+          
           $token = "token " + $env:APPVEYOR_GITHUB_TOKEN
           
           $releaseUrl = "https://api.github.com/repos/$env:GITHUB_USERNAME/$env:APPVEYOR_PROJECT_NAME/releases"
@@ -198,6 +214,10 @@ for:
           
           $Releases = curl -H @{"Authorization" = $token} -Method GET $releaseUrl | ConvertFrom-Json
           
+          $env:PEV_RELEASE_BODY = " "
+          
+          if(-not (Test-Path env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED)) { $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED = " " }
+          
           if($Releases)
           {
               foreach( $tagName in $Releases.tag_name )
@@ -205,9 +225,17 @@ for:
                   if( $tagName -eq $env:APPVEYOR_PVR_TAG )
                   {
                       $TaggedRelease = curl -H @{"Authorization" = $token} -Method GET $releasebyTag | ConvertFrom-Json
-                      if($TaggedRelease.assets.length -gt 0)
+                      if($TaggedRelease.assets.length -gt 1)
                       {
+                          $env:PEV_RELEASE_BODY = $TaggedRelease.body
+                          
+                          if( $env:PEV_RELEASE_BODY -match "Changelog - ((.|\n)*)" )
+                          {
+                              $env:PEV_RELEASE_BODY = $matches[1]
+                          }
+                          
                           $deleteUrl = $releaseUrl+"/"+$TaggedRelease.id
+                          
                           curl -H @{"Authorization" = $token} -Method DELETE $deleteUrl | ConvertFrom-Json
                       }
                   }
@@ -218,9 +246,24 @@ for:
     - provider: GitHub
       tag: $(APPVEYOR_PVR_TAG)
       release: PhoneVR-$(APPVEYOR_PVR_TAG)_$(APPVEYOR_BUILD_NUMBER)
-      description: AppVeyor build\nBranch - $(APPVEYOR_REPO_BRANCH)\nOn Commit - $(APPVEYOR_REPO_COMMIT)\nDate - $(APPVEYOR_REPO_COMMIT_TIMESTAMP)
+      description: AppVeyor build\nBranch - $(APPVEYOR_REPO_BRANCH)\nOn Commit - $(APPVEYOR_REPO_COMMIT)\nDate - $(APPVEYOR_REPO_COMMIT_TIMESTAMP)\n\n\n Changelog - \n$(APPVEYOR_REPO_COMMIT) `Build_$(APPVEYOR_BUILD_NUMBER)` - $(APPVEYOR_REPO_COMMIT_MESSAGE) \n$(APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED) \n$(PEV_RELEASE_BODY)
       auth_token: $(APPVEYOR_GITHUB_TOKEN)
-      artifact: PhoneVR-$(APPVEYOR_PVR_TAG)_$(APPVEYOR_BUILD_NUMBER)-$(APPVEYOR_REPO_BRANCH)
+      artifact: /.*/
       force_update: true
       on:
         branch: master
+
+    after_deploy:
+    - ps: >-    
+          Invoke-RestMethod https://raw.githubusercontent.com/DiscordHooks/appveyor-discord-webhook/master/send.ps1 -o send.ps1
+          
+          ./send.ps1 success $env:DISCORD_RELEASE_WEBHOOK_URL
+
+    on_success:
+      - ps: Invoke-RestMethod https://raw.githubusercontent.com/DiscordHooks/appveyor-discord-webhook/master/send.ps1 -o send.ps1
+      - ps: ./send.ps1 success $env:DISCORD_ALL_WEBHOOK_URL
+
+    on_failure:
+      - ps: Invoke-RestMethod https://raw.githubusercontent.com/DiscordHooks/appveyor-discord-webhook/master/send.ps1 -o send.ps1
+      - ps: ./send.ps1 failure $env:DISCORD_ALL_WEBHOOK_URL
+

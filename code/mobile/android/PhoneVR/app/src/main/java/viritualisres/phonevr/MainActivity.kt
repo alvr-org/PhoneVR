@@ -11,9 +11,11 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 
+import viritualisres.phonevr.BuildConfig;
 
 class MainActivity : AppCompatActivity() {
 
@@ -39,6 +41,9 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        val VersionTV : TextView = findViewById<TextView>(R.id.tViewVersion);
+        VersionTV.text = "PhoneVR v" + BuildConfig.VERSION_NAME + "_" + BuildConfig.VERSION_CODE;
 
         //        MediaCodecInfo[] dmsadas = (new MediaCodecList(MediaCodecList.REGULAR_CODECS)).getCodecInfos();
         //        for (MediaCodecInfo mci : dmsadas){
