@@ -1,4 +1,4 @@
-version: 0.1-beta_{build}
+version: 0.2-beta_{build}
 pull_requests:
   do_not_increment_build_number: true
 branches:
@@ -10,7 +10,7 @@ skip_tags: true
 max_jobs: 3
 
 environment:
-  APPVEYOR_PVR_TAG: '0.1-beta'
+  APPVEYOR_PVR_TAG: '0.2-beta'
   ANDROID_HOME: "C:\\android-sdk-windows"
   ANDROID_NDK_HOME: "C:\\android-sdk-windows\ndk"
   GITHUB_USERNAME: "ShootingKing-AM"

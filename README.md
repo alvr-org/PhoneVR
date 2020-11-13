@@ -13,6 +13,13 @@
 Use Steam VR-enabled applications with your phone as HMD (*Head-mounted display*). The only Open-Source solution to similar commercial packages like VRidge, Riftcat, Trinus etc etc.
 <br/>
 
+| Tabs | Links |
+| --- | --- |
+| Latest Release | [`Github Release`](https://github.com/ShootingKing-AM/PhoneVR/releases/latest) |
+| Previous Builds | [`Appveyor Previous Builds`](https://ci.appveyor.com/project/ShootingKing-AM/phonevr/history) |
+| Issues | [`Github Issue Tracker`](https://github.com/ShootingKing-AM/PhoneVR/issues) |
+| Discuss/Chat/Help/Real-Time Updates/Any - Discord | [`Discord Server Invite Link`](https://discord.com/invite/pNYtBNk) |
+
 ## Contents
 * [Requirements](#requirements)
 * [Installation](#installation)
@@ -119,7 +126,8 @@ This Project is presently under testing. But, pull requests are welcome.
   
 * Incase above mentioned things have not been helpful to you, then you might want to **Install Debug variant of APK** from `[PhoneVR.zip]/android/arm7/debug` which can help you/us to get more detailed logs.
   
-  FPS Nomenclature (in order from VRAppFrameCreation to MobileFrameDisplay:
+* **FPS Nomenclature** (in order from VRAppFrameCreation to MobileFrameDisplay):<br/>
+  These stats can be enabled by checking `Settings`->`Debug` option. All the values must be stable and more or less equal to `game_fps`± 10 value in `pvrsettings.json`.
   * `C |` - CPU (Windows) Components
     * `VRa` - Actual VRApplication Rendering FPS (SteamVR Home, VRChat, . etc etc)
     * `E` - Media Encoder (x264) FPS
