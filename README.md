@@ -30,8 +30,8 @@ A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or abov
 * Make sure you have Steam and SteamVR installed (To find SteamVR on steam, `Library -> Tools -> SteamVR`).
 * Download latest release [`PhoneVR.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases/latest) of this repository.
 * Copy the whole folder `PVRServer` in `driver` folder of zip file into your `SteamVR/drivers` folder. (Default Path: `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers`.
-* Install the Release varaint of Apk on your mobile from `[PhoneVR.zip]/android/arm7/release`.
-* Make sure that "Run in Background", "Auto Start"(Restart on Crash) permissions are given. Also make sure that any kind of 3rd party battery saver app dosen't kill PhoneVR when in background.
+* Install the Android Apk on your mobile from [`Releases`](https://github.com/ShootingKing-AM/PhoneVR/releases/latest) page.
+* Make sure that "Run in Background", "Auto Start"(Restart on Crash) permissions, if exists on your device(espicially Xiaomi users), are given. Also make sure that any kind of 3rd party battery saver app dosen't kill PhoneVR when in background.
 
 To **play**, **first open the Phone App**(SteamVR should also be closed), then run the game of your choice on PC. (Obviously, both PC and Mobile should be on same Network, preferably Wifi 5.0)
 
