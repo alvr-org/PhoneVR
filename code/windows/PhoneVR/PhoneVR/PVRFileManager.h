@@ -59,7 +59,7 @@ namespace
 	};
 
 	//const wchar_t *const setsFile = L"C:\\Program Files\\PhoneVR\\pvrsettings.json";
-	const wchar_t *const setsFile = L"\\..\\..\\drivers\\pvr\\pvrsettings.json";
+	const wchar_t *const setsFile = L"\\..\\..\\drivers\\PVRServer\\pvrsettings.json";
 	
 	nlohmann::json PVRGetSets() 
 	{
