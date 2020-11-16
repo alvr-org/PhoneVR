@@ -40,7 +40,10 @@ void PVRStartSendSensorData(uint16_t port, bool (*getSensorData)(float *orQuat, 
 
 
 // TODO: Make a .h file of Native-lib.cpp and add the below
-void updateJavaTextViewFPS(float f1, float f2, float f3, float cf1, float cf2, float cf3);
+void updateJavaTextViewFPS(float f1, float f2, float f3,
+        float cf1, float cf2, float cf3, float cf4, float cf5,
+        float ctd1, float ctd2,
+        int td1, int td2);
 #ifdef __cplusplus
 }
 #endif

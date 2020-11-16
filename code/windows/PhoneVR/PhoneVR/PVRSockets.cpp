@@ -31,7 +31,18 @@ namespace {
 	io_service *connSvc, *dataSvc;
 	bool connRunning, videoRunning = false, dataRunning;
 
-	queue<pair<int64_t, Quaternionf>> quatQueue;
+	queue<
+		pair<
+			pair<
+				int64_t /*pts*/,				//pts
+				pair<
+					Clk::time_point,	//tpWhenFrameRecvd from OpenVRSDK::Present
+					float
+				>						//Renderer Delay(ms)
+			>, 
+			Quaternionf 
+		>> quatQueue;
+
 	vector<x264_picture_t> vFrames(nVFrames);
 	int64_t pts = 0;         // in microseconds
 	int64_t vFrameDtUs;
@@ -41,9 +52,11 @@ namespace {
 
 	float fpsSteamVRApp = 0.0;
 	float fpsStreamer = 0.0;
+	float fpsStreamWriter = 0.0;
+	float fpsEncoder = 0.0;
 }
 
-extern float fpsEncoder = 0.0;
+float fpsRenderer = 0.0;
 
 //prePEQ.enqueue(Quaternionf(quatBuf[0], quatBuf[1], quatBuf[2], quatBuf[3]),
    // (float)(tmBuf[0] - lastNanos) / 1'000'000'000.f);// difference first -> avoid losing accuracy
@@ -213,11 +226,13 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 
 		int lastWhichFrame = 0;
 		//uint8_t buf[256 * 256];
-		uint8_t extraBuf[8 + 16 + 4 + 12];
+		uint8_t extraBuf[8 + 16 + 4 + 20 + 8 + 8];
 		auto pbuf = reinterpret_cast<int64_t *>(&extraBuf[0]); // pts buf ref
 		auto qbuf = reinterpret_cast<float *>(&extraBuf[8]); // quat buf ref
 		auto nbuf = reinterpret_cast<int *>(&extraBuf[8 + 16]);
 		auto fpsbuf = reinterpret_cast<float *>(&extraBuf[8 + 16 + 4]);
+		auto tDelaysBuf = reinterpret_cast<float *>(&extraBuf[8 + 16 + 4 + 20]);
+		auto timestamp = reinterpret_cast<int64_t *>(&extraBuf[8 + 16 + 4 + 20 + 8]);
 
 		asio::error_code ec;
 		//ofstream outp("C:\\Users\\narni\\mystream.h264", ofstream::binary);/////////////////////////////////////////////
@@ -226,7 +241,9 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 		while (videoRunning)
 		{
 			//PVRUpdTexWraps();
-			static Clk::time_point oldtime = Clk::now();
+			static Clk::time_point oldtime, oldtimeStreamer;
+			oldtime = Clk::now();
+			oldtimeStreamer = Clk::now();
 
 			if ((lastWhichFrame + 1) % nVFrames != whichFrame)
 				PVR_DB_I("[PVRStartStreamer th] Skipped frame! Please re-tune the encoder parameters lWf:"+to_string(lastWhichFrame)+", nVfs:"+ to_string(nVFrames)+ ", wF:"+to_string(whichFrame));
@@ -234,13 +251,18 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 			whichFrameMtxs[lastWhichFrame].lock();   // LOCK
 			auto totSz = x264_encoder_encode(enc, &nals, &nNals, &vFrames[lastWhichFrame], &outPic);
 			whichFrameMtxs[lastWhichFrame].unlock(); // UNLOCK
+
+			fpsEncoder = (1000000000.0 / (Clk::now() - oldtime).count());
+
+			oldtime = Clk::now();
+
 			if (totSz > 0)
 			{
 				PVR_DB("[PVRStartStreamer th] Rendering lWf:"+to_string(lastWhichFrame)+", wF:"+to_string(whichFrame));
 				quatQueueMutex.lock();   // LOCK
-				while ((quatQueue.size() != 0) && (quatQueue.front().first < outPic.i_pts)) // handle skipped frames
+				while ((quatQueue.size() != 0) && (quatQueue.front().first.first < outPic.i_pts)) // handle skipped frames
 				{
-					PVR_DB("[PVRStartStreamer th] handle skipped frames qPts:" + to_string(quatQueue.front().first) + ", outpicPts:" + to_string(outPic.i_pts));
+					PVR_DB("[PVRStartStreamer th] handle skipped frames qPts:" + to_string(quatQueue.front().first.first) + ", outpicPts:" + to_string(outPic.i_pts));
 					quatQueue.pop();
 				}
 				quatQueueMutex.unlock(); // UNLOCK
@@ -248,7 +270,9 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 				if (quatQueue.size() != 0)
 				{
 					quatQueueMutex.lock();
-					auto outPts = quatQueue.front().first;
+					auto outPts = quatQueue.front().first.first;
+					auto time = quatQueue.front().first.second.first;
+					auto renderDur = quatQueue.front().first.second.second;
 					auto quat = quatQueue.front().second;
 					quatQueue.pop();
 					quatQueueMutex.unlock();
@@ -259,13 +283,25 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 					qbuf[2] = quat.y();
 					qbuf[3] = quat.z();
 					*nbuf = totSz;
-					fpsbuf[0] = fpsSteamVRApp;
-					fpsbuf[1] = fpsEncoder;
-					fpsbuf[2] = fpsStreamer;
+					fpsbuf[0] = fpsSteamVRApp;		// VRApp FPS
+					fpsbuf[1] = fpsEncoder;			// Encoder FPS
+					fpsbuf[2] = fpsStreamWriter;	// StreamWriter FPS
+					fpsbuf[3] = fpsStreamer;		// Streamer FPS
+					fpsbuf[4] = fpsRenderer;
+					tDelaysBuf[0] = renderDur;		// Renderer Delay
+					tDelaysBuf[1] = (float)((Clk::now() - time).count() / 1000000.0);	// Encoder Delay
+					*timestamp = (int64_t)duration_cast<microseconds>(system_clock::now().time_since_epoch()).count(); // FrameSent TimeStamp
 
 					write(skt, buffer(extraBuf), ec);
 					write(skt, buffer(nals->p_payload, totSz), ec);
-					PVR_DB("[PVRStartStreamer th] wrote render to socket: Pts:" + to_string(outPts) + ", Size: "+to_string(sizeof(extraBuf))+","+to_string(totSz));
+
+					PVR_DB("[PVRStartStreamer th] wrote render to socket: Pts:[Tenc:"
+						+ str_fmt("%.2f", tDelaysBuf[1])
+						+" ms, Trend:"
+						+ str_fmt("%.2f", renderDur)
+						+" ms]"
+						+ to_string(outPts) + ", Size: "
+						+to_string(sizeof(extraBuf))+","+to_string(totSz));
 
 					if (ec.value() != 0 && videoRunning)
 						PVR_DB("Write failed: " + ec.message() + " Code: " + to_string(ec.value()));
@@ -278,12 +314,15 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 					//outp.write((char*)nals->p_payload, totSz);/////////////////////////////////////////////////////////
 				}
 			}
+			fpsStreamWriter = (1000000000.0 / (Clk::now() - oldtime).count());
+			PVR_DB("[PVRStartStreamer th] ------------------- StreamWriting @ FPS: " + to_string(fpsStreamWriter) + " Encoding @ FPS : " + to_string(fpsEncoder) + " VRApp Running @ FPS : " + to_string(fpsSteamVRApp));
+			oldtime = Clk::now();
+
 			while ((whichFrame == lastWhichFrame || quatQueue.size() == 0) && videoRunning)
 				sleep_for(500us);
 
-			fpsStreamer = (1000000000.0 / (Clk::now() - oldtime).count());
-			PVR_DB("[PVRStartStreamer th] ------------------- Streaming @ FPS: " + to_string(fpsStreamer) + " Encoding @ FPS : " + to_string(fpsEncoder) + " VRApp Running @ FPS : " + to_string(fpsSteamVRApp));
-			oldtime = Clk::now();
+			fpsStreamer = (1000000000.0 / (Clk::now() - oldtimeStreamer).count());
+			oldtimeStreamer = Clk::now();
 		}
 		x264_encoder_close(enc);
 
@@ -298,25 +337,40 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 
 void PVRProcessFrame(uint64_t hdl, Quaternionf quat) {
 	if (videoRunning) {
-		static Clk::time_point oldtime = Clk::now();
+
+		static Clk::time_point oldtimeVRApp = Clk::now();
 		
 		int newWhichFrame = (whichFrame + 1) % nVFrames;
-		PVR_DB("[PVRProcessFrame] pushing frame to que nWf: " +to_string(newWhichFrame)+ ", pts: " + to_string(pts + vFrameDtUs));
 		whichFrameMtxs[newWhichFrame].lock();   // LOCK
+
 		pts += vFrameDtUs;
+
 		quatQueueMutex.lock();	// LOCK
-		quatQueue.push({ pts, quat });
+		quatQueue.push({ {pts, {Clk::now(),0}}, quat });
 		quatQueueMutex.unlock(); // UNLOCK
-		PVRUpdTexHdl(hdl, newWhichFrame);
+
+		//PVRUpdTexHdl() -> Blocking: This will wait if there is already a handle being rendered.
+		PVRUpdTexHdl(hdl, newWhichFrame); // Render Frame
+
+		quatQueueMutex.lock();	// LOCK
+		quatQueue.back().first.second.second = (Clk::now() - quatQueue.back().first.second.first).count() / 1000000.0;
+		quatQueueMutex.unlock(); // UNLOCK
+
 		vFrames[newWhichFrame].i_pts = pts;
+
 		whichFrameMtxs[newWhichFrame].unlock(); // UNLOCK
 		whichFrame = newWhichFrame;
 
-		fpsSteamVRApp = (1000000000.0 / (Clk::now() - oldtime).count());
-		//PVR_DB("[PVRProcessFrame] SteamVR-App FPS: "+ to_string(fpsSteamVRApp) +" pushing frame to que nWf: " + to_string(newWhichFrame) + ", pts: " + to_string(pts));
-		oldtime = Clk::now();
+		fpsSteamVRApp = (1000000000.0 / (Clk::now() - oldtimeVRApp).count());
+
+		/*PVR_DB("[PVRProcessFrame] pushed frame to que Wf: " 
+			+ to_string(whichFrame) 
+			+ ", pts(Trend:"+ str_fmt("%.2f", (Clk::now() - quatQueue.back().first.second.first).count() / 1000000.0) + "ms): "
+			+ to_string(pts));*/
+		oldtimeVRApp = Clk::now();
 	}
 }
+
 
 void PVRStopStreamer() {
 	videoRunning = false;
