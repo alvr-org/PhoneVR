@@ -29,8 +29,8 @@ namespace
 	int64_t pvrdebug_oldMs = 0;
 	int64_t pvrInfo_oldMs = 0;
 
-	const wstring logFileDebug = L"\\..\\..\\drivers\\pvr\\logs\\pvrDebuglog.txt";
-	const wstring logFileInfo = L"\\..\\..\\drivers\\pvr\\logs\\pvrlog.txt";
+	const wstring logFileDebug = L"\\..\\..\\drivers\\PVRServer\\logs\\pvrDebuglog.txt";
+	const wstring logFileInfo = L"\\..\\..\\drivers\\PVRServer\\logs\\pvrlog.txt";
 }
 
 std::wstring _GetExePath(void)
