@@ -17,6 +17,46 @@
 #include <cxxabi.h>
 #include <dlfcn.h>
 
+#include "NativeErrorHandler.h"
+
+#if !defined(__cplusplus) && !defined(NO_CPP_DEMANGLE)
+#define NO_CPP_DEMANGLE
+#endif
+
+#include <memory.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <signal.h>
+#include <ucontext.h>
+#include <dlfcn.h>
+#ifndef NO_CPP_DEMANGLE
+#include <cxxabi.h>
+#ifdef __cplusplus
+using __cxxabiv1::__cxa_demangle;
+#endif
+#endif
+
+#ifdef HAS_ULSLIB
+#include "uls/logger.h"
+#define sigsegv_outp(x)         sigsegv_outp(,gx)
+#else
+#define sigsegv_outp(x, ...)    fprintf(stderr, x "\n", ##__VA_ARGS__)
+#endif
+
+#define REG_RIP
+
+#if defined(REG_RIP)
+# define SIGSEGV_STACK_IA64
+# define REGFORMAT "%016lx"
+#elif defined(REG_EIP)
+# define SIGSEGV_STACK_X86
+# define REGFORMAT "%08x"
+#else
+# define SIGSEGV_STACK_GENERIC
+# define REGFORMAT "%x"
+#endif
+
 using namespace std;
 using namespace Eigen;
 using namespace gvr;
@@ -139,9 +179,9 @@ struct android_backtrace_state
 };
 
 _Unwind_Reason_Code android_unwind_callback(struct _Unwind_Context* context,
-                                            void* arg)
+                                            void* ptr)
 {
-    android_backtrace_state* state = (android_backtrace_state *)arg;
+    /*android_backtrace_state* state = (android_backtrace_state *)arg;
     uintptr_t pc = _Unwind_GetIP(context);
     if (pc)
     {
@@ -154,7 +194,79 @@ _Unwind_Reason_Code android_unwind_callback(struct _Unwind_Context* context,
             *state->current++ = reinterpret_cast<void*>(pc);
         }
     }
-    return _URC_NO_REASON;
+    return _URC_NO_REASON;*/
+
+    static const char *si_codes[3] = {"", "SEGV_MAPERR", "SEGV_ACCERR"};
+
+    int i, f = 0;
+    ucontext_t *ucontext = (ucontext_t*)ptr;
+    Dl_info dlinfo;
+    void **bp = 0;
+    void *ip = 0;
+
+    sigsegv_outp("Segmentation Fault!");
+    //sigsegv_outp("info.si_signo = %d", signum);
+    //sigsegv_outp("info.si_errno = %d", info->si_errno);
+    //sigsegv_outp("info.si_code  = %d (%s)", info->si_code, si_codes[info->si_code]);
+    //sigsegv_outp("info.si_addr  = %p", info->si_addr);
+    //for(i = 0; i < NGREG; i++)
+    //    sigsegv_outp("reg[%02d]       = 0x" REGFORMAT, i, ucontext->uc_mcontext.gregs[i]);
+
+#ifndef SIGSEGV_NOSTACK
+#if defined(SIGSEGV_STACK_IA64) || defined(SIGSEGV_STACK_X86)
+    #if defined(SIGSEGV_STACK_IA64)
+    //ip = (void*)ucontext->uc_mcontext.gregs[REG_RIP];
+    //bp = (void**)ucontext->uc_mcontext.gregs[REG_RBP];
+#elif defined(SIGSEGV_STACK_X86)
+    ip = (void*)ucontext->uc_mcontext.gregs[REG_EIP];
+    bp = (void**)ucontext->uc_mcontext.gregs[REG_EBP];
+#endif
+
+    sigsegv_outp("Stack trace:");
+    while(bp && ip) {
+        if(!dladdr(ip, &dlinfo))
+            break;
+
+        const char *symname = dlinfo.dli_sname;
+
+#ifndef NO_CPP_DEMANGLE
+        int status;
+        char * tmp = __cxa_demangle(symname, NULL, 0, &status);
+
+        if (status == 0 && tmp)
+            symname = tmp;
+#endif
+
+        sigsegv_outp("% 2d: %p <%s+%lu> (%s)",
+                 ++f,
+                 ip,
+                 symname,
+                 (unsigned long)ip - (unsigned long)dlinfo.dli_saddr,
+                 dlinfo.dli_fname);
+
+#ifndef NO_CPP_DEMANGLE
+        if (tmp)
+            free(tmp);
+#endif
+
+        if(dlinfo.dli_sname && !strcmp(dlinfo.dli_sname, "main"))
+            break;
+
+        ip = bp[1];
+        bp = (void**)bp[0];
+    }
+#else
+    sigsegv_outp("Stack trace (non-dedicated):");
+    sz = backtrace(bt, 20);
+    strings = backtrace_symbols(bt, sz);
+    for(i = 0; i < sz; ++i)
+        sigsegv_outp("%s", strings[i]);
+#endif
+    sigsegv_outp("End of stack trace.");
+#else
+    sigsegv_outp("Not printing stack strace.");
+#endif
+    _exit (-1);
 }
 
 void dump_stack(void)
@@ -203,8 +315,8 @@ void dump_stack(void)
 
 SUB(setExtDirectory)(JNIEnv *env, jclass, jstring jExtDir, jint len) {
 
-    try
-    {
+    //try
+    //{
         throw std::runtime_error(
                 "C++ Meow Moew Madafakas"); // Dont Change this Line -- Catch this error o
         auto dir = env->GetStringUTFChars(jExtDir, nullptr);
@@ -225,14 +337,14 @@ SUB(setExtDirectory)(JNIEnv *env, jclass, jstring jExtDir, jint len) {
         PVR_DB_I(
                 "--------------------------------------------------------------------------------");
         PVR_DB_I("JNI setExtDirectory: len: " + to_string(len) + ", copdstr: " + ExtDirectory);
-    }
-    catch (std::exception e)
-    {
-        dump_stack();
+    //}
+    //catch (std::runtime_error e)
+    //{
+        //dump_stack();
 
-        jclass jc = env->FindClass("java/lang/RuntimeException");
-        if(jc) env->ThrowNew (jc, e.what());
-    }
+        //jclass jc = env->FindClass("java/lang/RuntimeException");
+        //if(jc) env->ThrowNew (jc, e.what());
+    //}
 }
 
 
@@ -428,3 +540,13 @@ SUB(drawFrame)(JNIEnv *env, jclass, jlong pts) {
     PVRRender(pts);
 }
 
+// Native Error Handling
+SUB(initializeNativeCrashHandler)( JNIEnv* env, jobject /* this */)
+{
+    initializeNativeCrashHandler();
+}
+
+FUNC(jboolean, deinitializeNativeCrashHandler)( JNIEnv* env, jobject /* this */)
+{
+    return deinitializeNativeCrashHandler();
+}

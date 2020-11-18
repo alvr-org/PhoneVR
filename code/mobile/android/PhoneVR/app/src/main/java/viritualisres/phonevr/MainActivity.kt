@@ -14,6 +14,8 @@ import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import viritualisres.phonevr.Wrap.deinitializeNativeCrashHandler
+import viritualisres.phonevr.Wrap.initializeNativeCrashHandler
 
 //import viritualisres.phonevr.BuildConfig;
 
@@ -61,15 +63,15 @@ class MainActivity : AppCompatActivity() {
     private fun setExtDirinJNI() {
         val dir = getExternalFilesDir(null).toString()
         Log.d("PhoneVR", "ExtDir: " + dir + ", ExtRead Only? :"+ isExternalStorageReadOnly() + ", ExtAvalb ?:"+ isExternalStorageAvailable())
-        android.os.Debug.waitForDebugger();
-        try{
-            Wrap.setExtDirectory(dir, dir.length)
-        }
-        catch( e: Exception )
-        {
-            Log.d("PVR-JAVA", "Exp setExtDir() Msg: " + e.message + " " + e.stackTrace );
-            e.printStackTrace();
-        }
+
+        //try{
+        Wrap.setExtDirectory(dir, dir.length)
+        //}
+        //catch( e: Exception )
+        //{
+        //    Log.d("PVR-JAVA", "Exp setExtDir() Msg: " + e.message + " " + e.stackTrace );
+        //    e.printStackTrace();
+        //}
     }
 
     private fun isExternalStorageReadOnly(): Boolean {
@@ -111,11 +113,15 @@ class MainActivity : AppCompatActivity() {
 
         //Log.d("PhoneVR", "OnResume called... Starting Announcer @ port :" + prefs.getInt(connPortKey, connPortDef).toString());
         prefs.getString(pcIpKey, pcIpDef)?.let { Wrap.startAnnouncer(it, prefs.getInt(connPortKey, connPortDef)) }
+
+        initializeNativeCrashHandler();
     }
 
     override fun onPause() {
         super.onPause()
         Wrap.stopAnnouncer()
+
+        deinitializeNativeCrashHandler();
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
