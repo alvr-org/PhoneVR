@@ -39,7 +39,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:ems="10"
-        android:hint="auto"
+        android:hint="Auto"
         android:inputType="textPersonName"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -52,31 +52,29 @@
         android:id="@+id/videoPort"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
         android:ems="10"
-        android:inputType="textPersonName"
+        android:inputType="number"
         android:text="00000"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        android:digits="0123456789"/>
 
     <EditText
         android:id="@+id/posePort"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
         android:ems="10"
-        android:inputType="textPersonName"
+        android:inputType="number"
         android:text="00000"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView5" />
+        app:layout_constraintTop_toBottomOf="@+id/textView5"
+        android:digits="0123456789.," />
 
     <TextView
         android:id="@+id/textView7"
@@ -133,7 +131,8 @@
         android:text="0.000"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        app:layout_constraintTop_toBottomOf="@+id/textView2"
+        android:digits="0123456789.," />
 
     <EditText
         android:id="@+id/resMul"
@@ -148,7 +147,8 @@
         android:text="000"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView7" />
+        app:layout_constraintTop_toBottomOf="@+id/textView7"
+        android:digits="0123456789.," />
 
     <TextView
         android:id="@+id/textView5"
@@ -193,16 +193,15 @@
         android:id="@+id/connPort"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
         android:ems="10"
         android:inputType="number"
         android:text="00000"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView6" />
+        app:layout_constraintTop_toBottomOf="@+id/textView6"
+        android:digits="0123456789.," />
 
     <TextView
         android:id="@+id/textView"
@@ -223,14 +222,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginRight="8dp"
-        android:text="Debug mode"
+        android:text="Stats"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/warp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp" />
+        app:layout_constraintTop_toBottomOf="@+id/warp" />
 
     <CheckBox
         android:id="@+id/warp"
@@ -260,7 +257,8 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView8" />
+        app:layout_constraintTop_toBottomOf="@+id/textView8"
+        android:digits="0123456789.," />
 
     <TextView
         android:id="@+id/textViewLog"
@@ -294,5 +292,6 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewLog" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
