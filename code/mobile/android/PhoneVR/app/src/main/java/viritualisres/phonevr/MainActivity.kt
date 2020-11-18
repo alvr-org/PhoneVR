@@ -15,7 +15,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 
-import viritualisres.phonevr.BuildConfig;
+//import viritualisres.phonevr.BuildConfig;
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,7 +43,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         val VersionTV : TextView = findViewById<TextView>(R.id.tViewVersion);
-        VersionTV.text = "PhoneVR v" + BuildConfig.VERSION_NAME + "_" + BuildConfig.VERSION_CODE;
+        VersionTV.text = "PVR vXXX_XX";
+       // VersionTV.text = "PhoneVR v" + BuildConfig.VERSION_NAME + "_" + BuildConfig.VERSION_CODE; You check this out why its coming like this later
 
         //        MediaCodecInfo[] dmsadas = (new MediaCodecList(MediaCodecList.REGULAR_CODECS)).getCodecInfos();
         //        for (MediaCodecInfo mci : dmsadas){
@@ -60,7 +61,15 @@ class MainActivity : AppCompatActivity() {
     private fun setExtDirinJNI() {
         val dir = getExternalFilesDir(null).toString()
         Log.d("PhoneVR", "ExtDir: " + dir + ", ExtRead Only? :"+ isExternalStorageReadOnly() + ", ExtAvalb ?:"+ isExternalStorageAvailable())
-        Wrap.setExtDirectory(dir, dir.length)
+        android.os.Debug.waitForDebugger();
+        try{
+            Wrap.setExtDirectory(dir, dir.length)
+        }
+        catch( e: Exception )
+        {
+            Log.d("PVR-JAVA", "Exp setExtDir() Msg: " + e.message + " " + e.stackTrace );
+            e.printStackTrace();
+        }
     }
 
     private fun isExternalStorageReadOnly(): Boolean {

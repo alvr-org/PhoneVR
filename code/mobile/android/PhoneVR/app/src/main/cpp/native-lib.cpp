@@ -13,6 +13,9 @@
 #include <queue>
 #include <sys/stat.h>
 #include <android/log.h>
+#include <unwind.h>
+#include <cxxabi.h>
+#include <dlfcn.h>
 
 using namespace std;
 using namespace Eigen;
@@ -22,6 +25,39 @@ using namespace PVR;
 #define JNI_VERS JNI_VERSION_1_6
 #define FUNC(type, func) extern "C" JNIEXPORT type JNICALL Java_viritualisres_phonevr_Wrap_##func
 #define SUB(func) FUNC(void, func)
+
+#define CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION                \
+  catch (const std::bad_alloc& e)                                   \
+  {                                                               \
+    /* OOM exception */                                           \
+    jclass jc = env->FindClass("java/lang/OutOfMemoryError");     \
+    if(jc) env->ThrowNew (jc, e.what());                          \
+  }                                                               \
+  catch (const std::ios_base::failure& e)                         \
+  {                                                               \
+    /* IO exception */                                            \
+    jclass jc = env->FindClass("java/io/IOException");            \
+    if(jc) env->ThrowNew (jc, e.what());                          \
+  }                                                               \
+  catch (const std::exception& e)                                 \
+  {                                                               \
+    /* unknown exception */                                       \
+    jclass jc = env->FindClass("java/lang/RuntimeException");     \
+    jthrowable exc;                                               \
+    exc = env->ExceptionOccurred();                               \
+    jboolean isCopy = false;                                      \
+    jmethodID toString = env->GetMethodID(env->FindClass("java/lang/Object"), "toString", "()Ljava/lang/String;");                                       \
+    jstring s = (jstring)env->CallObjectMethod(exc, toString);                                       \
+    const char* utf = env->GetStringUTFChars(s, &isCopy);                                       \
+    PVR_DB(utf)                                       \
+    if(jc) env->ThrowNew (jc, e.what());                          \
+  }                                                               \
+  catch (...)                                                     \
+  {                                                               \
+    /* Oops I missed identifying this exception! */               \
+    jclass jc = env->FindClass("java/lang/Error");                \
+    if(jc) env->ThrowNew (jc, "unidentified exception");          \
+  }
 
 namespace {
     JavaVM *jVM;
@@ -95,25 +131,110 @@ extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3, float cf1, f
         jVM->DetachCurrentThread();
 }
 
-SUB(setExtDirectory)(JNIEnv *env, jclass, jstring jExtDir, jint len) {
-    auto dir = env->GetStringUTFChars(jExtDir, nullptr);
-    ExtDirectory = new char[len];
-    memcpy(ExtDirectory, dir, len);
-    ExtDirectory[len] = '\0';
 
-    env->ReleaseStringUTFChars(jExtDir, dir);
+struct android_backtrace_state
+{
+    void **current;
+    void **end;
+};
 
-    if( mkdir(string(string(ExtDirectory) + string("/PVR/")).c_str(), 0777) ) {
-        __android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "Directory Error %d (%s): %s - %s",
-							errno,
-							string(ExtDirectory).c_str(),
-							string(string(ExtDirectory) + string("/PVR/")).c_str(),
-							strerror(errno));
+_Unwind_Reason_Code android_unwind_callback(struct _Unwind_Context* context,
+                                            void* arg)
+{
+    android_backtrace_state* state = (android_backtrace_state *)arg;
+    uintptr_t pc = _Unwind_GetIP(context);
+    if (pc)
+    {
+        if (state->current == state->end)
+        {
+            return _URC_END_OF_STACK;
+        }
+        else
+        {
+            *state->current++ = reinterpret_cast<void*>(pc);
+        }
+    }
+    return _URC_NO_REASON;
+}
+
+void dump_stack(void)
+{
+    __android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "android stack dump");
+
+    const int max = 100;
+    void* buffer[max];
+
+    android_backtrace_state state;
+    state.current = buffer;
+    state.end = buffer + max;
+
+    _Unwind_Backtrace(android_unwind_callback, &state);
+
+    int count = (int)(state.current - buffer);
+
+    for (int idx = 0; idx < count; idx++)
+    {
+        const void* addr = buffer[idx];
+        const char* symbol = "";
+
+        Dl_info info;
+        if (dladdr(addr, &info) && info.dli_sname)
+        {
+            symbol = info.dli_sname;
+        }
+        int status = 0;
+        char *demangled = __cxxabiv1::__cxa_demangle(symbol, 0, 0, &status);
+
+        char dummy[150];
+        dummy[0] = '\0';
+        __android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D",  "%03d- 0x%p %s",idx,
+                addr,
+                (NULL != demangled && 0 == status) ?
+                demangled : symbol );
+
+        //__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", new std::string(dummy));
+
+        if (NULL != demangled)
+            free(demangled);
     }
 
-    PVR_DB_I("--------------------------------------------------------------------------------");
-    PVR_DB_I("JNI setExtDirectory: len: "+to_string(len)+", copdstr: "+ExtDirectory);
+     __android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "android stack dump done");
 }
+
+SUB(setExtDirectory)(JNIEnv *env, jclass, jstring jExtDir, jint len) {
+
+    try
+    {
+        throw std::runtime_error(
+                "C++ Meow Moew Madafakas"); // Dont Change this Line -- Catch this error o
+        auto dir = env->GetStringUTFChars(jExtDir, nullptr);
+        ExtDirectory = new char[len];
+        memcpy(ExtDirectory, dir, len);
+        ExtDirectory[len] = '\0';
+
+        env->ReleaseStringUTFChars(jExtDir, dir);
+
+        if (mkdir(string(string(ExtDirectory) + string("/PVR/")).c_str(), 0777)) {
+            __android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "Directory Error %d (%s): %s - %s",
+                                errno,
+                                string(ExtDirectory).c_str(),
+                                string(string(ExtDirectory) + string("/PVR/")).c_str(),
+                                strerror(errno));
+        }
+
+        PVR_DB_I(
+                "--------------------------------------------------------------------------------");
+        PVR_DB_I("JNI setExtDirectory: len: " + to_string(len) + ", copdstr: " + ExtDirectory);
+    }
+    catch (std::exception e)
+    {
+        dump_stack();
+
+        jclass jc = env->FindClass("java/lang/RuntimeException");
+        if(jc) env->ThrowNew (jc, e.what());
+    }
+}
+
 
 /////////////////////////////////////// discovery ////////////////////////////////////////////////
 SUB(startAnnouncer)(JNIEnv *env, jclass, jstring jIP, jint port) {
