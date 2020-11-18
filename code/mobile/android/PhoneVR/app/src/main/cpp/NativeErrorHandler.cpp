@@ -27,19 +27,6 @@ static void unregisterSignalHandler(struct sigaction old_handlers[NSIG]) {
     }
 }
 
-/// deinitializeNativeCrashHandler to be called on onPause()
-static bool deinitializeNativeCrashHandler() {
-    // Check if already deinitialized
-    if (!crashInContext) return false;
-    // Unregister signal handlers
-    unregisterSignalHandler(crashInContext->old_handlers);
-    // Free singleton crash handler context
-    free(crashInContext);
-    crashInContext = nullptr;
-    __android_log_print(ANDROID_LOG_ERROR, "PVR-JNI", "%s", "Native crash handler successfully deinitialized.");
-    return true;
-}
-
 /// Create a crash message using whatever available such as signal, C++ exception etc
 static const char* createCrashMessage(int signo, siginfo* siginfo) {
     void* current_exception = __cxxabiv1::__cxa_current_primary_exception();
@@ -95,7 +82,7 @@ static void nativeCrashSignalHandler(int signo, siginfo* siginfo, void* ctxvoid)
     // Restoring an old handler to make built-in Android crash mechanism work.
     sigaction(signo, &crashInContext->old_handlers[signo], nullptr);
     // Log crash message
-    __android_log_print(ANDROID_LOG_ERROR, "PVR-JNI", "%s", createCrashMessage(signo, siginfo));
+    __android_log_print(ANDROID_LOG_ERROR, "PVR-JNI-EH", "%s", createCrashMessage(signo, siginfo));
     // In some cases we need to re-send a signal to run standard bionic handler.
     if (siginfo->si_code <= 0 || signo == SIGABRT) {
         if (syscall(__NR_tgkill, getpid(), gettid(), signo) < 0) {
@@ -104,11 +91,23 @@ static void nativeCrashSignalHandler(int signo, siginfo* siginfo, void* ctxvoid)
     }
 }
 
+/// deinitializeNativeCrashHandler to be called on onPause()
+bool deinitializeNativeCrashHandler() {
+    // Check if already deinitialized
+    if (!crashInContext) return false;
+    // Unregister signal handlers
+    unregisterSignalHandler(crashInContext->old_handlers);
+    // Free singleton crash handler context
+    free(crashInContext);
+    crashInContext = nullptr;
+    __android_log_print(ANDROID_LOG_ERROR, "PVR-JNI-EH", "%s", "Native crash handler successfully deinitialized.");
+    return true;
+}
 /// like TestFairy.begin() but for crashes
-static void initializeNativeCrashHandler() {
+void initializeNativeCrashHandler() {
     // Check if already initialized
     if (crashInContext) {
-        __android_log_print(ANDROID_LOG_INFO, "PVR-JNI", "%s", "Native crash handler is already initialized.");
+        __android_log_print(ANDROID_LOG_INFO, "PVR-JNI-EH", "%s", "Native crash handler is already initialized.");
         return;
     }
     // Initialize singleton crash handler context
@@ -117,9 +116,9 @@ static void initializeNativeCrashHandler() {
     // Trying to register signal handler.
     if (!registerSignalHandler(&nativeCrashSignalHandler, crashInContext->old_handlers)) {
         deinitializeNativeCrashHandler();
-        __android_log_print(ANDROID_LOG_ERROR, "PVR-JNI", "%s", "Native crash handler initialization failed.");
+        __android_log_print(ANDROID_LOG_ERROR, "PVR-JNI-EH", "%s", "Native crash handler initialization failed.");
         return;
     }
-    __android_log_print(ANDROID_LOG_ERROR, "PVR-JNI", "%s", "Native crash handler successfully initialized.");
+    __android_log_print(ANDROID_LOG_ERROR, "PVR-JNI-EH", "%s", "Native crash handler successfully initialized.");
 }
 

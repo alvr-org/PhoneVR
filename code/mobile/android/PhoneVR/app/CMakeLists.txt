@@ -11,9 +11,8 @@ file(GLOB_RECURSE  MY_SRC
 
 # add my library
 add_library(native-lib  SHARED
-            src/main/cpp/NativeErrorHandler.h
-            src/main/cpp/NativeErrorHandler.cpp
             src/main/cpp/native-lib.cpp
+            src/main/cpp/NativeErrorHandler.cpp
             ${MY_SRC}
             )
 
@@ -25,6 +24,7 @@ target_include_directories(native-lib
                            # my headers
                            PUBLIC ../../../../common/src
                            PUBLIC ../../../mobile-common
+                           PUBLIC src/main/cpp
                            )
 
 target_link_libraries(native-lib

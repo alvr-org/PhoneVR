@@ -27,6 +27,8 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
+        initializeNativeCrashHandler();
+
         setExtDirinJNI();
 
         setContentView(R.layout.activity_main)

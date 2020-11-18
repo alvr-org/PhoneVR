@@ -44,7 +44,7 @@ typedef void (*CrashSignalHandler)(int, siginfo*, void*);
 /// Global instance of context. Since an app can't crash twice in a single run, we can make this singleton.
 static CrashInContext* crashInContext = nullptr;
 
-static void initializeNativeCrashHandler(void);
-static bool deinitializeNativeCrashHandler(void);
+void initializeNativeCrashHandler(void);
+bool deinitializeNativeCrashHandler(void);
 
 #endif //PHONEVR_NATIVEERRORHANDLER_H
