@@ -187,11 +187,13 @@ void PVRStartReceiveStreams(uint16_t port) {
             function<void(const asio::error_code &, size_t)> handler = [&](
                     const asio::error_code &err, size_t) { ec = err; };
 
-            uint8_t extraBuf[28 + 12];
+            uint8_t extraBuf[8 + 16 + 4 + 20 + 8 + 8];
             auto pts = reinterpret_cast<int64_t *>(extraBuf);              // these values are automatically updated
             auto quatBuf = reinterpret_cast<float *>(extraBuf + 8);        // when extraBuf is updated
             auto pktSz = reinterpret_cast<uint32_t *>(extraBuf + 8 + 16);
             auto fpsBuf = reinterpret_cast<float *>(extraBuf + 8 + 16 + 4);
+            auto ctdBuf = reinterpret_cast<float *>(extraBuf + 8 + 16 + 4 + 20);
+            auto timestamp = reinterpret_cast<int64_t *>(extraBuf + 8 + 16 + 4 + 20 + 8);
 
             // reinit queues
             quatQueue = queue<pair<int64_t, vector<float>>>();
@@ -205,6 +207,8 @@ void PVRStartReceiveStreams(uint16_t port) {
                 async_read(skt, buffer(extraBuf, sizeof(extraBuf)), handler);
                 svc.run();
                 svc.reset();
+
+                auto networkDelay = (int)( (duration_cast<microseconds>(system_clock::now().time_since_epoch()).count() - *timestamp)/1000);
 
                 PVR_DB("[StreamReceiver th] recvd 28maxBs with Error: " + to_string(ec.value()) +
                        ", pts: " + to_string(*pts) + ", pktSz" + to_string(*pktSz));
@@ -232,11 +236,15 @@ void PVRStartReceiveStreams(uint16_t port) {
                 } else
                     break;
 
+                //PVR_DB_I("Time: "+ to_string( (duration_cast<microseconds>(system_clock::now().time_since_epoch()).count() - *timestamp) ));
                 fpsStreamRecver = (1000000000.0 / (Clk::now() - oldtime).count());
                 PVR_DB("[StreamReceiver th] ------------------- Stream Receiving @ FPS: " + to_string(fpsStreamRecver) + " De-coding @ FPS : " + to_string(fpsStreamDecoder) + " Rendering @ FPS : " + to_string(fpsRenderer));
                 oldtime = Clk::now();
 
-                updateJavaTextViewFPS(fpsStreamRecver, fpsStreamDecoder, fpsRenderer, fpsBuf[0], fpsBuf[1], fpsBuf[2]);
+                updateJavaTextViewFPS(fpsStreamRecver, fpsStreamDecoder, fpsRenderer,
+                        fpsBuf[0], fpsBuf[1], fpsBuf[2], fpsBuf[3], fpsBuf[4],
+                        ctdBuf[0], ctdBuf[1],
+                        networkDelay, (int)( (duration_cast<microseconds>(system_clock::now().time_since_epoch()).count() - *timestamp)/1000) );
             }
             delMtx.lock();
             videoSvc = nullptr;

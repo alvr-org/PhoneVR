@@ -35,25 +35,38 @@ class GameActivity : Activity(), SensorEventListener {
     private lateinit var prefs: SharedPreferences
     private lateinit var surf: GLSurfaceView
     private lateinit var gvrLayout: GvrLayout
+
     private var uiFPSTextViewUpdatethread: Thread? = null
     private var fpsMutex: ReentrantLock = ReentrantLock()
     private var fpsResumeMutex: ReentrantLock = ReentrantLock()
 
+    // CPU TimeDelays
+    //private var tDelaycRend: Float = 0.0f
+   // private var tDelaycEnc: Float = 0.0f
+    var lastctDelaysVals : Array<Array<Float>> = arrayOf(arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), //tDelay CPU Rendering
+                                                    arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f)) //tDelay CPU Encoding
+
+    var lasttDelaysVals : Array<Array<Int>> = arrayOf(  arrayOf<Int>(0, 0, 0, 0, 0), // tNetworkDelay
+                                                        arrayOf<Int>(0, 0, 0, 0, 0)) // tDelaycTillUpdateCall
+
     // Mobile FPSs
-    var fpsStreamRecv: Float = 0.0f
-    var fpsDecoder: Float = 0.0f
-    var fpsRenderer: Float = 0.0f
+    //var fpsStreamRecv: Float = 0.0f
+    //var fpsDecoder: Float = 0.0f
+    //var fpsRenderer: Float = 0.0f
     var lastfpsVals : Array<Array<Float>> = arrayOf(arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), //StreamRecv
                                                     arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), //Decoder
                                                     arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f)) //Renderer
 
     // CPU FPSs
-    var cfpsSteamVRApp: Float = 0.0f
-    var cfpsEncoder: Float = 0.0f
-    var cfpsStreamer: Float = 0.0f
+    //var cfpsSteamVRApp: Float = 0.0f
+    //var cfpsEncoder: Float = 0.0f
+    //var cfpsStreamWriter: Float = 0.0f
+    //var cfpsStreamer: Float = 0.0f
     var clastfpsVals: Array<Array<Float>> = arrayOf(arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), //VRApp
                                                     arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), //Encoder
-                                                    arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f)) //Streamer
+                                                    arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), //StreamWriter
+                                                    arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), //StreamWriter
+                                                    arrayOf<Float>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f)) //Renderer
 
     var fpsCounter : Int = 0 // For storing previous 5 Fps Values
 
@@ -133,14 +146,38 @@ class GameActivity : Activity(), SensorEventListener {
                 override fun run() {
                     try {
                         while (!this.isInterrupted) {
-                            sleep(500)
+                            sleep(250)
                             runOnUiThread {
                                 val tv = findViewById<TextView>(R.id.textViewFPS)
                                 fpsResumeMutex.lock()
                                 fpsMutex.lock()
-                                tv.text = String.format("---FPS---\nM| SR: %5.1f D: %5.1f R  : %5.1f\nC| SS: %5.1f E: %5.1f VRa: %5.1f",
-                                        lastfpsVals[0].average(), lastfpsVals[1].average(), lastfpsVals[2].average(),
-                                        clastfpsVals[2].average(), clastfpsVals[1].average(), clastfpsVals[0].average())
+                                /*  --- FPS and Latency Stats       ---
+                                    --- M - Mobile; C - CPU/Desktop ---
+                                    SR - StreamReceiver @M
+                                    D - Media Decoder @M
+                                    R - Frame Renderer @M
+
+                                    cR - Frame Renderer @C
+                                    SS - Stream Sender @C
+                                    SW - Stream Writer @C
+                                    E - Media Encoder @C
+                                    VRa - VR Application FPS @C
+
+                                    tSS - Time Delay between RendererGotFrame and RendererRendered @C
+                                    tE - Time Delay between EncoderGotFrame and EncoderEncoded @C
+                                    tND - NetworkDelay - Time Delay between DataPacketSent from @C to DataPacketReceived @M
+                                    tSR - StreamReceiver - Time Delay between DataPacketSent from @C to DataSentToMediaDecoder @M
+                                 */
+                                tv.text = String.format("---FPS---\n" +
+                                        "M| SR: %5.1f D: %5.1f R: %5.1f cR: %5.1f\n" +
+                                        "C| SS: %5.1f SW: %5.1f E: %5.1f VRa: %5.1f\n" +
+                                        "---Latency(ms)---\n" +
+                                        "C| tSS: %5.1f tE: %5.1f\n" +
+                                        "M| tND: %5.1f tSR: %5.1f",
+                                        lastfpsVals[0].average(), lastfpsVals[1].average(), lastfpsVals[2].average(), clastfpsVals[4].average(),
+                                        clastfpsVals[3].average(), clastfpsVals[2].average(), clastfpsVals[1].average(), clastfpsVals[0].average(),
+                                        lastctDelaysVals[1].average(), lastctDelaysVals[0].average(),
+                                        lasttDelaysVals[0].average(), lasttDelaysVals[1].average())
                                         //fpsStreamRecv, fpsDecoder, fpsRenderer,
                                         //cfpsStreamer, cfpsEncoder, cfpsSteamVRApp)
                                 fpsMutex.unlock()
@@ -217,22 +254,34 @@ class GameActivity : Activity(), SensorEventListener {
     }
 
     fun updateFPS(fpsStreamRecvJNI: Float, fpsDecoderJNI: Float, fpsRendererJNI: Float,
-                          cfpsSteamVRAppJNI : Float, cfpsEncoderJNI : Float, cfpsStreamerJNI: Float) {
+                  cfpsSteamVRAppJNI : Float, cfpsEncoderJNI : Float, cfpsStreamWriterJNI: Float, cfpsStreamerJNI: Float, cfpsRenderer: Float,
+                  ctDelayRend : Float, ctDelayEnc: Float,
+                  tNetworkDelay:Int, tStreamRecvDelayms : Int) {
         fpsMutex.lock()
 
-        fpsStreamRecv = fpsStreamRecvJNI
-        fpsDecoder = fpsDecoderJNI
-        fpsRenderer = fpsRendererJNI
+        //fpsStreamRecv = fpsStreamRecvJNI
+        //fpsDecoder = fpsDecoderJNI
+        //fpsRenderer = fpsRendererJNI
         lastfpsVals[0][fpsCounter] = fpsStreamRecvJNI
         lastfpsVals[1][fpsCounter] = fpsDecoderJNI
         lastfpsVals[2][fpsCounter] = fpsRendererJNI
 
-        cfpsSteamVRApp = cfpsSteamVRAppJNI
-        cfpsEncoder = cfpsEncoderJNI
-        cfpsStreamer = cfpsStreamerJNI
+        //cfpsSteamVRApp = cfpsSteamVRAppJNI
+        //cfpsEncoder = cfpsEncoderJNI
+        //cfpsStreamWriter = cfpsStreamWriterJNI
+        //cfpsStreamer = cfpsStreamerJNI
+
         clastfpsVals[0][fpsCounter] = cfpsSteamVRAppJNI
         clastfpsVals[1][fpsCounter] = cfpsEncoderJNI
-        clastfpsVals[2][fpsCounter] = cfpsStreamerJNI
+        clastfpsVals[2][fpsCounter] = cfpsStreamWriterJNI
+        clastfpsVals[3][fpsCounter] = cfpsStreamerJNI
+        clastfpsVals[4][fpsCounter] = cfpsRenderer
+
+        lastctDelaysVals[0][fpsCounter] = ctDelayRend
+        lastctDelaysVals[1][fpsCounter] = ctDelayEnc
+
+        lasttDelaysVals[0][fpsCounter] = tNetworkDelay// Latency in Network Communication
+        lasttDelaysVals[1][fpsCounter] = tStreamRecvDelayms
 
         fpsCounter = (++fpsCounter) % 5
         fpsMutex.unlock()
