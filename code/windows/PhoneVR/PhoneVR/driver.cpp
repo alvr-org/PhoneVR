@@ -19,11 +19,9 @@ namespace {
 }
 
 class HMD : public ITrackedDeviceServerDriver, public IVRDisplayComponent, public IVRVirtualDisplay { // todo: try to remove IVRDisplayComponent
-	uint16_t rdrW = 0, rdrH = 0;
+	
 	float projRect[4]; // left eye viewport, flip 
-
 	float poseTmOffS;
-
 
 	microseconds vstreamDT;
 
@@ -45,6 +43,8 @@ class HMD : public ITrackedDeviceServerDriver, public IVRDisplayComponent, publi
 
 	//std::mutex mxaddDataRcvd;
 	bool addDataRcvd = false;
+	float ipd = 0.0;
+	uint16_t rdrW = 0, rdrH = 0;
 
 	void terminate() {
 		//system("taskkill /f /im vrmonitor.exe"); // trigger closing
@@ -84,7 +84,7 @@ public:
 				memcpy(projRect, &data[2 * 2], 4 * 4);
 				PVR_DB_I("[HMD::talker]: addData: Viewport:  left: " + to_string(projRect[0]) + "  top: " + to_string(projRect[1]) +
 					"  right: " + to_string(projRect[2]) + "  bottom: " + to_string(projRect[3]));
-				float ipd = *reinterpret_cast<float *>(&data[2 * 2 + 4 * 4]);
+				ipd = *reinterpret_cast<float *>(&data[2 * 2 + 4 * 4]);
 
 				//VRProperties()->SetFloatProperty(propCont, Prop_UserIpdMeters_Float, ipd);
 				PVR_DB_I("[HMD::talker]: IPD: " + to_string(ipd));
@@ -207,6 +207,9 @@ public:
 		if (addDataRcvd) 
 		{
 			PVR_DB_I("[Activating HMD]: Rcvd addotionalData... Starting PVRStartStreamer with [WxH]:" + to_string(rdrW) + "x" + to_string(rdrH));
+
+			VRProperties()->SetFloatProperty(propCont, Prop_UserIpdMeters_Float, ipd);
+			
 			PVRStartStreamer(devIP, rdrW, rdrH, [=](auto v) {
 				talker.send(PVR_MSG::HEADER_NALS, v);
 			}, [=] { terminate(); });
