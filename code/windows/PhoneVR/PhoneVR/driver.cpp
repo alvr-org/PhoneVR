@@ -43,6 +43,8 @@ class HMD : public ITrackedDeviceServerDriver, public IVRDisplayComponent, publi
 
 	DriverPose_t pose = {};
 
+	//std::mutex mxaddDataRcvd;
+	bool addDataRcvd = false;
 
 	void terminate() {
 		//system("taskkill /f /im vrmonitor.exe"); // trigger closing
@@ -60,26 +62,38 @@ public:
 			terminate();
 		}
 		else if (msgType == PVR_MSG::ADDITIONAL_DATA) {
-			PVR_DB_I("[HMD::talker]: ADD DATA MSG RCV'ed.. waiting for propCont");
-			auto oldTm = Clk::now();
-			while (objId == k_unTrackedDeviceIndexInvalid && Clk::now() - oldTime < 3s) // 7s - ensure propCont is set
-				sleep_for(10ms);
+			PVR_DB_I("[HMD::talker]: addData msg RCV'ed....");
 
-			PVR_DB_I("[HMD::talker]: ADD DATA MSG RCV'ed.. propCont seems to be set or timeout");
-			if (objId == k_unTrackedDeviceIndexInvalid)
+			//mxaddDataRcvd.lock();
+			if (addDataRcvd)
+			{
+				PVR_DB_I("[HMD::talker]: addData is already Recvd and Set...skipping...");
+				return;
+			}
+			//mxaddDataRcvd.unlock();
+			//auto oldTm = Clk::now();
+			//while (objId == k_unTrackedDeviceIndexInvalid && Clk::now() - oldTime < 3s) // 7s - ensure propCont is set
+			//	sleep_for(10ms);
+
+			//PVR_DB_I("[HMD::talker]: ADD DATA MSG RCV'ed.. propCont seems to be set or timeout");
+			//if (objId == k_unTrackedDeviceIndexInvalid)
 			{
 				auto ui16Data = reinterpret_cast<uint16_t *>(&data[0]);
 				rdrW = ui16Data[0];
 				rdrH = ui16Data[1];
 				memcpy(projRect, &data[2 * 2], 4 * 4);
-				PVR_DB_I("[HMD::talker]: Viewport:  left: " + to_string(projRect[0]) + "  top: " + to_string(projRect[1]) +
+				PVR_DB_I("[HMD::talker]: addData: Viewport:  left: " + to_string(projRect[0]) + "  top: " + to_string(projRect[1]) +
 					"  right: " + to_string(projRect[2]) + "  bottom: " + to_string(projRect[3]));
 				float ipd = *reinterpret_cast<float *>(&data[2 * 2 + 4 * 4]);
 
-				VRProperties()->SetFloatProperty(propCont, Prop_UserIpdMeters_Float, ipd);
+				//VRProperties()->SetFloatProperty(propCont, Prop_UserIpdMeters_Float, ipd);
 				PVR_DB_I("[HMD::talker]: IPD: " + to_string(ipd));
 
-				addDataBomb->defuse();
+				//mxaddDataRcvd.lock();
+				addDataRcvd = true;
+				//mxaddDataRcvd.unlock();
+
+				//addDataBomb->defuse();
 			}
 
 		}
@@ -170,15 +184,29 @@ public:
 		VRProperties()->SetStringProperty(propCont, Prop_NamedIconPathDeviceStandby_String, "{PVRServer}/icons/hmd_standby.png");
 		VRProperties()->SetStringProperty(propCont, Prop_NamedIconPathDeviceAlertLow_String, "{PVRServer}/icons/hmd_ready_low.png");
 
-		PVR_DB_I("[Activating HMD]: waiting for addData");
-		bool addDataRcvd = true;
-		addDataBomb.reset(new TimeBomb(5s, [&] { addDataRcvd = false; }));
-		addDataBomb->ignite(false);
+		//bool addDataRcvd = false;
+		//addDataBomb.reset(new TimeBomb(5s, [&] { addDataRcvd = false; }));
+		//addDataBomb->ignite(false);
 		
 		objId = objectId;
+		auto oldTime = Clk::now();
 
-		if (addDataRcvd) {
-			PVR_DB_I("[Activating HMD]: waiting for addData... bomb ended with Rcvd:true");
+		PVR_DB_I("[Activating HMD]: waiting for additionalData from Client...");
+		auto timeout = (seconds)(PVRProp<int>({ CONN_TIMEOUT }));
+
+		while ( (Clk::now() - oldTime < timeout) )
+		{
+			//mxaddDataRcvd.lock();
+			if (addDataRcvd) break;
+			//mxaddDataRcvd.unlock();
+
+			//PVR_DB("[Activating HMD]: waiting for additionalData from Client...");
+			//sleep_for(50us);
+		}
+
+		if (addDataRcvd) 
+		{
+			PVR_DB_I("[Activating HMD]: Rcvd addotionalData... Starting PVRStartStreamer with [WxH]:" + to_string(rdrW) + "x" + to_string(rdrH));
 			PVRStartStreamer(devIP, rdrW, rdrH, [=](auto v) {
 				talker.send(PVR_MSG::HEADER_NALS, v);
 			}, [=] { terminate(); });
@@ -190,7 +218,7 @@ public:
 			return VRInitError_None;
 		}
 		else {
-			PVR_DB_I("[Activating HMD]: Timeout waiting for response ... bomb ended with Rcvd:false");
+			PVR_DB_I("[Activating HMD]: Timeout didnt recv additionalData... for " + to_string(timeout.count()) + "secs");
 			return VRInitError_Unknown;
 		}
 	}
@@ -336,9 +364,12 @@ public:
 		PVR_DB_I("[ServerProvider::Init] Initializing server");
 
 		bool hmdPaired = false;
-		TimeBomb hmdBomb(5s);
+		auto timeout = (seconds)(PVRProp<int>({ CONN_TIMEOUT }));
+
+		TimeBomb hmdBomb(timeout);
 
 		// any exception is handled by the called method
+		// Start Listening for any incoming connection on CONN_PORT(def:33333)
 		PVRStartConnectionListener([&](auto ip, auto msgType) {
 			if (msgType == PVR_MSG::PAIR_HMD && !hmd) {
 				//VR_INIT_SERVER_DRIVER_CONTEXT(drvCtx);
@@ -380,7 +411,7 @@ public:
 
 		if (!hmdPaired) {
 			PVRStopConnectionListener();
-			PVR_DB_I("[ServerProvider::Init] Pairing failed! Cause: timeout");
+			PVR_DB_I("[ServerProvider::Init] Pairing failed! Cause: timeout ... for " + to_string(timeout.count()) + "secs");
 			return VRInitError_Init_HmdNotFound;
 		}
 
