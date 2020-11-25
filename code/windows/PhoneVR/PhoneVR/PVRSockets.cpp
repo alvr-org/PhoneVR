@@ -67,6 +67,7 @@ float fpsRenderer = 0.0;
 
 // pair packet: "pvr" / msgType byte / app version (uint)
 
+// Invoked on ServerProviderInit() to Listen for any incoming connection on CONN_PORT (def:33333)
 void PVRStartConnectionListener(function<void(string, PVR_MSG)> callback) {
 	connRunning = true;
 	connThr = new std::thread([=] {
@@ -98,6 +99,7 @@ void PVRStartConnectionListener(function<void(string, PVR_MSG)> callback) {
 						skt.async_receive_from(buffer(buf), remEP, handle);
 					}
 				};
+				PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Listener Started on Port : " + to_string(PVRProp<uint16_t>({ CONN_PORT_KEY })));
 				skt.async_receive_from(buffer(buf), remEP, handle);
 				svc.run();
 				svc.reset();
