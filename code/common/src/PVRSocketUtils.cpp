@@ -33,7 +33,7 @@ TCPTalker::TCPTalker(uint16_t port,
 				ec = err;
 			};
 			if (isServer) 
-			{ // talker is a server
+			{ // talker is a server; Mobile device will be Announcing UDP + Will be Server
 				if (ip.empty())
 				{
 					acc.async_accept(skt, errHdl); // todo: simplify
@@ -41,12 +41,13 @@ TCPTalker::TCPTalker(uint16_t port,
 				}
 				else
 				{
-					skt.async_connect({ address::from_string(ip), port }, errHdl);
-					PVR_DB_I("[TCPTalker::TCPTalker] Talker is Server and  Connecting to ip:" + ip + " & port:" + to_string(port) + "...");
+					acc.async_accept(skt, errHdl); // todo: simplify
+					//skt.async_connect({ address::from_string(ip), port }, errHdl);
+					PVR_DB_I("[TCPTalker::TCPTalker] Talker is Server and Accepting connections from ip:" + ip + " & port:" + to_string(port) + "...");
 				}
 				initted = true; //early unblock server
 			} 
-			else            // talker is a client
+			else // talker is a client; Desktop will be Client will receive the Announcement + Will try to connect.
 			{
 				skt.async_connect({ address::from_string(ip), port }, errHdl);
 				PVR_DB_I("[TCPTalker::TCPTalker] Talker is Client and Connecting to ip:" + ip + " & port:" + to_string(port) + "...");

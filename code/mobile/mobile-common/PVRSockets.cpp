@@ -80,7 +80,7 @@ void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(),
                     unwindSegue();
                 }
             }, [](std::error_code err) {
-                PVR_DB_I("[PVRSockets::PVRStartAnnouncer] TCP error: " + err.message());
+                PVR_DB_I("[PVRSockets::PVRStartAnnouncer] TCPTalker error: " + err.message());
             }, true, pcIP);
 
             io_service svc;
@@ -104,14 +104,13 @@ void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(),
                 skt.send_to(buffer(buf, 8), remEP);
                 auto ec = asio::error_code();
                 if(ec.value())
-                    PVR_DB_I("[PVRSockets::PVRStartAnnouncer] Error(" + to_string(ec.value()) + "): " + ec.message());
+                    PVR_DB_I("[PVRSockets::PVRStartAnnouncer] Announcer:send_to() Error(" + to_string(ec.value()) + "): " + ec.message());
 
                 size_t pktSz = 0;
                 //TimeBomb bomb(milliseconds());
-
-
-                //usleep(1000000); // 1s
+                usleep(10000); // 10ms
             }
+            PVR_DB_I("[PVRSockets::PVRStartAnnouncer] Announcer Stopped.");
         }
         catch (exception &e) {
             PVR_DB_I("[PVRSockets::PVRStartAnnouncer] caught Exception: " + to_string(e.what()));
