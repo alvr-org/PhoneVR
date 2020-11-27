@@ -44,7 +44,7 @@ namespace {
 
     ANativeWindow *window = nullptr;
     AMediaCodec *codec;
-    thread *mediaThr;
+    std::thread *mediaThr;
     int64_t vOutPts = -1;
 }
 
@@ -231,7 +231,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
 
     PVR_DB_I("JNI MCodec th Setup...");
 
-    mediaThr = new thread([]{
+    mediaThr = new std::thread([]{
         while (pvrState != PVR_STATE_SHUTDOWN)
         {
             if (PVRIsVidBufNeeded()) //emptyVBufs.size() < 3
