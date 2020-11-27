@@ -1,11 +1,13 @@
 package viritualisres.phonevr
 
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.os.Environment.getExternalStorageDirectory
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
-import android.widget.EditText
+import android.view.MotionEvent
+import android.view.View.OnTouchListener
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_settings.*
@@ -13,20 +15,34 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.RandomAccessFile
-import java.lang.Exception
 import java.util.*
+
 
 class SettingsActivity : AppCompatActivity() {
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
         loadPrefs()
 
-        setTextToLogger(findViewById<EditText>(R.id.etLogView))
+        val etLogView = findViewById<TextView>(R.id.etLogView)
+
+        setTextToLogger(etLogView)
+        etLogView.setHorizontallyScrolling(true)
+        etLogView.setMovementMethod(ScrollingMovementMethod())
+        etLogView.setFocusable(false)
+        val touchListener = OnTouchListener { v, motionEvent ->
+                v.parent.requestDisallowInterceptTouchEvent(true)
+                when (motionEvent.action and MotionEvent.ACTION_MASK) {
+                    MotionEvent.ACTION_UP -> v.parent.requestDisallowInterceptTouchEvent(false)
+                }
+            false
+        }
+        etLogView.setOnTouchListener(touchListener)
     }
 
-    private fun setTextToLogger(et: EditText){
+    private fun setTextToLogger(et: TextView){
         val file: File = File(getExternalFilesDir(null).toString() + "/PVR/pvrlog.txt")
         et.setText(tail2(file, 100))
     }
@@ -93,7 +109,7 @@ class SettingsActivity : AppCompatActivity() {
                 apply()
             }
         }
-        catch(e : Exception)
+        catch (e: Exception)
         {
             Log.d("PVR-Java", "Exception caught in savePrefs.SettingsActivity : " + e.message);
             e.printStackTrace();
@@ -118,7 +134,7 @@ class SettingsActivity : AppCompatActivity() {
         debug.isChecked = prefs.getBoolean(debugKey, debugDef)
     }
 
-    private fun Util_IsVaildPort(port : Int) : Boolean
+    private fun Util_IsVaildPort(port: Int) : Boolean
     {
         return ((port > 0)  && (port <= 65536));
     }

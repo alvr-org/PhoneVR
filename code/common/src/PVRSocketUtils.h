@@ -37,3 +37,8 @@ public:
 
 	std::string getIP() { return IP; }
 };
+
+typedef unsigned long uint32;
+
+uint32 SockAddrToUint32(struct sockaddr * a);
+void Inet_NtoA(uint32 addr, char * ipbuf);

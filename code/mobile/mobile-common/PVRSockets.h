@@ -5,9 +5,22 @@
 #ifdef __cplusplus
 
 #include <vector>
+#include "ifaddrs.h"
+
+#include "PVRRenderer.h"
+
+#include <queue>
+#include <iostream>
+#include "PVRSocketUtils.h"
+#include "Utils/ThreadUtils.h"
+
+using namespace std;
+using namespace asio;
+using namespace asio::ip;
+using namespace std::chrono;
+
 std::vector<float> DequeueQuatAtPts(int64_t pts);
 void SendAdditionalData(std::vector<uint16_t> maxSize, std::vector<float> fov, float ipd);
-
 
 struct EmptyVidBuf
 {
@@ -32,6 +45,9 @@ FilledVidBuf PVRPopVideoBuf();
 
 void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(), void(*headerCb)(uint8_t *, size_t), void(*unwindSegueCb)());
 void PVRStopAnnouncer();
+
+void PrintNetworkInterfaceInfos();
+void PVRAnnounceToAllInterfaces(udp::socket &skt, uint8_t *buf, const uint16_t &port);
 
 void PVRStartReceiveStreams(uint16_t port);
 void PVRStopStreams();
