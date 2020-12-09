@@ -8,9 +8,6 @@ def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
-// YOu should have APPVEYOR_BUILD_NUMBER, APPVEYOR_PVR_TAG Set in your ENV Vars
-
-
 android {
     signingConfigs {
         releaseconfig {
@@ -29,8 +26,8 @@ android {
         applicationId "viritualisres.phonevr"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 100             //Integer.valueOf(System.env.APPVEYOR_BUILD_NUMBER ?: 0)
-        versionName "PhoneVR-0.1"   //System.getenv("APPVEYOR_PVR_TAG")
+        versionCode Integer.valueOf(System.env.APPVEYOR_BUILD_NUMBER ?: 0)
+        versionName System.getenv("APPVEYOR_PVR_TAG")
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         externalNativeBuild {
             cmake {

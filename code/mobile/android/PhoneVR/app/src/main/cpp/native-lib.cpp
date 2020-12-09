@@ -66,22 +66,22 @@ using namespace PVR;
 #define FUNC(type, func) extern "C" JNIEXPORT type JNICALL Java_viritualisres_phonevr_Wrap_##func
 #define SUB(func) FUNC(void, func)
 
-#define CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION                \
+/*#define CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION                \
   catch (const std::bad_alloc& e)                                   \
   {                                                               \
-    /* OOM exception */                                           \
+    // OOM exception                                            \
     jclass jc = env->FindClass("java/lang/OutOfMemoryError");     \
     if(jc) env->ThrowNew (jc, e.what());                          \
   }                                                               \
   catch (const std::ios_base::failure& e)                         \
   {                                                               \
-    /* IO exception */                                            \
+    // IO exception                                             \
     jclass jc = env->FindClass("java/io/IOException");            \
     if(jc) env->ThrowNew (jc, e.what());                          \
   }                                                               \
   catch (const std::exception& e)                                 \
   {                                                               \
-    /* unknown exception */                                       \
+    // unknown exception                                        \
     jclass jc = env->FindClass("java/lang/RuntimeException");     \
     jthrowable exc;                                               \
     exc = env->ExceptionOccurred();                               \
@@ -94,11 +94,11 @@ using namespace PVR;
   }                                                               \
   catch (...)                                                     \
   {                                                               \
-    /* Oops I missed identifying this exception! */               \
+    // Oops I missed identifying this exception!                \
     jclass jc = env->FindClass("java/lang/Error");                \
     if(jc) env->ThrowNew (jc, "unidentified exception");          \
   }
-
+*/
 namespace {
     JavaVM *jVM;
     jclass javaWrap;

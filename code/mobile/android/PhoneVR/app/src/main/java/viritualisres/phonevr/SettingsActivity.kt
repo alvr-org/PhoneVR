@@ -35,32 +35,6 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    /*2020-11-15 00:57:48.506 8620-8620/viritualisres.phonevr W/System.err: java.lang.RuntimeException: Meowwwww Meow Motherfuker!!!!
-2020-11-15 00:57:48.506 8620-8620/viritualisres.phonevr W/System.err:     at viritualisres.phonevr.SettingsActivity.onCreate(SettingsActivity.kt:25)
-2020-11-15 00:57:48.506 8620-8620/viritualisres.phonevr W/System.err:     at android.app.Activity.performCreate(Activity.java:7820)
-2020-11-15 00:57:48.506 8620-8620/viritualisres.phonevr W/System.err:     at android.app.Activity.performCreate(Activity.java:7809)
-2020-11-15 00:57:48.506 8620-8620/viritualisres.phonevr W/System.err:     at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1318)
-2020-11-15 00:57:48.506 8620-8620/viritualisres.phonevr W/System.err:     at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3363)
-2020-11-15 00:57:48.506 8620-8620/viritualisres.phonevr W/System.err:     at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3527)
-2020-11-15 00:57:48.506 8620-8620/viritualisres.phonevr W/System.err:     at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:83)
-2020-11-15 00:57:48.506 8620-8620/viritualisres.phonevr W/System.err:     at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:135)
-2020-11-15 00:57:48.506 8620-8620/viritualisres.phonevr W/System.err:     at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:95)
-2020-11-15 00:57:48.507 8620-8620/viritualisres.phonevr W/System.err:     at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2123)
-2020-11-15 00:57:48.507 8620-8620/viritualisres.phonevr W/System.err:     at android.os.Handler.dispatchMessage(Handler.java:107)
-2020-11-15 00:57:48.507 8620-8620/viritualisres.phonevr W/System.err:     at android.os.Looper.loop(Looper.java:214)
-2020-11-15 00:57:48.507 8620-8620/viritualisres.phonevr W/System.err:     at android.app.ActivityThread.main(ActivityThread.java:7710)
-2020-11-15 00:57:48.507 8620-8620/viritualisres.phonevr W/System.err:     at java.lang.reflect.Method.invoke(Native Method)
-2020-11-15 00:57:48.507 8620-8620/viritualisres.phonevr W/System.err:     at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:516)
-2020-11-15 00:57:48.507 8620-8620/viritualisres.phonevr W/System.err:     at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:950)
-This is called STACKTRACE, it will show where exactly tthe error Originated from and why !
-
-
- W/System.err: java.lang.RuntimeException: Meowwwww Meow Motherfuker!!!!
-  This is called e.ErrorMEssage() !!
-
-
-*/
-
     private fun setTextToLogger(et: EditText){
         val file: File = File(getExternalFilesDir(null).toString() + "/PVR/pvrlog.txt")
         et.setText(tail2(file, 100))
