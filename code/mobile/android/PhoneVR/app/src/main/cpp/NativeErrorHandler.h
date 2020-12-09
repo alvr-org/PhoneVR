@@ -16,12 +16,15 @@
 // Android
 #include <android/log.h>
 #include <unistd.h>
+#include <sys/syscall.h>
+
+#include "PVRGlobals.h"
 
 /// Helper macro to get size of an fixed length array during compile time
 #define sizeofa(array) sizeof(array) / sizeof(array[0])
 
 /// tgkill syscall id for backward compatibility (more signals available in many linux kernels)
-#define __NR_tgkill 270
+//#define __NR_tgkill 270
 
 /// Caught signals
 static const int SIGNALS_TO_CATCH[] = {
@@ -31,7 +34,7 @@ static const int SIGNALS_TO_CATCH[] = {
         SIGSEGV,
         SIGILL,
         SIGSTKFLT,
-        SIGTRAP,
+        SIGTRAP
 };
 /// Signal handler context
 struct CrashInContext {

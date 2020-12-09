@@ -1,7 +1,6 @@
 package viritualisres.phonevr
 
 import android.content.Intent
-import android.util.Log
 import android.view.Surface
 import java.lang.ref.WeakReference
 
@@ -34,10 +33,10 @@ internal object Wrap {
     }
 
     @JvmStatic
-    fun updateTextViewFPS(fpsStreamRecv : Float, fpsDecoder : Float, fpsRenderer: Float,
-                          cfpsSteamVRApp : Float, cfpsEncoder : Float, cfpsStreamer: Float) {
+    fun updateTextViewFPS(fpsStreamRecv: Float, fpsDecoder: Float, fpsRenderer: Float,
+                          cfpsSteamVRApp: Float, cfpsEncoder: Float, cfpsStreamer: Float) {
         //Log.d("--PVR-Java--", "updateTextViewFPS Wrapper : $fpsStreamRecv $fpsDecoder $fpsRenderer")
-        gameRef?.get()?.updateFPS(fpsStreamRecv,fpsDecoder,fpsRenderer, cfpsSteamVRApp, cfpsEncoder, cfpsStreamer)
+        gameRef?.get()?.updateFPS(fpsStreamRecv, fpsDecoder, fpsRenderer, cfpsSteamVRApp, cfpsEncoder, cfpsStreamer)
     }
 
     external fun createRenderer(gvrCtx: Long)
@@ -73,7 +72,9 @@ internal object Wrap {
 
     external fun setExtDirectory(dir: String, len: Int)
 
-    external fun initializeNativeCrashHandler(): Boolean
+    external fun initializeNativeCrashHandler()
 
-    external fun deinitializeNativeCrashHandler()
+    external fun deinitializeNativeCrashHandler(): Boolean
+
+    external fun crashAndGetExceptionMessage()
 }

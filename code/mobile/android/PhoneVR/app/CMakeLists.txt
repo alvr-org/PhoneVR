@@ -13,6 +13,7 @@ file(GLOB_RECURSE  MY_SRC
 add_library(native-lib  SHARED
             src/main/cpp/native-lib.cpp
             src/main/cpp/NativeErrorHandler.cpp
+            src/main/cpp/nativeCrashHandler.cpp
             ${MY_SRC}
             )
 
