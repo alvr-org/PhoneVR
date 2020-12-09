@@ -35,6 +35,7 @@ android {
         externalNativeBuild {
             cmake {
                 arguments ""
+                cppFlags "-std=c++14"
             }
 
         }
@@ -45,7 +46,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable false
             signingConfig signingConfigs.releaseconfig
         }

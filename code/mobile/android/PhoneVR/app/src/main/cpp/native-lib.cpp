@@ -18,44 +18,9 @@
 #include <dlfcn.h>
 
 #include "NativeErrorHandler.h"
+#include "nativeCrashHandler.h"
 
-#if !defined(__cplusplus) && !defined(NO_CPP_DEMANGLE)
-#define NO_CPP_DEMANGLE
-#endif
 
-#include <memory.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <signal.h>
-#include <ucontext.h>
-#include <dlfcn.h>
-#ifndef NO_CPP_DEMANGLE
-#include <cxxabi.h>
-#ifdef __cplusplus
-using __cxxabiv1::__cxa_demangle;
-#endif
-#endif
-
-#ifdef HAS_ULSLIB
-#include "uls/logger.h"
-#define sigsegv_outp(x)         sigsegv_outp(,gx)
-#else
-#define sigsegv_outp(x, ...)    fprintf(stderr, x "\n", ##__VA_ARGS__)
-#endif
-
-#define REG_RIP
-
-#if defined(REG_RIP)
-# define SIGSEGV_STACK_IA64
-# define REGFORMAT "%016lx"
-#elif defined(REG_EIP)
-# define SIGSEGV_STACK_X86
-# define REGFORMAT "%08x"
-#else
-# define SIGSEGV_STACK_GENERIC
-# define REGFORMAT "%x"
-#endif
 
 using namespace std;
 using namespace Eigen;
@@ -171,12 +136,86 @@ extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3, float cf1, f
         jVM->DetachCurrentThread();
 }
 
-
+/*
 struct android_backtrace_state
 {
     void **current;
     void **end;
 };
+
+static void dump_stack_latest(int signum, siginfo_t* info, void*ptr) {
+    static const char *si_codes[3] = {"", "SEGV_MAPERR", "SEGV_ACCERR"};
+
+    int i, f = 0;
+    ucontext_t *ucontext = (ucontext_t*)ptr;
+    Dl_info dlinfo;
+    void **bp = 0;
+    void *ip = 0;
+
+    sigsegv_outp("Segmentation Fault!");
+    sigsegv_outp("info.si_signo = %d", signum);
+    sigsegv_outp("info.si_errno = %d", info->si_errno);
+    sigsegv_outp("info.si_code  = %d (%s)", info->si_code, si_codes[info->si_code]);
+    sigsegv_outp("info.si_addr  = %p", info->si_addr);
+    for(i = 0; i < NGREG; i++)
+        sigsegv_outp("reg[%02d]       = 0x" REGFORMAT, i, ucontext->uc_mcontext.gregs[i]);
+
+#ifndef SIGSEGV_NOSTACK
+#if defined(SIGSEGV_STACK_IA64) || defined(SIGSEGV_STACK_X86)
+#if defined(SIGSEGV_STACK_IA64)
+    ip = (void*)ucontext->uc_mcontext.gregs[REG_RIP];
+    bp = (void**)ucontext->uc_mcontext.gregs[REG_RBP];
+#elif defined(SIGSEGV_STACK_X86)
+    ip = (void*)ucontext->uc_mcontext.gregs[REG_EIP];
+    bp = (void**)ucontext->uc_mcontext.gregs[REG_EBP];
+#endif
+
+    sigsegv_outp("Stack trace:");
+    while(bp && ip) {
+        if(!dladdr(ip, &dlinfo))
+            break;
+
+        const char *symname = dlinfo.dli_sname;
+
+#ifndef NO_CPP_DEMANGLE
+        int status;
+        char * tmp = __cxa_demangle(symname, NULL, 0, &status);
+
+        if (status == 0 && tmp)
+            symname = tmp;
+#endif
+
+        sigsegv_outp("% 2d: %p <%s+%lu> (%s)",
+                     ++f,
+                     ip,
+                     symname,
+                     (unsigned long)ip - (unsigned long)dlinfo.dli_saddr,
+                     dlinfo.dli_fname);
+
+#ifndef NO_CPP_DEMANGLE
+        if (tmp)
+            free(tmp);
+#endif
+
+        if(dlinfo.dli_sname && !strcmp(dlinfo.dli_sname, "main"))
+            break;
+
+        ip = bp[1];
+        bp = (void**)bp[0];
+    }
+#else
+    sigsegv_outp("Stack trace (non-dedicated):");
+    sz = backtrace(bt, 20);
+    strings = backtrace_symbols(bt, sz);
+    for(i = 0; i < sz; ++i)
+        sigsegv_outp("%s", strings[i]);
+#endif
+    sigsegv_outp("End of stack trace.");
+#else
+    sigsegv_outp("Not printing stack strace.");
+#endif
+    _exit (-1);
+}
 
 _Unwind_Reason_Code android_unwind_callback(struct _Unwind_Context* context,
                                             void* ptr)
@@ -196,7 +235,7 @@ _Unwind_Reason_Code android_unwind_callback(struct _Unwind_Context* context,
     }
     return _URC_NO_REASON;*/
 
-    static const char *si_codes[3] = {"", "SEGV_MAPERR", "SEGV_ACCERR"};
+    /*static const char *si_codes[3] = {"", "SEGV_MAPERR", "SEGV_ACCERR"};
 
     int i, f = 0;
     ucontext_t *ucontext = (ucontext_t*)ptr;
@@ -312,13 +351,12 @@ void dump_stack(void)
 
      __android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "android stack dump done");
 }
-
+*/
 SUB(setExtDirectory)(JNIEnv *env, jclass, jstring jExtDir, jint len) {
 
     //try
     //{
-        throw std::runtime_error(
-                "C++ Meow Moew Madafakas"); // Dont Change this Line -- Catch this error o
+        throw std::runtime_error("C++ Meow Moew Madafakas"); // Dont Change this Line -- Catch this error o
         auto dir = env->GetStringUTFChars(jExtDir, nullptr);
         ExtDirectory = new char[len];
         memcpy(ExtDirectory, dir, len);
@@ -543,10 +581,17 @@ SUB(drawFrame)(JNIEnv *env, jclass, jlong pts) {
 // Native Error Handling
 SUB(initializeNativeCrashHandler)( JNIEnv* env, jobject /* this */)
 {
+    __android_log_print(ANDROID_LOG_ERROR, "PVR-JNI-EH", "%s", "Calling initializeNativeCrashHandler");
     initializeNativeCrashHandler();
 }
 
 FUNC(jboolean, deinitializeNativeCrashHandler)( JNIEnv* env, jobject /* this */)
 {
+    __android_log_print(ANDROID_LOG_ERROR, "PVR-JNI-EH", "%s", "Calling deinitializeNativeCrashHandler");
     return deinitializeNativeCrashHandler();
+}
+
+SUB(crashAndGetExceptionMessage)(JNIEnv *env, jobject thiz) {
+
+    throw std::runtime_error("C++ Meow Moew Madafakas"); // Dont Change this Line -- Catch this error o
 }
