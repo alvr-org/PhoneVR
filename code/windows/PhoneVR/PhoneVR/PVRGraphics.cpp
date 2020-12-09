@@ -38,8 +38,6 @@ namespace {
 	thread *gThr;
 }
 
-extern float fpsEncoder;
-
 #define RELEASE(obj) if(obj) { obj->Release(); obj = nullptr; }
 #define OK_OR_EXEC(call, func) if(FAILED(call)) func()
 #define OK_OR_DEBUG(call) { HRESULT hr = call; OK_OR_EXEC(hr, [hr] { PVR_DB_I("######### DirectX Error: #########"); debugHr(hr); }); }
@@ -62,6 +60,7 @@ void PVRInitDX() {
 
 void PVRUpdTexHdl(uint64_t texHdl, int whichBuf) {
 	if (gRunning) {
+		//wait to obtain TextureMutex lock = Wait for the Renderer to complete rendering of present frame
 		texMtx.lock();
 		::whichBuf = whichBuf;
 		curHdl = texHdl;
@@ -101,15 +100,17 @@ void PVRStartGraphics(vector<vector<uint8_t *>> vvbuf, uint32_t inpWidth, uint32
 		while (curHdl == 0 && gRunning)
 			sleep_for(500us);
 		while (gRunning) {
-			
-			static Clk::time_point oldtime = Clk::now();
-
+						
+			// Lock texture Handle until this frame is completely rendered
 			texMtx.lock();
 
 			if (!dxDev) {
 				texMtx.unlock();
 				continue;
 			}
+
+			static Clk::time_point oldtime;
+			oldtime = Clk::now();
 
 			//PVR_DB(curHdl);
 			ID3D11Texture2D *inpTex;
@@ -179,12 +180,16 @@ void PVRStartGraphics(vector<vector<uint8_t *>> vvbuf, uint32_t inpWidth, uint32
 
 			curHdl = 0;
 			texMtx.unlock();
+
+			fpsRenderer = (1000000000.0 / (Clk::now() - oldtime).count());
+			oldtime = Clk::now();
+
+			// Wait until we receive a new SharedTextHandle Updated from 
+			// PVRGraphics::PVRUpdTexHdl() <- PVRSockets::PVRProcessFrame() <- OpenVR::Present()
 			while (curHdl == 0 && gRunning)
 				sleep_for(500us);
 			
-			fpsEncoder = (1000000000.0 / (Clk::now() - oldtime).count());
-			//PVR_DB("[PVRGraphics th] Encoding @ FPS: " + to_string(fpsEncoder) );
-			oldtime = Clk::now();
+			//PVR_DB("[PVRGraphics th] Rendering @ FPS: " + to_string(fpsRenderer) );
 		}
 		RELEASE(stagingTex);
 	});

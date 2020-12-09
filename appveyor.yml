@@ -255,15 +255,15 @@ for:
 
     after_deploy:
     - ps: >-    
-          Invoke-RestMethod https://raw.githubusercontent.com/DiscordHooks/appveyor-discord-webhook/master/send.ps1 -o send.ps1
+          Invoke-RestMethod https://raw.githubusercontent.com/ShootingKing-AM/appveyor-discord-webhook/master/send.ps1 -o send.ps1
           
           ./send.ps1 success $env:DISCORD_RELEASE_WEBHOOK_URL
 
     on_success:
-      - ps: Invoke-RestMethod https://raw.githubusercontent.com/DiscordHooks/appveyor-discord-webhook/master/send.ps1 -o send.ps1
+      - ps: Invoke-RestMethod https://raw.githubusercontent.com/ShootingKing-AM/appveyor-discord-webhook/master/send.ps1 -o send.ps1
       - ps: ./send.ps1 success $env:DISCORD_ALL_WEBHOOK_URL
 
     on_failure:
-      - ps: Invoke-RestMethod https://raw.githubusercontent.com/DiscordHooks/appveyor-discord-webhook/master/send.ps1 -o send.ps1
+      - ps: Invoke-RestMethod https://raw.githubusercontent.com/ShootingKing-AM/appveyor-discord-webhook/master/send.ps1 -o send.ps1
       - ps: ./send.ps1 failure $env:DISCORD_ALL_WEBHOOK_URL
 

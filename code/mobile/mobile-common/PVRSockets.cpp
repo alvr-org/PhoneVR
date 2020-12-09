@@ -1,16 +1,6 @@
 #include "PVRSockets.h"
-#include "PVRRenderer.h"
-
-#include <queue>
-#include <iostream>
-#include "PVRSocketUtils.h"
-#include "Utils/ThreadUtils.h"
 
 //using namespace PVR;
-using namespace std;
-using namespace asio;
-using namespace asio::ip;
-using namespace std::chrono;
 
 namespace {
     TCPTalker *talker = nullptr;
@@ -47,13 +37,13 @@ vector<float> DequeueQuatAtPts(int64_t pts) {
 }
 
 void SendAdditionalData(vector<uint16_t> maxSize, vector<float> fov, float ipd) {
-    if(talker){
+    if (talker) {
         vector<uint8_t> v(2 * 2 + 4 * 4 + 4);
         memcpy(&v[0], &maxSize[0], 2 * 2);
         memcpy(&v[2 * 2], &fov[0], 4 * 4);
         memcpy(&v[2 * 2 + 4 * 4], &ipd, 4);
-        if(!talker->send(PVR_MSG::ADDITIONAL_DATA, v))
-            PVR_DB_I("[PVRSockets::SendAdditionalData] Failed to send AddData");
+        if (!talker->send(PVR_MSG::ADDITIONAL_DATA, v)) PVR_DB_I(
+                "[PVRSockets::SendAdditionalData] Failed to send AddData");
 
         headerBomb.ignite(false);
     }
@@ -70,7 +60,7 @@ void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(),
             }
             talker = new TCPTalker(port, [=](PVR_MSG msgType, vector<uint8_t> data) {
                 if (msgType == PVR_MSG::PAIR_ACCEPT) {
-                    announcing = false;
+                    PVRStopAnnouncer();
                     pcIP = talker->getIP();
                     segueCb();
                 } else if (msgType == PVR_MSG::HEADER_NALS) {
@@ -80,38 +70,25 @@ void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(),
                     unwindSegue();
                 }
             }, [](std::error_code err) {
-                PVR_DB_I("[PVRSockets::PVRStartAnnouncer] TCP error: " + err.message());
+                PVR_DB_I("[PVRSockets::PVRStartAnnouncer] TCPTalker error: " + err.message());
             }, true, pcIP);
 
             io_service svc;
             udp::socket skt(svc);
+
             skt.open(udp::v4());
-            udp::endpoint remEP;
-            if (!pcIP.empty())
-                remEP = {address::from_string(pcIP), port};
-            else {   // broadcast if ip is unset
-                skt.set_option(socket_base::broadcast(true));
-                remEP = {address_v4::broadcast(), port};
-            }
+
+            skt.set_option(socket_base::broadcast(true));
 
             uint8_t buf[8] = {'p', 'v', 'r', PVR_MSG::PAIR_HMD};
             auto vers = PVR_CLIENT_VERSION;
             memcpy(&buf[4], &vers, 4);
 
             announcing = true;
-
-            while (announcing) {
-                skt.send_to(buffer(buf, 8), remEP);
-                auto ec = asio::error_code();
-                if(ec.value())
-                    PVR_DB_I("[PVRSockets::PVRStartAnnouncer] Error(" + to_string(ec.value()) + "): " + ec.message());
-
-                size_t pktSz = 0;
-                //TimeBomb bomb(milliseconds());
-
-
-                //usleep(1000000); // 1s
-            }
+//#if defined _DEBUG
+            PrintNetworkInterfaceInfos();
+//#endif
+            PVRAnnounceToAllInterfaces(skt, buf, port);
         }
         catch (exception &e) {
             PVR_DB_I("[PVRSockets::PVRStartAnnouncer] caught Exception: " + to_string(e.what()));
@@ -119,8 +96,124 @@ void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(),
     }).detach();
 }
 
+void
+PVRAnnounceToAllInterfaces(udp::socket &skt, uint8_t *buf, const uint16_t &port) {
+    struct ifaddrs *ifap;
+
+    try {
+        if (pcIP.empty() && (getifaddrs(&ifap) == 0)) {
+
+            struct ifaddrs *p = ifap;
+            struct ifaddrs *start = ifap;
+            while (announcing) {
+                while (p) {
+                    static uint32 ifaAddr, dstAddr;
+
+                    ifaAddr = SockAddrToUint32(p->ifa_addr);
+                    dstAddr = SockAddrToUint32(p->ifa_dstaddr);
+
+                    if (ifaAddr > 0) {
+                        static char ifaAddrStr[32], dstAddrStr[32];
+                        ifaAddrStr[0] = '\0';
+                        dstAddrStr[0] = '\0';
+
+                        Inet_NtoA(ifaAddr, ifaAddrStr);
+                        /// Found interface:  name=[lo] address=[127.0.0.1] netmask=[255.0.0.0] broadcastAddr=[127.0.0.1]
+                        if (!strcmp(ifaAddrStr, "127.0.0.1"))
+                        {
+                            p = p->ifa_next;
+                            continue;
+                        }
+
+                        Inet_NtoA(dstAddr, dstAddrStr);
+
+                        skt.send_to(buffer(buf, 8),
+                                    {address::from_string(to_string(dstAddrStr)), port});
+                        static asio::error_code ec;
+                        ec = asio::error_code();
+
+                        if (ec.value()) {
+                            PVR_DB_I(
+                                    "[PVRSockets::PVRStartAnnouncer::PVRAnnounceToAllInterfaces(nIntf)] Announcer:send_to() Error(" +
+                                    to_string(ec.value()) + ") for intf " +
+                                    " name=[" + string(p->ifa_name) +
+                                    "] address=[" + ifaAddrStr +
+                                    "] broadcastAddr=[" + dstAddrStr + "]" +
+                                    ": " + ec.message());
+                        }
+                    }
+                    p = p->ifa_next;
+                }
+                usleep(10000); // 10ms
+                p = start;
+            }
+            freeifaddrs(ifap);
+        } else {
+            udp::endpoint remEP;
+
+            if(pcIP.empty()) {
+                PVR_DB_I(
+                        "[PVRSockets::PVRStartAnnouncer::PVRAnnounceToAllInterfaces] Could not get network interfaces. Broadcasting to immediate devices...");
+                remEP = {address_v4::broadcast(), port};
+            }
+            else {
+                PVR_DB_I(
+                        "[PVRSockets::PVRStartAnnouncer::PVRAnnounceToAllInterfaces] pcIP Supplied: " + pcIP);
+                remEP = {address::from_string(pcIP), port};
+            }
+
+            while (announcing) {
+                skt.send_to(buffer(buf, 8), remEP);
+
+                static asio::error_code ec;
+                ec = asio::error_code();
+
+                if (ec.value()) {
+                    PVR_DB_I("[PVRSockets::PVRStartAnnouncer::PVRAnnounceToAllInterfaces] Announcer:send_to() Error(" +
+                            to_string(ec.value()) + "): " + ec.message());
+                }
+                usleep(10000); // 10ms
+            }
+        }
+        PVR_DB_I(
+                "[PVRSockets::PVRStartAnnouncer::PVRAnnounceToAllInterfaces] Announcer Stopped.");
+    }
+    catch (exception &e) {
+        PVR_DB_I("[PVRSockets::PVRStartAnnouncer::PVRAnnounceToAllInterfaces] caught Exception: " +
+                 to_string(e.what()));
+    }
+}
+
+void PrintNetworkInterfaceInfos() {
+    struct ifaddrs *ifap;
+    if (getifaddrs(&ifap) == 0) {
+        struct ifaddrs *p = ifap;
+        while (p) {
+            uint32 ifaAddr = SockAddrToUint32(p->ifa_addr);
+            uint32 maskAddr = SockAddrToUint32(p->ifa_netmask);
+            uint32 dstAddr = SockAddrToUint32(p->ifa_dstaddr);
+            if (ifaAddr > 0) {
+                char ifaAddrStr[32];
+                Inet_NtoA(ifaAddr, ifaAddrStr);
+                char maskAddrStr[32];
+                Inet_NtoA(maskAddr, maskAddrStr);
+                char dstAddrStr[32];
+                Inet_NtoA(dstAddr, dstAddrStr);
+
+                PVR_DB_I("[Ancr]      Found interface:  name=[" + string(p->ifa_name) +
+                         "] desc=[unavailable] address=[" + ifaAddrStr +
+                         "] netmask=[" + maskAddrStr +
+                         "] broadcastAddr=[" + dstAddrStr + "]");
+            }
+            p = p->ifa_next;
+        }
+        freeifaddrs(ifap);
+    }
+}
+
 void PVRStopAnnouncer() {
     announcing = false;
+    PVR_DB_I("[PVRSockets::PVRStopAnnouncer] Stopping Announcer.");
 }
 
 void PVRStartSendSensorData(uint16_t port, bool(*getSensorData)(float *, float *)) {
@@ -187,11 +280,13 @@ void PVRStartReceiveStreams(uint16_t port) {
             function<void(const asio::error_code &, size_t)> handler = [&](
                     const asio::error_code &err, size_t) { ec = err; };
 
-            uint8_t extraBuf[28 + 12];
+            uint8_t extraBuf[8 + 16 + 4 + 20 + 8 + 8];
             auto pts = reinterpret_cast<int64_t *>(extraBuf);              // these values are automatically updated
             auto quatBuf = reinterpret_cast<float *>(extraBuf + 8);        // when extraBuf is updated
             auto pktSz = reinterpret_cast<uint32_t *>(extraBuf + 8 + 16);
             auto fpsBuf = reinterpret_cast<float *>(extraBuf + 8 + 16 + 4);
+            auto ctdBuf = reinterpret_cast<float *>(extraBuf + 8 + 16 + 4 + 20);
+            auto timestamp = reinterpret_cast<int64_t *>(extraBuf + 8 + 16 + 4 + 20 + 8);
 
             // reinit queues
             quatQueue = queue<pair<int64_t, vector<float>>>();
@@ -205,6 +300,8 @@ void PVRStartReceiveStreams(uint16_t port) {
                 async_read(skt, buffer(extraBuf, sizeof(extraBuf)), handler);
                 svc.run();
                 svc.reset();
+
+                auto networkDelay = (int)( (duration_cast<microseconds>(system_clock::now().time_since_epoch()).count() - *timestamp)/1000);
 
                 PVR_DB("[StreamReceiver th] recvd 28maxBs with Error: " + to_string(ec.value()) +
                        ", pts: " + to_string(*pts) + ", pktSz" + to_string(*pktSz));
@@ -221,10 +318,14 @@ void PVRStartReceiveStreams(uint16_t port) {
                         svc.run();
                         svc.reset();
 
-                        PVR_DB("[StreamReceiver th] emptyVBufs.size: "+to_string(emptyVBufs.size())+", Reading sock for "+to_string(*pktSz)+"Bs" );
+                        PVR_DB("[StreamReceiver th] emptyVBufs.size: " +
+                               to_string(emptyVBufs.size()) + ", Reading sock for " +
+                               to_string(*pktSz) + "Bs");
                         if (ec.value() == 0) {
                             filledVBufs.push({eBuf.idx, *pktSz, (uint64_t) *pts});
-                            PVR_DB("[StreamReceiver th] pushing onto filledVBufs idx: "+to_string(eBuf.idx)+", size: "+to_string(*pktSz)+", pts:"+to_string(*pts) +"...pop eVbuf " );
+                            PVR_DB("[StreamReceiver th] pushing onto filledVBufs idx: " +
+                                   to_string(eBuf.idx) + ", size: " + to_string(*pktSz) + ", pts:" +
+                                   to_string(*pts) + "...pop eVbuf ");
                             emptyVBufs.pop();
                         } else
                             break;
@@ -232,11 +333,20 @@ void PVRStartReceiveStreams(uint16_t port) {
                 } else
                     break;
 
+                //PVR_DB_I("Time: "+ to_string( (duration_cast<microseconds>(system_clock::now().time_since_epoch()).count() - *timestamp) ));
                 fpsStreamRecver = (1000000000.0 / (Clk::now() - oldtime).count());
-                PVR_DB("[StreamReceiver th] ------------------- Stream Receiving @ FPS: " + to_string(fpsStreamRecver) + " De-coding @ FPS : " + to_string(fpsStreamDecoder) + " Rendering @ FPS : " + to_string(fpsRenderer));
+                PVR_DB("[StreamReceiver th] ------------------- Stream Receiving @ FPS: " +
+                       to_string(fpsStreamRecver) + " De-coding @ FPS : " +
+                       to_string(fpsStreamDecoder) + " Rendering @ FPS : " +
+                       to_string(fpsRenderer));
                 oldtime = Clk::now();
 
-                updateJavaTextViewFPS(fpsStreamRecver, fpsStreamDecoder, fpsRenderer, fpsBuf[0], fpsBuf[1], fpsBuf[2]);
+                updateJavaTextViewFPS(fpsStreamRecver, fpsStreamDecoder, fpsRenderer,
+                                      fpsBuf[0], fpsBuf[1], fpsBuf[2], fpsBuf[3], fpsBuf[4],
+                                      ctdBuf[0], ctdBuf[1],
+                                      networkDelay, (int) ((duration_cast<microseconds>(
+                                system_clock::now().time_since_epoch()).count() - *timestamp) /
+                                                           1000));
             }
             delMtx.lock();
             videoSvc = nullptr;

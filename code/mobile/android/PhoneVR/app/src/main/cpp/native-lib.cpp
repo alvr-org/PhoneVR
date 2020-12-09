@@ -85,7 +85,7 @@ namespace {
 
     ANativeWindow *window = nullptr;
     AMediaCodec *codec;
-    thread *mediaThr;
+    std::thread *mediaThr;
     int64_t vOutPts = -1;
 }
 
@@ -114,9 +114,12 @@ void callJavaMethod(const char *name) {
         jVM->DetachCurrentThread();
 }
 
-extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3, float cf1, float cf2, float cf3)
+extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3,
+        float cf1, float cf2, float cf3, float cf4, float cf5,
+        float ctd1, float ctd2,
+        int td1, int td2)
 {
-    PVR_DB("JNI Calling updataJavaTextViewFPS: " + to_string(f1) + " " + to_string(f2) + " " + to_string(f3)+ " " + to_string(cf1) + " " + to_string(cf2)+ " " + to_string(cf3));
+    PVR_DB("JNI Calling updataJavaTextViewFPS: " + to_string(f1) + " " + to_string(f2) + " " + to_string(f3)+ " " + to_string(cf1) + " " + to_string(cf2)+ " " + to_string(cf3) +" " + to_string(cf4));
     bool isMainThread = true;
     JNIEnv *env;
     if (jVM->GetEnv((void **) &env, JNI_VERS) != JNI_OK) {
@@ -126,12 +129,24 @@ extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3, float cf1, f
     jfloat jf1 = f1;
     jfloat jf2 = f2;
     jfloat jf3 = f3;
+
     jfloat jcf1 = cf1;
     jfloat jcf2 = cf2;
     jfloat jcf3 = cf3;
+    jfloat jcf4 = cf4;
+    jfloat jcf5 = cf5;
+
+    jfloat jctd1 = ctd1;
+    jfloat jctd2 = ctd2;
+
+    jint jtd1 = td1;
+    jint jtd2 = td2;
 
     env->CallStaticVoidMethod(javaWrap, env->GetStaticMethodID(javaWrap, "updateTextViewFPS",
-                                                               "(FFFFFF)V"), jf1, jf2, jf3, jcf1, jcf2, jcf3);
+                                                               "(FFFFFFFFFFII)V"), jf1, jf2, jf3,
+                                                                       jcf1, jcf2, jcf3, jcf4, jcf5,
+                                                                       jctd1, jctd2,
+                                                                       jtd1, jtd2);
     if (!isMainThread)
         jVM->DetachCurrentThread();
 }
@@ -487,7 +502,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
 
     PVR_DB_I("JNI MCodec th Setup...");
 
-    mediaThr = new thread([]{
+    mediaThr = new std::thread([]{
         while (pvrState != PVR_STATE_SHUTDOWN)
         {
             if (PVRIsVidBufNeeded()) //emptyVBufs.size() < 3

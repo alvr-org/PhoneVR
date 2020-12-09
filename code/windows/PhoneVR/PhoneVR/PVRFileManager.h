@@ -30,6 +30,7 @@ ccc KEYINT_MAX_KEY = "keyint_max";
 ccc I_REFRESH_KEY = "intra_refresh";
 ccc BITRATE_KEY = "bitrate";
 ccc PROFILE_KEY = "profile";
+ccc CONN_TIMEOUT = "connection_timeout";
 
 namespace 
 {
@@ -44,6 +45,7 @@ namespace
 		{VIDEO_PORT_KEY, 15243},
 		{POSE_PORT_KEY, 51423},
 		{CONN_PORT_KEY, 33333},
+		{CONN_TIMEOUT, 5},
 		{ENCODER_SECT, {
 			{PRESET_KEY, "ultrafast"},
 			{TUNE_KEY, "zerolatency"},
@@ -59,7 +61,7 @@ namespace
 	};
 
 	//const wchar_t *const setsFile = L"C:\\Program Files\\PhoneVR\\pvrsettings.json";
-	const wchar_t *const setsFile = L"\\..\\..\\drivers\\pvr\\pvrsettings.json";
+	const wchar_t *const setsFile = L"\\..\\..\\drivers\\PVRServer\\pvrsettings.json";
 	
 	nlohmann::json PVRGetSets() 
 	{

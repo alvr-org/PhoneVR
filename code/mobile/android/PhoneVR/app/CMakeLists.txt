@@ -5,9 +5,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++1z -frtti -fexceptions -Wc++11
 
 # find all src files
 file(GLOB_RECURSE  MY_SRC
-     ../../../../common/src/*.cpp
-     ../../../mobile-common/*.cpp
-     )
+    ../../../../common/libs/ifaddrs/*.c
+    ../../../../common/src/*.cpp
+    ../../../mobile-common/*.cpp
+    )
 
 # add my library
 add_library(native-lib  SHARED
@@ -18,15 +19,17 @@ add_library(native-lib  SHARED
             )
 
 target_include_directories(native-lib
-                           PUBLIC ../../libraries/headers
-                           PUBLIC ../../../../common/libs/asio
-                           PUBLIC ../../../../common/libs/Eigen
+                            PUBLIC ../../libraries/headers
+                            PUBLIC ../../../../common/libs/asio
+                            PUBLIC ../../../../common/libs/Eigen
+                            PUBLIC ../../../../common/libs/ifaddrs
 
-                           # my headers
-                           PUBLIC ../../../../common/src
-                           PUBLIC ../../../mobile-common
-                           PUBLIC src/main/cpp
-                           )
+                            # my headers
+                            PUBLIC ../../../../common/src
+                            PUBLIC ../../../mobile-common
+                            PUBLIC src/main/cpp
+                            )
+
 
 target_link_libraries(native-lib
                       log android EGL GLESv3 mediandk OpenMAXAL #todo remove OpenMaxal?

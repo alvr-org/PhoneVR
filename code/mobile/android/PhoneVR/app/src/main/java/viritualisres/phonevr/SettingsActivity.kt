@@ -1,11 +1,13 @@
 package viritualisres.phonevr
 
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.os.Environment.getExternalStorageDirectory
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
-import android.widget.EditText
+import android.view.MotionEvent
+import android.view.View.OnTouchListener
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_settings.*
@@ -13,12 +15,16 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.RandomAccessFile
+
 import java.lang.Exception
 import java.lang.RuntimeException
+
 import java.util.*
+
 
 class SettingsActivity : AppCompatActivity() {
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
@@ -26,16 +32,31 @@ class SettingsActivity : AppCompatActivity() {
 
             setContentView(R.layout.activity_settings)
             loadPrefs()
-
-            setTextToLogger(findViewById<EditText>(R.id.etLogView))
         }
         catch (e : Exception)
         {
             Log.d("PVR-JAVA", "Settings::onCreate() Thrw Exception with Message : " + e.message + "\n\n And with StackTrance :" + e.printStackTrace());
         }
+
+        setTextToLogger(findViewById<TextView>(R.id.etLogView))
+        val etLogView = findViewById<TextView>(R.id.etLogView)
+
+        setTextToLogger(etLogView)
+        etLogView.setHorizontallyScrolling(true)
+        etLogView.setMovementMethod(ScrollingMovementMethod())
+        etLogView.setFocusable(false)
+        val touchListener = OnTouchListener { v, motionEvent ->
+                v.parent.requestDisallowInterceptTouchEvent(true)
+                when (motionEvent.action and MotionEvent.ACTION_MASK) {
+                    MotionEvent.ACTION_UP -> v.parent.requestDisallowInterceptTouchEvent(false)
+                }
+            false
+        }
+        etLogView.setOnTouchListener(touchListener)
+
     }
 
-    private fun setTextToLogger(et: EditText){
+    private fun setTextToLogger(et: TextView){
         val file: File = File(getExternalFilesDir(null).toString() + "/PVR/pvrlog.txt")
         et.setText(tail2(file, 100))
     }
@@ -95,14 +116,14 @@ class SettingsActivity : AppCompatActivity() {
                 if(Util_IsVaildPort(videoPort.text.toString().toInt())) putInt(videoPortKey, videoPort.text.toString().toInt())
                 if(Util_IsVaildPort(posePort.text.toString().toInt())) putInt(posePortKey, posePort.text.toString().toInt())
                 putInt(resMulKey, resMul.text.toString().toInt())
-                putFloat(mt2phKey, mt2ph.text.toString().toFloat())
-                putFloat(offFovKey, offFov.text.toString().toFloat())
+                putFloat(mt2phKey, mt2ph.text.toString().replace(',', '.').toFloat())
+                putFloat(offFovKey, offFov.text.toString().replace(',', '.').toFloat())
                 putBoolean(warpKey, warp.isChecked)
                 putBoolean(debugKey, debug.isChecked)
                 apply()
             }
         }
-        catch(e : Exception)
+        catch (e: Exception)
         {
             Log.d("PVR-Java", "Exception caught in savePrefs.SettingsActivity : " + e.message);
             e.printStackTrace();
@@ -127,7 +148,7 @@ class SettingsActivity : AppCompatActivity() {
         debug.isChecked = prefs.getBoolean(debugKey, debugDef)
     }
 
-    private fun Util_IsVaildPort(port : Int) : Boolean
+    private fun Util_IsVaildPort(port: Int) : Boolean
     {
         return ((port > 0)  && (port <= 65536));
     }

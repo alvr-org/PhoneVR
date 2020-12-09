@@ -126,16 +126,30 @@ This Project is presently under testing. But, pull requests are welcome.
   
 * Incase above mentioned things have not been helpful to you, then you might want to **Install Debug variant of APK** from `[PhoneVR.zip]/android/arm7/debug` which can help you/us to get more detailed logs.
   
-* **FPS Nomenclature** (in order from VRAppFrameCreation to MobileFrameDisplay):<br/>
-  These stats can be enabled by checking `Settings`->`Debug` option. All the values must be stable and more or less equal to `game_fps`± 10 value in `pvrsettings.json`.
-  * `C |` - CPU (Windows) Components
-    * `VRa` - Actual VRApplication Rendering FPS (SteamVR Home, VRChat, . etc etc)
-    * `E` - Media Encoder (x264) FPS
-    * `SS` - Network Stream Sender FPS
-  * `M |` - Mobile Components
-    * `SR` - Network Stream Receiver FPS
-    * `D` - Media Decoder FPS
-    * `R` - OpenGL Renderer FPS - Final on mobile screen FPS<br/><br/>
+* **Diagnostics Stats Nomenclature** (in order from VRAppFrameCreation to MobileFrameDisplay):<br/>
+  These stats can be enabled by checking `Settings`->`Stats` option. All the values must be stable and more or less equal to `game_fps`± 10 value in `pvrsettings.json`.
+  
+  * ```css
+    --- @M - Mobile; @C - CPU/Desktop ---
+    ```
+    ```css
+    @FPS(s) :
+    SR - StreamReceiver @M
+    D - Media Decoder @M
+    R - Frame Renderer @M
+
+    cR - Frame Renderer @C
+    SS - Stream Sender @C
+    SW - Stream Writer @C
+    E - Media Encoder @C
+    VRa - VR Application FPS @C
+
+    @Latency(s) :
+    tSS - Time Delay between RendererGotFrame and RendererRendered @C
+    tE - Time Delay between EncoderGotFrame and EncoderEncoded @C
+    tND - NetworkDelay - Time Delay between DataPacketSent from @C to DataPacketReceived @M
+    tSR - StreamReceiver - Time Delay between DataPacketSent from @C to DataSentToMediaDecoder @M
+    ```
   ![PhonveVR FPS](./.github/fps.jpg)
 
 ## Issues
