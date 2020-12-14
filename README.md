@@ -10,7 +10,7 @@
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ShootingKing-AM/PhoneVR?color=orange&include_prereleases)
 [![Discord](https://img.shields.io/discord/745688786410930296?label=Discuss&logo=Discord&logoColor=white)](https://discord.gg/pNYtBNk)
 
-Use Steam VR-enabled applications with your phone as HMD (*Head-mounted display*). The only Open-Source solution to similar commercial packages like VRidge, Riftcat, Trinus etc etc.
+Use Steam VR-enabled applications with your phone as HMD (*Head-mounted display*). The only Open-Source solution to similar commercial packages like VRidge, Riftcat, Trinus etc etc. *Common-network* can be anytype of network between desktop and android app, even *USB Tethering* and *Mobile Hotspots* are supported.
 <br/>
 
 | Tabs | Links |
@@ -26,7 +26,7 @@ Use Steam VR-enabled applications with your phone as HMD (*Head-mounted display*
 * [Advanced Configuration](#advanced-configuration)
 * [Development](#development)
 * [Troubleshooting](#troubleshooting)
-* [Issues](#issues)
+* [Issue / Bug Reporting](#issue--bug-reporting)
 
 ## Requirements
 
@@ -152,12 +152,30 @@ This Project is presently under testing. But, pull requests are welcome.
     ```
   ![PhonveVR FPS](./.github/fps.jpg)
 
-## Issues
-You can use the [`Github Issues`](https://github.com/ShootingKing-AM/PhoneVR/issues) or [`Discord`](https://discord.gg/pNYtBNk) to submit any issues related to working of this Project or for any query.
-For quick resolution you may want to add the following data along with your issue,
+## Issue / Bug Reporting
+
+Prior to reporting your Issue/Bug, please check out the ongoing issues ([here](https://github.com/ShootingKing-AM/PhoneVR/issues)), If you have the same issue, you can join and watch that discussion(s).
+
+You can use the [`Github Issues`](https://github.com/ShootingKing-AM/PhoneVR/issues) or [`Discord`](https://discord.gg/pNYtBNk) to submit any issues/bugs related to working of this Project or for any query.
+For quick resolution you may want to add the following data along with your issue/bug report,
+
+<ins>For Installation-time or SteamVR-and-PhoneVR-linking issues,</ins>
 * `steamvr.vrsettings` file in default location `C:\Program Files (x86)\Steam\config\steamvr.vrsettings`
 * `vrserver.txt` file in default location `C:\Program Files (x86)\Steam\logs\vrserver.txt`
-* `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default windows location `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\PVRServer\logs`
-* `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default android location `.../Android/data/virtualis.phonevr/files/PVR/` and/or `Log` from your `Settings page` on the app.
 * Open a `cmd` in the follow default directory and copy paste output of the `vrcmd` command. `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\bin\win64\vrcmd.exe`
+
+<ins>For networking issues,</ins>
+
+* Network Capture of Desktop `.pcap` file. How-to-get-it-> [Here](https://github.com/ShootingKing-AM/PhoneVR/issues/26#issuecomment-683905486)
+* Network Capture of Android/Mobile `.pcap` file. How-to-get-it-> [Here](https://github.com/ShootingKing-AM/PhoneVR/issues/26#issuecomment-687640757)
+
+<ins>If Unexpected android app crashes occur(unexpected means, you did **NOT** get</ins> [this](https://user-images.githubusercontent.com/4137788/102040730-9c168180-3df3-11eb-985a-5d8d6798ea5a.jpg) <ins>screen when PhoneVR crashed),</ins>
+
+1. Open `PhoneVR` android app and let it crash.
+2. Collect `bugreport-xxx.zip` from android device (How-to under *"Capture a bug report from a device"* paragraph [here](https://developer.android.com/studio/debug/bug-report#bugreportdevice))
+3. Attach the `bugreport-xxx.zip` file in Discord or GitHub or mail to *"phonevr.crash@gmail.com"*
+
+<ins>**Common files required for all kinds issues,**</ins>
+* `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default **windows** location `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\PVRServer\logs`
+* `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default **android** location `.../Android/data/virtualis.phonevr/files/PVR/`. *Optionally* you can also attach `Log` from your `Settings page` on the app.
 * And ofcourse, how to reproduce the issue :)
