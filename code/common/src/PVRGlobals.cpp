@@ -92,41 +92,67 @@ using namespace std;
 extern char* ExtDirectory;
 
 void pvrInfo(string msg) {
+	try {
+		if (ExtDirectory != nullptr) {
+			auto *file = fopen(
+					string(string(ExtDirectory).c_str() + string("/PVR/pvrlog.txt")).c_str(),
+					"a");
 
-	auto *file = fopen(string(string(ExtDirectory).c_str() + string("/PVR/pvrlog.txt")).c_str(),
-					   "a");
+			std::time_t nowtime = std::chrono::system_clock::to_time_t(
+					std::chrono::system_clock::now());
+			struct tm *time = localtime(&nowtime);
 
-	std::time_t nowtime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	struct tm *time = localtime(&nowtime);
-
-	if (file) {
-		fprintf(file, "%02d:%02d:%02d-%02d.%02d.%04d - PVR-JNI-I: %s\n", time->tm_hour, time->tm_min, time->tm_sec,
-				time->tm_mday, 1+time->tm_mon, 1900+time->tm_year, msg.c_str());
-		fclose(file);
+			if (file) {
+				fprintf(file, "%02d:%02d:%02d-%02d.%02d.%04d - PVR-JNI-I: %s\n", time->tm_hour,
+						time->tm_min, time->tm_sec,
+						time->tm_mday, 1 + time->tm_mon, 1900 + time->tm_year, msg.c_str());
+				fclose(file);
+			} else if( file == NULL ) {
+                 __android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "PVRGlobals_pvrInfo:: fopen returned NULL value");
+			}
+		}
+	}
+	catch(exception e) {
+        //__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "PVRGlobals_pvrInfo:: Caught Exception: " + string(e.what()));
+	}
+	catch(...) {
+        //__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "PVRGlobals_pvrInfo:: Caught Exception: from Generic Handler");
 	}
 }
 
 void pvrdebug(string msg) {
 	__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "%s", msg.c_str());
 
-	auto *file = fopen(string(string(ExtDirectory) +"/PVR/pvrDebuglog.txt").c_str(), "a");
+	try {
+		if (ExtDirectory != nullptr) {
+			auto *file = fopen(string(string(ExtDirectory) + "/PVR/pvrDebuglog.txt").c_str(), "a");
 
-	std::time_t nowtime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	struct tm *time = localtime(&nowtime);
+			std::time_t nowtime = std::chrono::system_clock::to_time_t(
+					std::chrono::system_clock::now());
+			struct tm *time = localtime(&nowtime);
 
-	if (file) {
-		fprintf(file, "%02d:%02d:%02d-%02d.%02d.%04d - PVR-JNI-D: %s\n", time->tm_hour, time->tm_min, time->tm_sec,
-				time->tm_mday, 1+time->tm_mon, 1900+time->tm_year, msg.c_str());
-		fclose(file);
-        //__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "Wrote in File: %s - %s",	string(ExtDirectory).c_str(), string(string(ExtDirectory) + string("/PVR/pvrlog.txt")).c_str());
+			if (file) {
+				fprintf(file, "%02d:%02d:%02d-%02d.%02d.%04d - PVR-JNI-D: %s\n", time->tm_hour,
+						time->tm_min, time->tm_sec,
+						time->tm_mday, 1 + time->tm_mon, 1900 + time->tm_year, msg.c_str());
+				fclose(file);
+				//__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "Wrote in File: %s - %s",	string(ExtDirectory).c_str(), string(string(ExtDirectory) + string("/PVR/pvrlog.txt")).c_str());
+			} else {
+				__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "File Error %d (%s): %s - %s",
+									errno,
+									string(ExtDirectory).c_str(),
+									string(string(ExtDirectory) +
+										   string("/PVR/pvrlog.txt")).c_str(),
+									strerror(errno));
+			}
+		}
 	}
-    else {
-        __android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "File Error %d (%s): %s - %s",
-                            errno,
-                            string(ExtDirectory).c_str(),
-                            string(string(ExtDirectory) + string("/PVR/pvrlog.txt")).c_str(),
-                            strerror(errno));
-    }
+	catch(exception e){
+        //__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "PVRGlobals_pvrInfo:: Caught Exception: " + string(e.what()));
+	}
+	catch(...) {
+        //__android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "PVRGlobals_pvrInfo:: Caught Exception: from Generic Handler");
+	}
 }
 
 
