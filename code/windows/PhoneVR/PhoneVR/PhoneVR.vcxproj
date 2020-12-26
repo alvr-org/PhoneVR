@@ -50,7 +50,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -78,6 +78,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\</OutDir>
+    <IncludePath>$(FFMPEG_MASTER)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(FFMPEG_MASTER)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -108,16 +110,20 @@
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_WIN32_WINNT=0x0601;_DEBUG;_WINDOWS;_USRDLL;PHONEVR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WIN32_WINNT=0x0601;NDEBUG;PVR_DEBUG;_WINDOWS;_USRDLL;PHONEVR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName);$(SolutionDir)\..\..\common\src;$(SolutionDir)\..\libs\json;$(SolutionDir)\..\libs\x264\include;$(SolutionDir)\..\..\common\libs\asio;$(SolutionDir)\..\..\common\libs\eigen;$(SolutionDir)\..\..\common\src\Utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\libs\x264\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AssemblyDebug>
+      </AssemblyDebug>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)$(Configuration)\$(Platform)" "C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\PVRServer\bin\win64" /h /i /c /k /e /r /y</Command>
+      <Command>$(SolutionDir)post_build_debug.cmd</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -144,12 +150,16 @@
       <WarningLevel>Level1</WarningLevel>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0601;NDEBUG;_WINDOWS;_USRDLL;PHONEVR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName);$(SolutionDir)\..\..\common\src;$(SolutionDir)\..\libs\json;$(SolutionDir)\..\libs\x264\include;$(SolutionDir)\..\..\common\libs\asio;$(SolutionDir)\..\..\common\libs\eigen;$(SolutionDir)\..\..\common\src\Utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <SupportJustMyCode>true</SupportJustMyCode>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -158,13 +168,17 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\..\libs\x264\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)$(Configuration)\$(Platform)" "C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\PVRServer\bin\win64" /h /i /c /k /e /r /y</Command>
+      <Command>$(SolutionDir)post_build_release.cmd</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\common\src\PVRGlobals.cpp" />
     <ClCompile Include="..\..\..\common\src\PVRSocketUtils.cpp" />
     <ClCompile Include="driver.cpp" />
+    <ClCompile Include="PVRffmpeg.cpp">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
+    </ClCompile>
+    <ClCompile Include="PVRffmpegBackgroundProcess.cpp" />
     <ClCompile Include="PVRGraphics.cpp" />
     <ClCompile Include="PVRMath.cpp" />
     <ClCompile Include="PVRSockets.cpp" />
@@ -175,6 +189,8 @@
     <ClInclude Include="..\..\..\common\src\Utils\StrUtils.h" />
     <ClInclude Include="..\..\..\common\src\Utils\ThreadUtils.h" />
     <ClInclude Include="openvr_driver.h" />
+    <ClInclude Include="PVRffmpeg.h" />
+    <ClInclude Include="PVRffmpegBackgroundProcess.h" />
     <ClInclude Include="PVRGraphics.h" />
     <ClInclude Include="PVRFileManager.h" />
     <ClInclude Include="PVRMath.h" />

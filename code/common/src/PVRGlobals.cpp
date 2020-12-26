@@ -47,6 +47,10 @@ void pvrdebug(string msg)
 	GetLocalTime(&t);
 	ofstream of(std::wstring(_GetExePath() + logFileDebug).c_str(), ios_base::app);
 	auto ms = system_clock::now().time_since_epoch() / 1ms;
+
+	//std::replace(msg.begin(), msg.end(), '\n', ' ');
+	std::replace(msg.begin(), msg.end(), '\r', ' ');
+
 	string elapsed = (ms - pvrdebug_oldMs < 1000 ? to_string(ms - pvrdebug_oldMs) : "max");
 	of << t.wMinute << ":" << setfill('0') << setw(2) << t.wSecond << " " << setfill('0') << setw(3) << elapsed << "  " << msg << endl;
 	

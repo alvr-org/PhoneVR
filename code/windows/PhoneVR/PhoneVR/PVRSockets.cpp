@@ -121,212 +121,55 @@ void PVRStopConnectionListener() {
 
 void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(vector<uint8_t>)> headerCb, function<void()> onErrCb) {
 	videoRunning = true;
+	/*
 	videoThr = new std::thread([=] {
-		PVR_DB("[PVRStartStreamer th] Setting encoder");
-		auto S = ENCODER_SECT;
-		int fps = PVRProp<int>({ GAME_FPS_KEY });
 
-		//auto wait = 1'000'000us / fps / 5;
+		PVR_DB("[PVRStartStreamer FF th] Setting encoder");
+		int fps = PVRProp<int>({ GAME_FPS_KEY });
 		vFrameDtUs = (1'000'000us / fps).count();
 
-		x264_param_t par;
-		x264_picture_t outPic;
-		auto res = x264_param_default_preset(&par, PVRProp<string>({ S, PRESET_KEY }).c_str(), PVRProp<string>({ S, TUNE_KEY }).c_str());
+		auto S = ENCODER_SECT;
 
-		{
-			par.i_csp = FMT;
-			par.i_width = width;
-			par.i_height = height;
-			par.b_vfr_input = 0; // disable variable frame rate, ignore pts
-			par.b_repeat_headers = 1;
-			par.b_annexb = 1;
-			par.i_fps_num = fps;
+		PVR_DB("[PVRStartStreamer FF th] Inint PVRffmpeg class and start reading Pipes...");
 
-			par.rc.i_rc_method = PVRProp<int>({ S, RC_METHOD_KEY }); // 0->X264_RC_CQP, 2->X264_RC_ABR;
+		PVRffmpeg ffmpeg = PVRffmpeg();
+		ffmpeg.initFFMPEGChildProcess();
 
-			auto qcomp = PVRProp<float>({ S, QCOMP_KEY });
-			if (qcomp >= 0)
-				par.rc.f_qcompress = qcomp;
+		ffmpeg.startPipeReader();
 
-			auto qp = PVRProp<int>({ S, QP_KEY });
-			if (qp > 0) {
-				par.rc.i_qp_constant = qp;
-				par.rc.i_qp_min = qp - 5;
-				par.rc.i_qp_max = qp + 5;
-			}
-
-
-			auto br = PVRProp<int>({ S, BITRATE_KEY });
-			if (br > 0)
-				par.rc.i_bitrate = br;
-
-			auto ki_max = PVRProp<int>({ S, KEYINT_MAX_KEY });
-			if (ki_max > 0)
-				par.i_keyint_max = ki_max;
-
-			par.b_intra_refresh = PVRProp<bool>({ S, I_REFRESH_KEY }) ? 1 : 0;
-		}
-		res = x264_param_apply_profile(&par, PVRProp<string>({ S, PROFILE_KEY }).c_str());
-
-
-
-		par.rc.i_rc_method = 1;
-
-		par.rc.i_bitrate = 1000;
-		par.rc.i_vbv_max_bitrate = 1200;
-		par.rc.i_vbv_buffer_size = 20000;
-		par.rc.f_vbv_buffer_init = 0.9f;
-
-		//par.rc.i_qp_constant = 25;
-		//par.rc.i_qp_min = par.rc.i_qp_constant - 1;
-		//par.rc.i_qp_max = par.rc.i_qp_constant + 1;
-		//par.rc.f_qcompress = 0.0f;
-
-		//par.rc.f_rf_constant = 12;
-		//par.rc.f_rf_constant_max = 13;
-		par.rc.f_rf_constant = 24;
-		par.rc.f_rf_constant_max = 26;
-
-
-
-		//par.nalu_process           TODO: callback available!!!!!!!!! manage a udp thread inside here, then dispatch sends
-		// use opaque pointer to know from which frame a nal belongs
-		// use i_first_mb to sort slice nals
-		// still need to find out how to sort non-slice nals
-
+		PVR_DB("[PVRStartStreamer FF th] FFMPEGChildProcess Created");
+		
 		vector<vector<uint8_t *>> vvbuf;
 		for (size_t i = 0; i < nVFrames; i++) {
 			x264_picture_alloc(&vFrames[i], FMT, width, height);
 			vvbuf.push_back({ vFrames[i].img.plane[0], vFrames[i].img.plane[1], vFrames[i].img.plane[2] });
 		}
+
+		PVR_DB("[PVRStartStreamer FF th] Starting graphics");
 		PVRStartGraphics(vvbuf, width, height);
 
-
-		auto *enc = x264_encoder_open(&par);
-
-		x264_param_t outPar;
-		x264_encoder_parameters(enc, &outPar);
-		PVR_DB("[PVRStartStreamer th] Render size: " + to_string(width) + "x" + to_string(height));
-		PVR_DB("[PVRStartStreamer th] Using encoding level: " + to_string(outPar.i_level_idc));
-
-		x264_nal_t *nals;
-		int nNals;
-		res = x264_encoder_headers(enc, &nals, &nNals);
-		vector<uint8_t> vheader;
-		for (size_t i = 0; i < nNals; i++)
-			vheader.insert(vheader.end(), nals[i].p_payload, nals[i].p_payload + nals[i].i_payload);  // WARNING: including SEI nal
-		headerCb(vheader);
-
-		io_service svc;
-		tcp::socket skt(svc);
-		tcp::acceptor acc(svc, { tcp::v4(), PVRProp<uint16_t>({ VIDEO_PORT_KEY }) });
-		acc.accept(skt);
-
-		//udp::socket skt(svc);
-		//udp::endpoint remEP(address::from_string(ip), port);
-		//skt.open(udp::v4());
-
 		int lastWhichFrame = 0;
-		//uint8_t buf[256 * 256];
-		uint8_t extraBuf[8 + 16 + 4 + 20 + 8 + 8];
-		auto pbuf = reinterpret_cast<int64_t *>(&extraBuf[0]); // pts buf ref
-		auto qbuf = reinterpret_cast<float *>(&extraBuf[8]); // quat buf ref
-		auto nbuf = reinterpret_cast<int *>(&extraBuf[8 + 16]);
-		auto fpsbuf = reinterpret_cast<float *>(&extraBuf[8 + 16 + 4]);
-		auto tDelaysBuf = reinterpret_cast<float *>(&extraBuf[8 + 16 + 4 + 20]);
-		auto timestamp = reinterpret_cast<int64_t *>(&extraBuf[8 + 16 + 4 + 20 + 8]);
 
-		asio::error_code ec;
-		//ofstream outp("C:\\Users\\narni\\mystream.h264", ofstream::binary);/////////////////////////////////////////////
 		while ((whichFrame == lastWhichFrame || quatQueue.size() == 0) && videoRunning) // for first frame
 			sleep_for(500us);
 		while (videoRunning)
 		{
-			//PVRUpdTexWraps();
-			static Clk::time_point oldtime, oldtimeStreamer;
-			oldtime = Clk::now();
-			oldtimeStreamer = Clk::now();
-
 			if ((lastWhichFrame + 1) % nVFrames != whichFrame)
-				PVR_DB_I("[PVRStartStreamer th] Skipped frame! Please re-tune the encoder parameters lWf:"+to_string(lastWhichFrame)+", nVfs:"+ to_string(nVFrames)+ ", wF:"+to_string(whichFrame));
+				PVR_DB_I("[PVRStartStreamer FF th] Skipped frame! Please re-tune the encoder parameters lWf:" + to_string(lastWhichFrame) + ", nVfs:" + to_string(nVFrames) + ", wF:" + to_string(whichFrame));
 			lastWhichFrame = whichFrame;
 			whichFrameMtxs[lastWhichFrame].lock();   // LOCK
-			auto totSz = x264_encoder_encode(enc, &nals, &nNals, &vFrames[lastWhichFrame], &outPic);
+
+			PVR_DB("[PVRStartStreamer FF th] Writing to Pipe of frame: " + 
+					to_string(lastWhichFrame) + 
+					" DataWritten: " +
+					to_string(ffmpeg.WriteToPipe(&vFrames[lastWhichFrame], height)) );
+
+			if (!ffmpeg.isChildProcessRunning()) ffmpeg.CreateFFMPEGChildProcess();
 			whichFrameMtxs[lastWhichFrame].unlock(); // UNLOCK
-
-			fpsEncoder = (1000000000.0 / (Clk::now() - oldtime).count());
-
-			oldtime = Clk::now();
-
-			if (totSz > 0)
-			{
-				PVR_DB("[PVRStartStreamer th] Rendering lWf:"+to_string(lastWhichFrame)+", wF:"+to_string(whichFrame));
-				quatQueueMutex.lock();   // LOCK
-				while ((quatQueue.size() != 0) && (quatQueue.front().first.first < outPic.i_pts)) // handle skipped frames
-				{
-					PVR_DB("[PVRStartStreamer th] handle skipped frames qPts:" + to_string(quatQueue.front().first.first) + ", outpicPts:" + to_string(outPic.i_pts));
-					quatQueue.pop();
-				}
-				quatQueueMutex.unlock(); // UNLOCK
-
-				if (quatQueue.size() != 0)
-				{
-					quatQueueMutex.lock();
-					auto outPts = quatQueue.front().first.first;
-					auto time = quatQueue.front().first.second.first;
-					auto renderDur = quatQueue.front().first.second.second;
-					auto quat = quatQueue.front().second;
-					quatQueue.pop();
-					quatQueueMutex.unlock();
-
-					*pbuf = outPts;
-					qbuf[0] = quat.w();
-					qbuf[1] = quat.x();
-					qbuf[2] = quat.y();
-					qbuf[3] = quat.z();
-					*nbuf = totSz;
-					fpsbuf[0] = fpsSteamVRApp;		// VRApp FPS
-					fpsbuf[1] = fpsEncoder;			// Encoder FPS
-					fpsbuf[2] = fpsStreamWriter;	// StreamWriter FPS
-					fpsbuf[3] = fpsStreamer;		// Streamer FPS
-					fpsbuf[4] = fpsRenderer;
-					tDelaysBuf[0] = renderDur;		// Renderer Delay
-					tDelaysBuf[1] = (float)((Clk::now() - time).count() / 1000000.0);	// Encoder Delay
-					*timestamp = (int64_t)duration_cast<microseconds>(system_clock::now().time_since_epoch()).count(); // FrameSent TimeStamp
-
-					write(skt, buffer(extraBuf), ec);
-					write(skt, buffer(nals->p_payload, totSz), ec);
-
-					PVR_DB("[PVRStartStreamer th] wrote render to socket: Pts:[Tenc:"
-						+ str_fmt("%.2f", tDelaysBuf[1])
-						+" ms, Trend:"
-						+ str_fmt("%.2f", renderDur)
-						+" ms]"
-						+ to_string(outPts) + ", Size: "
-						+to_string(sizeof(extraBuf))+","+to_string(totSz));
-
-					if (ec.value() != 0 && videoRunning)
-						PVR_DB("Write failed: " + ec.message() + " Code: " + to_string(ec.value()));
-					if (ec == error::connection_aborted || ec == error::connection_reset)
-					{
-						videoRunning = false;
-						//onErrCb();
-					}
-
-					//outp.write((char*)nals->p_payload, totSz);/////////////////////////////////////////////////////////
-				}
-			}
-			fpsStreamWriter = (1000000000.0 / (Clk::now() - oldtime).count());
-			PVR_DB("[PVRStartStreamer th] ------------------- StreamWriting @ FPS: " + to_string(fpsStreamWriter) + " Encoding @ FPS : " + to_string(fpsEncoder) + " VRApp Running @ FPS : " + to_string(fpsSteamVRApp));
-			oldtime = Clk::now();
 
 			while ((whichFrame == lastWhichFrame || quatQueue.size() == 0) && videoRunning)
 				sleep_for(500us);
-
-			fpsStreamer = (1000000000.0 / (Clk::now() - oldtimeStreamer).count());
-			oldtimeStreamer = Clk::now();
 		}
-		x264_encoder_close(enc);
 
 		PVRStopGraphics();
 
@@ -334,10 +177,254 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 
 		for (auto frame : vFrames)
 			x264_picture_clean(&frame);
-	});
+	});*/
+		
+	/* Piping Video Frames Code
+	{
+		videoThr = new std::thread([=] {
+			PVR_DB("[PVRStartStreamer th] Setting encoder");
+			auto S = ENCODER_SECT;
+			int fps = PVRProp<int>({ GAME_FPS_KEY });
+
+			//auto wait = 1'000'000us / fps / 5;
+			vFrameDtUs = (1'000'000us / fps).count();
+
+			x264_param_t par;
+			x264_picture_t outPic;
+			auto res = x264_param_default_preset(&par, PVRProp<string>({ S, PRESET_KEY }).c_str(), PVRProp<string>({ S, TUNE_KEY }).c_str());
+
+			{
+				par.i_csp = FMT;
+				par.i_width = width;
+				par.i_height = height;
+				par.b_vfr_input = 0; // disable variable frame rate, ignore pts
+				par.b_repeat_headers = 1;
+				par.b_annexb = 1;
+				par.i_fps_num = fps;
+
+				par.rc.i_rc_method = PVRProp<int>({ S, RC_METHOD_KEY }); // 0->X264_RC_CQP, 2->X264_RC_ABR;
+
+				auto qcomp = PVRProp<float>({ S, QCOMP_KEY });
+				if (qcomp >= 0)
+					par.rc.f_qcompress = qcomp;
+
+				auto qp = PVRProp<int>({ S, QP_KEY });
+				if (qp > 0) {
+					par.rc.i_qp_constant = qp;
+					par.rc.i_qp_min = qp - 5;
+					par.rc.i_qp_max = qp + 5;
+				}
+
+
+				auto br = PVRProp<int>({ S, BITRATE_KEY });
+				if (br > 0)
+					par.rc.i_bitrate = br;
+
+				auto ki_max = PVRProp<int>({ S, KEYINT_MAX_KEY });
+				if (ki_max > 0)
+					par.i_keyint_max = ki_max;
+
+				par.b_intra_refresh = PVRProp<bool>({ S, I_REFRESH_KEY }) ? 1 : 0;
+			}
+			res = x264_param_apply_profile(&par, PVRProp<string>({ S, PROFILE_KEY }).c_str());
+
+
+
+			par.rc.i_rc_method = 1;
+
+			par.rc.i_bitrate = 1000;
+			par.rc.i_vbv_max_bitrate = 1200;
+			par.rc.i_vbv_buffer_size = 20000;
+			par.rc.f_vbv_buffer_init = 0.9f;
+
+			//par.rc.i_qp_constant = 25;
+			//par.rc.i_qp_min = par.rc.i_qp_constant - 1;
+			//par.rc.i_qp_max = par.rc.i_qp_constant + 1;
+			//par.rc.f_qcompress = 0.0f;
+
+			//par.rc.f_rf_constant = 12;
+			//par.rc.f_rf_constant_max = 13;
+			par.rc.f_rf_constant = 24;
+			par.rc.f_rf_constant_max = 26;
+
+
+
+			//par.nalu_process           TODO: callback available!!!!!!!!! manage a udp thread inside here, then dispatch sends
+			// use opaque pointer to know from which frame a nal belongs
+			// use i_first_mb to sort slice nals
+			// still need to find out how to sort non-slice nals
+
+			vector<vector<uint8_t *>> vvbuf;
+			for (size_t i = 0; i < nVFrames; i++) {
+				x264_picture_alloc(&vFrames[i], FMT, width, height);
+				vvbuf.push_back({ vFrames[i].img.plane[0], vFrames[i].img.plane[1], vFrames[i].img.plane[2] });
+			}
+			PVRStartGraphics(vvbuf, width, height);
+			
+			auto *enc = x264_encoder_open(&par);
+
+			x264_param_t outPar;
+			x264_encoder_parameters(enc, &outPar);
+			PVR_DB("[PVRStartStreamer th] Render size: " + to_string(width) + "x" + to_string(height));
+			PVR_DB("[PVRStartStreamer th] Using encoding level: " + to_string(outPar.i_level_idc));
+
+			x264_nal_t *nals;
+			int nNals;
+			res = x264_encoder_headers(enc, &nals, &nNals);
+			vector<uint8_t> vheader;
+			for (size_t i = 0; i < nNals; i++)
+				vheader.insert(vheader.end(), nals[i].p_payload, nals[i].p_payload + nals[i].i_payload);  // WARNING: including SEI nal
+			headerCb(vheader);
+
+			io_service svc;
+			tcp::socket skt(svc);
+			tcp::acceptor acc(svc, { tcp::v4(), PVRProp<uint16_t>({ VIDEO_PORT_KEY }) });
+			acc.accept(skt);
+
+			//udp::socket skt(svc);
+			//udp::endpoint remEP(address::from_string(ip), port);
+			//skt.open(udp::v4());
+
+			int lastWhichFrame = 0;
+			//uint8_t buf[256 * 256];
+			uint8_t extraBuf[8 + 16 + 4 + 20 + 8 + 8];
+			auto pbuf = reinterpret_cast<int64_t *>(&extraBuf[0]); // pts buf ref
+			auto qbuf = reinterpret_cast<float *>(&extraBuf[8]); // quat buf ref
+			auto nbuf = reinterpret_cast<int *>(&extraBuf[8 + 16]);
+			auto fpsbuf = reinterpret_cast<float *>(&extraBuf[8 + 16 + 4]);
+			auto tDelaysBuf = reinterpret_cast<float *>(&extraBuf[8 + 16 + 4 + 20]);
+			auto timestamp = reinterpret_cast<int64_t *>(&extraBuf[8 + 16 + 4 + 20 + 8]);
+			
+			PVR_DB("[PVRStartStreamer FF th] Inint PVRffmpeg class and start reading Pipes...");
+
+			PVRffmpeg ffmpeg = PVRffmpeg();
+			ffmpeg.initFFMPEGChildProcess();
+
+			ffmpeg.startSTDErrPipeReader();
+			ffmpeg.startSTDOutPipeReader();
+			
+			asio::error_code ec;
+			//ofstream outp("C:\\Users\\narni\\mystream.h264", ofstream::binary);/////////////////////////////////////////////
+			while ((whichFrame == lastWhichFrame || quatQueue.size() == 0) && videoRunning) // for first frame
+				sleep_for(500us);
+			while (videoRunning)
+			{
+				//PVRUpdTexWraps();
+				static Clk::time_point oldtime, oldtimeStreamer;
+				oldtime = Clk::now();
+				oldtimeStreamer = Clk::now();
+
+				//if ((lastWhichFrame + 1) % nVFrames != whichFrame)
+					//PVR_DB_I("[PVRStartStreamer th] Skipped frame! Please re-tune the encoder parameters lWf:" + to_string(lastWhichFrame) + ", nVfs:" + to_string(nVFrames) + ", wF:" + to_string(whichFrame));
+				lastWhichFrame = whichFrame;
+				
+				if (!ffmpeg.isChildProcessRunning())
+				{
+					ffmpeg.CreateFFMPEGChildProcess();
+					PVR_DB("[PVRStartStreamer FF th] FFMPEGChildProcess Created");
+				}
+
+				whichFrameMtxs[lastWhichFrame].lock();   // LOCK
+
+				PVR_DB("[PVRStartStreamer FF th] Writing to Pipe of frame: " +
+					to_string(lastWhichFrame) +
+					" DataWritten: " +
+					to_string(100*ffmpeg.WriteToPipe(&vFrames[lastWhichFrame], height)) + "%" );
+
+				auto totSz = 5;
+				//auto totSz = x264_encoder_encode(enc, &nals, &nNals, &vFrames[lastWhichFrame], &outPic);
+								
+				whichFrameMtxs[lastWhichFrame].unlock(); // UNLOCK
+				
+				fpsEncoder = (1000000000.0 / (Clk::now() - oldtime).count());
+
+				oldtime = Clk::now();
+
+				if (totSz > 0)
+				{
+					//PVR_DB("[PVRStartStreamer th] Rendering lWf:" + to_string(lastWhichFrame) + ", wF:" + to_string(whichFrame));
+					quatQueueMutex.lock();   // LOCK
+					//while ((quatQueue.size() != 0) && (quatQueue.front().first.first < outPic.i_pts)) // handle skipped frames
+					//{
+						//PVR_DB("[PVRStartStreamer th] handle skipped frames qPts:" + to_string(quatQueue.front().first.first) + ", outpicPts:" + to_string(outPic.i_pts));
+						//quatQueue.pop();
+					//}
+					quatQueueMutex.unlock(); // UNLOCK
+
+					if (quatQueue.size() != 0)
+					{
+						quatQueueMutex.lock();
+						auto outPts = quatQueue.front().first.first;
+						auto time = quatQueue.front().first.second.first;
+						auto renderDur = quatQueue.front().first.second.second;
+						auto quat = quatQueue.front().second;
+						quatQueue.pop();
+						quatQueueMutex.unlock();
+
+						*pbuf = outPts;
+						qbuf[0] = quat.w();
+						qbuf[1] = quat.x();
+						qbuf[2] = quat.y();
+						qbuf[3] = quat.z();
+						*nbuf = totSz;
+						fpsbuf[0] = fpsSteamVRApp;		// VRApp FPS
+						fpsbuf[1] = fpsEncoder;			// Encoder FPS
+						fpsbuf[2] = fpsStreamWriter;	// StreamWriter FPS
+						fpsbuf[3] = fpsStreamer;		// Streamer FPS
+						fpsbuf[4] = fpsRenderer;
+						tDelaysBuf[0] = renderDur;		// Renderer Delay
+						tDelaysBuf[1] = (float)((Clk::now() - time).count() / 1000000.0);	// Encoder Delay
+						*timestamp = (int64_t)duration_cast<microseconds>(system_clock::now().time_since_epoch()).count(); // FrameSent TimeStamp
+
+						write(skt, buffer(extraBuf), ec);
+						//write(skt, buffer(nals->p_payload, totSz), ec);
+						write(skt, buffer("00000", 5), ec);
+
+						PVR_DB("[PVRStartStreamer th] wrote render to socket: Pts:[Tenc:"
+							+ str_fmt("%.2f", tDelaysBuf[1])
+							+ " ms, Trend:"
+							+ str_fmt("%.2f", renderDur)
+							+ " ms]"
+							+ to_string(outPts) + ", Size: "
+							+ to_string(sizeof(extraBuf)) + "," + to_string(totSz));
+
+						if (ec.value() != 0 && videoRunning)
+							PVR_DB("Write failed: " + ec.message() + " Code: " + to_string(ec.value()));
+						if (ec == error::connection_aborted || ec == error::connection_reset)
+						{
+							videoRunning = false;
+							//onErrCb();
+						}
+
+						//outp.write((char*)nals->p_payload, totSz);/////////////////////////////////////////////////////////
+					}
+				}
+				fpsStreamWriter = (1000000000.0 / (Clk::now() - oldtime).count());
+				//PVR_DB("[PVRStartStreamer th] ------------------- StreamWriting @ FPS: " + to_string(fpsStreamWriter) + " Encoding @ FPS : " + to_string(fpsEncoder) + " VRApp Running @ FPS : " + to_string(fpsSteamVRApp));
+				oldtime = Clk::now();
+
+				while ((whichFrame == lastWhichFrame || quatQueue.size() == 0) && videoRunning)
+					sleep_for(500us);
+
+				fpsStreamer = (1000000000.0 / (Clk::now() - oldtimeStreamer).count());
+				oldtimeStreamer = Clk::now();
+			}
+			x264_encoder_close(enc);
+
+			PVRStopGraphics();
+
+			//outp.close();//////////////////////////////////////////////////////////////////////////////////////////
+
+			for (auto frame : vFrames)
+				x264_picture_clean(&frame);
+		});
+	}*/	
 }
 
-void PVRProcessFrame(uint64_t hdl, Quaternionf quat) {
+void PVRProcessFrame(PVRffmpeg* mPVRffmpeg, SharedTextureHandle_t hdl, Quaternionf quat) {
+
+	mPVRffmpeg->ProcessSharedHandle(hdl, quat);
+
 	if (videoRunning) {
 
 		static Clk::time_point oldtimeVRApp = Clk::now();

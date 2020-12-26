@@ -1,0 +1,5 @@
+in Debug Build,
+
+Replace _DEBUG preProcessor with NDEBUG & PVR_DEBUG
+
+Code Generation RuntimeLibrary -> MultiThreaded DLL (/MD) (initially was /MDd)

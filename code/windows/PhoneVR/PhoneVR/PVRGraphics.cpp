@@ -1,24 +1,5 @@
 #include "PVRGraphics.h"
 
-#include <d3d11.h>
-
-#include <amp_graphics.h>
-#include "PVRGlobals.h"
-#include <optional>
-
-
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "d3dcompiler.lib")
-
-
-using namespace std;
-using namespace this_thread;
-using namespace concurrency;
-using namespace concurrency::direct3d;
-using namespace concurrency::graphics;
-using namespace concurrency::graphics::direct3d;
-
 namespace {
 	ID3D11Device *dxDev;
 	ID3D11DeviceContext *dxDevCtx;
@@ -37,21 +18,6 @@ namespace {
 	bool gRunning = false;
 	thread *gThr;
 }
-
-#define RELEASE(obj) if(obj) { obj->Release(); obj = nullptr; }
-#define OK_OR_EXEC(call, func) if(FAILED(call)) func()
-#define OK_OR_DEBUG(call) { HRESULT hr = call; OK_OR_EXEC(hr, [hr] { PVR_DB_I("######### DirectX Error: #########"); debugHr(hr); }); }
-#define QUERY(from, to) OK_OR_DEBUG(from->QueryInterface(__uuidof(to), reinterpret_cast<void**>(&to)))
-//#define PARENT(child, parent) OK_OR_DEBUG(child->GetParent(__uuidof(parent), reinterpret_cast<void**>(&parent)))
-//#define OK_OR_REINIT(call) OK_OR_EXEC(call, [] { PVRReleaseDX(); PVRInitDX(outID); })
-
-// RGB to YUV constants
-#define wr 0.299f
-#define wb 0.114f
-#define wg 0.587f // 1.0 - wr - wb;
-#define ku 0.492f //0.436 / (1.0 - wb);
-#define kv 0.877f //0.615 / (1.0 - wr);
-
 
 void PVRInitDX() {
 	auto fl = D3D_FEATURE_LEVEL_11_0;
@@ -72,7 +38,8 @@ void PVRUpdTexHdl(uint64_t texHdl, int whichBuf) {
 
 void PVRStartGraphics(vector<vector<uint8_t *>> vvbuf, uint32_t inpWidth, uint32_t inpHeight) {
 	gRunning = true;
-	gThr = new thread([=] {
+	gThr = new std::thread([=] {
+
 		vector<vector<array_view<uint, 2>>> yuvBufViews;   // output
 
 		for (auto vbuf : vvbuf) // divide width by 4: store 4 bytes in an uint

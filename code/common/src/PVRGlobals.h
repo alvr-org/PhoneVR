@@ -67,13 +67,13 @@ void pvrInfo(T i) {
 void pvrdebugClear();
 
 // PVR_DB only to Debug Log file, PVR_DB_I both to Log file and Info file
-#if defined _DEBUG
+#if defined PVR_DEBUG
 	#define PVR_DB(msg) pvrdebug(msg)
 #else
 	#define PVR_DB(msg)
 #endif
 
-#if defined _DEBUG
+#if defined PVR_DEBUG
     #define PVR_DB_I(msg) {pvrdebug(msg);pvrInfo(msg);}
 #else
 	#define PVR_DB_I(msg) pvrInfo(msg);

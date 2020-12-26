@@ -35,8 +35,10 @@ class HMD : public ITrackedDeviceServerDriver, public IVRDisplayComponent, publi
 	Clk::time_point oldTime = Clk::now();
 	uint64_t frmCount = 0;
 	bool waitForPresent = false;
+#if defined NOT_DEV
+	//TCPTalker talker;
+#endif
 
-	TCPTalker talker;
 	unique_ptr<TimeBomb> addDataBomb;
 
 	DriverPose_t pose = {};
@@ -53,8 +55,12 @@ class HMD : public ITrackedDeviceServerDriver, public IVRDisplayComponent, publi
 		VRServerDriverHost()->VendorSpecificEvent(objId, VREvent_DriverRequestedQuit, { 0, 0 }, 0);
 	}
 
+	PVRffmpeg* gPVRffmpeg = new PVRffmpeg();
+
 public:
-	HMD(string ip) : talker(PVRProp<uint16_t>({ CONN_PORT_KEY }), [=](auto msgType, auto data)
+	HMD(string ip)
+#if defined NOT_DEV
+				   : talker(PVRProp<uint16_t>({ CONN_PORT_KEY }), [=](auto msgType, auto data)
 	{
 		if (msgType == PVR_MSG::DISCONNECT) {
 			// TODO: send remove device event
@@ -103,7 +109,9 @@ public:
 		if (err.value() == 104) {
 			terminate();
 		}
-	}, false, ip), devIP(ip)
+	}, false, ip),
+#endif
+	: devIP(ip)
 	{
 
 		PVR_DB_I("HMD initializing");
@@ -120,9 +128,9 @@ public:
 
 
 		vstreamDT = 1'000'000us / PVRProp<int>({ GAME_FPS_KEY });
-
+#if defined NOT_DEV
 		talker.send(PVR_MSG::PAIR_ACCEPT);
-
+#endif
 		PVRInitDX();
 
 		PVR_DB_I("HMD initialized");
@@ -132,7 +140,9 @@ public:
 		PVR_DB_I("HMD destroying");
 		//PVRCloseStreamer();
 		PVRReleaseDX();
+#if defined NOT_DEV
 		talker.send(PVR_MSG::DISCONNECT);
+#endif
 		PVR_DB_I("HMD destroyed");
 	}
 
@@ -189,6 +199,7 @@ public:
 		//addDataBomb->ignite(false);
 		
 		objId = objectId;
+		/* Commented for Bypassing Negotiation : FFMPEG
 		auto oldTime = Clk::now();
 
 		PVR_DB_I("[Activating HMD]: waiting for additionalData from Client...");
@@ -224,6 +235,39 @@ public:
 			PVR_DB_I("[Activating HMD]: Timeout didnt recv additionalData... for " + to_string(timeout.count()) + "secs");
 			return VRInitError_Unknown;
 		}
+		//[HMD::talker] : addData : Viewport : left : -1.440970  top : 2.207398  right : 1.767124  bottom : -1.549411
+		//[HMD::talker] : IPD : 0.064000, 1704x960
+		*/
+
+		// DEV: Overriting Additonal Data
+		rdrW = 1704;
+		rdrH = 960;
+		projRect[0] = -1.440970;
+		projRect[1] = 2.207398;
+		projRect[2] = 1.767124;
+		projRect[3] = -1.549411;
+
+		PVR_DB_I("[DEV][HMD::talker]: addData: Viewport:  left: " + to_string(projRect[0]) + "  top: " + to_string(projRect[1]) +
+			"  right: " + to_string(projRect[2]) + "  bottom: " + to_string(projRect[3]));
+		ipd = 0.064000;
+		PVR_DB_I("[DEV][HMD::talker]: IPD: " + to_string(ipd));
+
+		//Executing Success Activate ();
+		PVR_DB_I("[DEV][Activating HMD]: Rcvd addotionalData... Starting PVRStartStreamer with [WxH]:" + to_string(rdrW) + "x" + to_string(rdrH));
+
+		VRProperties()->SetFloatProperty(propCont, Prop_UserIpdMeters_Float, ipd);
+
+		/*PVRStartStreamer(devIP, rdrW, rdrH, [=](auto v) {
+			talker.send(PVR_MSG::HEADER_NALS, v);
+		}, [=] { terminate(); });*/
+		//PVRStartReceiveData(devIP, &pose, &objId);
+		// DEV END
+		gPVRffmpeg->setSettings(rdrW, rdrH, devIP, 40000);
+		gPVRffmpeg->Stream();
+		//PVRffmpeg.init(devIP, rdrW, rdrH);
+
+		PVR_DB_I("[DEV][Activating HMD]: HMD activated with id: " + to_string(objectId));
+		return VRInitError_None;
 	}
 
 	virtual void Deactivate() override {
@@ -327,7 +371,7 @@ public:
 
 		auto now = Clk::now();
 		//if (now - oldTime > vstreamDT) {
-		PVRProcessFrame(backBuffer, newFrameQuat);
+		PVRProcessFrame(gPVRffmpeg, backBuffer, newFrameQuat);
 		oldTime = now;
 
 		//}
@@ -337,7 +381,7 @@ public:
 		//newFrameQuat = Quaternionf(latestQuat); // poll here the quaternion used in the next frame
 		//VRServerDriverHost()->TrackedDevicePoseUpdated(objId, GetPose(), sizeof(DriverPose_t));
 		//waitForPresent = false;
-	//VRServerDriverHost()->VsyncEvent(0.0028);
+		//VRServerDriverHost()->VsyncEvent(0.0028);
 	}
 
 	/** Block until the last presented buffer start scanning out. */
@@ -364,7 +408,7 @@ class ServerProvider : public IServerTrackedDeviceProvider {
 
 public:
 	virtual EVRInitError Init(IVRDriverContext *drvCtx) override {
-		PVR_DB_I("[ServerProvider::Init] Initializing server");
+		PVR_DB_I("[ServerProvider::Init] Initializing IServerTrackedDeviceProvider server");
 
 		bool hmdPaired = false;
 		auto timeout = (seconds)(PVRProp<int>({ CONN_TIMEOUT }));
@@ -373,6 +417,8 @@ public:
 
 		// any exception is handled by the called method
 		// Start Listening for any incoming connection on CONN_PORT(def:33333)
+
+		/* Commented for Dev Testing : FFMPEG
 		PVRStartConnectionListener([&](auto ip, auto msgType) {
 			if (msgType == PVR_MSG::PAIR_HMD && !hmd) {
 				//VR_INIT_SERVER_DRIVER_CONTEXT(drvCtx);
@@ -416,7 +462,26 @@ public:
 			PVRStopConnectionListener();
 			PVR_DB_I("[ServerProvider::Init] Pairing failed! Cause: timeout ... for " + to_string(timeout.count()) + "secs");
 			return VRInitError_Init_HmdNotFound;
+		}*/
+
+		// DEV
+		vr::EVRInitError eError = vr::InitServerDriverContext(drvCtx);
+		if (eError == vr::VRInitError_None)
+		{
+			hmd = new HMD("127.0.0.1");
+			hmdPaired = VRServerDriverHost()->TrackedDeviceAdded("0", TrackedDeviceClass_HMD, hmd);
+			if (!hmdPaired)
+			{
+				PVR_DB_I("[ServerProvider::Init::PVRStartConnectionListener] Error: could not activate HMD");
+			}
+			else
+				hmdBomb.defuse();
 		}
+		else
+		{
+			PVR_DB_I("[ServerProvider::Init::PVRStartConnectionListener] Error: could not InitServerDriverContext");
+		}
+		// DEV
 
 		PVR_DB_I("[ServerProvider::Init] Server initialized");
 		return VRInitError_None;
@@ -448,8 +513,8 @@ public:
 	}
 
 	virtual bool ShouldBlockStandbyMode() override {
-		//PVR_DB("Block standby mode: false");
-		return false;
+		PVR_DB("Block standby mode: True");
+		return true;
 	}
 
 	virtual void EnterStandby() override {
@@ -470,6 +535,14 @@ void *HmdDriverFactory(const char *iName, int *retCode) {
 		*retCode = VRInitError_Driver_Failed;
 		return nullptr;
 	}*/
+
+	PVR_DB("------------------------------------");
+	while (!::IsDebuggerPresent())
+	{
+		PVR_DB("Waiting for debugger to attach...");
+		::Sleep(100);
+	}
+
 	if (!PVRProp<bool>({ ENABLE_KEY })) {
 		PVR_DB_I("PhoneVR server disabled!");
 		*retCode = VRInitError_Driver_Failed;
