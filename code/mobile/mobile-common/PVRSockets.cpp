@@ -28,72 +28,103 @@ extern float fpsStreamDecoder = 0.0;
 extern float fpsRenderer = 0.0;
 
 vector<float> DequeueQuatAtPts(int64_t pts) {
+
     vector<float> quat;
-    while (quatQueue.size() > 0 && quatQueue.front().first <= pts) {
-        quat = quatQueue.front().second;
-        quatQueue.pop();
+    try {
+        while (quatQueue.size() > 0 && quatQueue.front().first <= pts) {
+            quat = quatQueue.front().second;
+            quatQueue.pop();
+        }
+
     }
+    catch(exception e) {
+        PVR_DB("PVRSockets_DequeueQuatAtPts:: Caught Exception: " + string(e.what()));
+    }
+    catch(...) {
+        PVR_DB("PVRSockets_DequeueQuatAtPts:: Caught Exception: from Generic Handler");
+    }
+
     return quat;
 }
 
 void SendAdditionalData(vector<uint16_t> maxSize, vector<float> fov, float ipd) {
-    if (talker) {
-        vector<uint8_t> v(2 * 2 + 4 * 4 + 4);
-        memcpy(&v[0], &maxSize[0], 2 * 2);
-        memcpy(&v[2 * 2], &fov[0], 4 * 4);
-        memcpy(&v[2 * 2 + 4 * 4], &ipd, 4);
-        if (!talker->send(PVR_MSG::ADDITIONAL_DATA, v)) PVR_DB_I(
-                "[PVRSockets::SendAdditionalData] Failed to send AddData");
+    try {
+        if (talker) {
+            vector<uint8_t> v(2 * 2 + 4 * 4 + 4);
+            memcpy(&v[0], &maxSize[0], 2 * 2);
+            memcpy(&v[2 * 2], &fov[0], 4 * 4);
+            memcpy(&v[2 * 2 + 4 * 4], &ipd, 4);
+            if (!talker->send(PVR_MSG::ADDITIONAL_DATA, v)) PVR_DB_I(
+                    "[PVRSockets::SendAdditionalData] Failed to send AddData");
 
-        headerBomb.ignite(false);
+            headerBomb.ignite(false);
+        }
+    }
+    catch(exception e) {
+        PVR_DB("PVRSockets_SendAdditionalData:: Caught Exception: " + string(e.what()));
+    }
+    catch(...) {
+        PVR_DB("PVRSockets_SendAdditionalData:: Caught Exception: from Generic Handler");
     }
 }
 
 void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(),
                        void(*headerCb)(uint8_t *, size_t), void(*unwindSegue)()) {
-    pcIP = ip; //ip will become invalid afterwards, so I capture a string copy
-    std::thread([=] {
-        try {
-            if (talker) {
-                talker->send(PVR_MSG::DISCONNECT);
-                delete talker;
-            }
-            talker = new TCPTalker(port, [=](PVR_MSG msgType, vector<uint8_t> data) {
-                if (msgType == PVR_MSG::PAIR_ACCEPT) {
-                    PVRStopAnnouncer();
-                    pcIP = talker->getIP();
-                    segueCb();
-                } else if (msgType == PVR_MSG::HEADER_NALS) {
-                    headerCb(&data[0], data.size());
-                    headerBomb.defuse();
-                } else if (msgType == PVR_MSG::DISCONNECT) {
-                    unwindSegue();
+    try {
+        pcIP = ip; //ip will become invalid afterwards, so I capture a string copy
+        std::thread([=] {
+            try {
+                if (talker) {
+                    talker->send(PVR_MSG::DISCONNECT);
+                    delete talker;
                 }
-            }, [](std::error_code err) {
-                PVR_DB_I("[PVRSockets::PVRStartAnnouncer] TCPTalker error: " + err.message());
-            }, true, pcIP);
+                talker = new TCPTalker(port, [=](PVR_MSG msgType, vector<uint8_t> data) {
+                    if (msgType == PVR_MSG::PAIR_ACCEPT) {
+                        PVRStopAnnouncer();
+                        pcIP = talker->getIP();
+                        segueCb();
+                    } else if (msgType == PVR_MSG::HEADER_NALS) {
+                        headerCb(&data[0], data.size());
+                        headerBomb.defuse();
+                    } else if (msgType == PVR_MSG::DISCONNECT) {
+                        unwindSegue();
+                    }
+                }, [](std::error_code err) {
+                    PVR_DB_I("[PVRSockets::PVRStartAnnouncer] TCPTalker error: " + err.message());
+                }, true, pcIP);
 
-            io_service svc;
-            udp::socket skt(svc);
+                io_service svc;
+                udp::socket skt(svc);
 
-            skt.open(udp::v4());
+                skt.open(udp::v4());
 
-            skt.set_option(socket_base::broadcast(true));
+                skt.set_option(socket_base::broadcast(true));
 
-            uint8_t buf[8] = {'p', 'v', 'r', PVR_MSG::PAIR_HMD};
-            auto vers = PVR_CLIENT_VERSION;
-            memcpy(&buf[4], &vers, 4);
+                uint8_t buf[8] = {'p', 'v', 'r', PVR_MSG::PAIR_HMD};
+                auto vers = PVR_CLIENT_VERSION;
+                memcpy(&buf[4], &vers, 4);
 
-            announcing = true;
+                announcing = true;
 //#if defined _DEBUG
-            PrintNetworkInterfaceInfos();
+                PrintNetworkInterfaceInfos();
 //#endif
-            PVRAnnounceToAllInterfaces(skt, buf, port);
-        }
-        catch (exception &e) {
-            PVR_DB_I("[PVRSockets::PVRStartAnnouncer] caught Exception: " + to_string(e.what()));
-        }
-    }).detach();
+                PVRAnnounceToAllInterfaces(skt, buf, port);
+            }
+            catch (exception &e) {
+                PVR_DB_I(
+                        "PVRSockets_PVRStartAnnouncer::NewThread caught Exception: " + to_string(e.what()));
+            }
+            catch(...) {
+                PVR_DB("PVRSockets_PVRStartAnnouncer::NewThread Caught Exception: from Generic Handler");
+            }
+        }).detach();
+    }
+    catch(exception e) {
+        PVR_DB("PVRSockets_PVRStartAnnouncer:: Caught Exception: " + string(e.what()));
+    }
+    catch(...) {
+        PVR_DB("PVRSockets_PVRStartAnnouncer:: Caught Exception: from Generic Handler");
+    }
 }
 
 void
@@ -182,32 +213,43 @@ PVRAnnounceToAllInterfaces(udp::socket &skt, uint8_t *buf, const uint16_t &port)
         PVR_DB_I("[PVRSockets::PVRStartAnnouncer::PVRAnnounceToAllInterfaces] caught Exception: " +
                  to_string(e.what()));
     }
+    catch(...) {
+        PVR_DB("[PVRSockets::PVRStartAnnouncer::PVRAnnounceToAllInterfaces]:: Caught Exception: from Generic Handler");
+    }
 }
 
 void PrintNetworkInterfaceInfos() {
-    struct ifaddrs *ifap;
-    if (getifaddrs(&ifap) == 0) {
-        struct ifaddrs *p = ifap;
-        while (p) {
-            uint32 ifaAddr = SockAddrToUint32(p->ifa_addr);
-            uint32 maskAddr = SockAddrToUint32(p->ifa_netmask);
-            uint32 dstAddr = SockAddrToUint32(p->ifa_dstaddr);
-            if (ifaAddr > 0) {
-                char ifaAddrStr[32];
-                Inet_NtoA(ifaAddr, ifaAddrStr);
-                char maskAddrStr[32];
-                Inet_NtoA(maskAddr, maskAddrStr);
-                char dstAddrStr[32];
-                Inet_NtoA(dstAddr, dstAddrStr);
+    try {
+        struct ifaddrs *ifap;
+        if (getifaddrs(&ifap) == 0) {
+            struct ifaddrs *p = ifap;
+            while (p) {
+                uint32 ifaAddr = SockAddrToUint32(p->ifa_addr);
+                uint32 maskAddr = SockAddrToUint32(p->ifa_netmask);
+                uint32 dstAddr = SockAddrToUint32(p->ifa_dstaddr);
+                if (ifaAddr > 0) {
+                    char ifaAddrStr[32];
+                    Inet_NtoA(ifaAddr, ifaAddrStr);
+                    char maskAddrStr[32];
+                    Inet_NtoA(maskAddr, maskAddrStr);
+                    char dstAddrStr[32];
+                    Inet_NtoA(dstAddr, dstAddrStr);
 
-                PVR_DB_I("[Ancr]      Found interface:  name=[" + string(p->ifa_name) +
-                         "] desc=[unavailable] address=[" + ifaAddrStr +
-                         "] netmask=[" + maskAddrStr +
-                         "] broadcastAddr=[" + dstAddrStr + "]");
+                    PVR_DB_I("[Ancr]      Found interface:  name=[" + string(p->ifa_name) +
+                             "] desc=[unavailable] address=[" + ifaAddrStr +
+                             "] netmask=[" + maskAddrStr +
+                             "] broadcastAddr=[" + dstAddrStr + "]");
+                }
+                p = p->ifa_next;
             }
-            p = p->ifa_next;
+            freeifaddrs(ifap);
         }
-        freeifaddrs(ifap);
+    }
+    catch(exception e) {
+        PVR_DB("PVRSockets_PrintNetworkInterfaceInfos:: Caught Exception: " + string(e.what()));
+    }
+    catch(...) {
+        PVR_DB("PVRSockets_PrintNetworkInterfaceInfos:: Caught Exception: from Generic Handler");
     }
 }
 
@@ -241,6 +283,9 @@ void PVRStartSendSensorData(uint16_t port, bool(*getSensorData)(float *, float *
         catch (exception &e) {
             PVR_DB_I("[PVRStartSendSensorData] caught Exception: " + to_string(e.what()));
         }
+        catch(...) {
+            PVR_DB("PVRSockets_PVRStartSendSensorData:: Caught Exception: from Generic Handler");
+        }
     }).detach();
 }
 
@@ -249,14 +294,30 @@ bool PVRIsVidBufNeeded() {
 }
 
 void PVREnqueueVideoBuf(EmptyVidBuf eBuf) {
-    emptyVBufs.push(eBuf);
+    try {
+        emptyVBufs.push(eBuf);
+    }
+    catch(exception e) {
+        PVR_DB("PVRSockets_PVREnqueueVideoBuf:: Caught Exception: " + string(e.what()));
+    }
+    catch(...) {
+        PVR_DB("PVRSockets_PVREnqueueVideoBuf:: Caught Exception: from Generic Handler");
+    }
 }
 
 FilledVidBuf PVRPopVideoBuf() {
-    if (!filledVBufs.empty()) {
-        auto fbuf = filledVBufs.front();
-        filledVBufs.pop();
-        return fbuf;
+    try {
+        if (!filledVBufs.empty()) {
+            auto fbuf = filledVBufs.front();
+            filledVBufs.pop();
+            return fbuf;
+        }
+    }
+    catch(exception e) {
+        PVR_DB("PVRSockets_PVRPopVideoBuf:: Caught Exception: " + string(e.what()));
+    }
+    catch(...) {
+        PVR_DB("PVRSockets_PVRPopVideoBuf:: Caught Exception: from Generic Handler");
     }
     return {-1, 0, 0}; //idx == -1 -> no buffers available
 }
@@ -355,19 +416,30 @@ void PVRStartReceiveStreams(uint16_t port) {
         catch (exception &e) {
             PVR_DB_I("[PVRStartReceiveStreams] caught Exception: " + to_string(e.what()));
         }
+        catch(...) {
+            PVR_DB("PVRSockets_PVRStartReceiveStreams:: Caught Exception: from Generic Handler");
+        }
     });
 }
 
 void PVRStopStreams() {
-    // talker sends disconnects at segue
-    delMtx.lock();
-    if (videoSvc)
-        videoSvc->stop(); //todo: use mutex
-    delMtx.unlock();
+    try {
+        // talker sends disconnects at segue
+        delMtx.lock();
+        if (videoSvc)
+            videoSvc->stop(); //todo: use mutex
+        delMtx.unlock();
 
-    if (strThr) {
-        strThr->join();
-        delete strThr;
-        strThr = nullptr;
+        if (strThr) {
+            strThr->join();
+            delete strThr;
+            strThr = nullptr;
+        }
+    }
+    catch(exception e) {
+        PVR_DB("PVRSockets_PVRStopStreams:: Caught Exception: " + string(e.what()));
+    }
+    catch(...) {
+        PVR_DB("PVRSockets_PVRStopStreams:: Caught Exception: from Generic Handler");
     }
 }
