@@ -55,8 +55,9 @@ namespace {
     const float farP = 10;
 
     Matrix4f Perspective(const Rectf &fov) {
-        Matrix4f res = Matrix4f::Zero();
+        Matrix4f res;
         try {
+            res = Matrix4f::Zero();
             float left = -tan(fov.left * deg2rad) * nearP;
             float top = tan(fov.top * deg2rad) * nearP;
             float right = tan(fov.right * deg2rad) * nearP;
@@ -146,32 +147,40 @@ namespace {
 }
 
 unsigned int PVRInitSystem(int maxW, int maxH, float offFov, bool reproj, bool debug) {
-    pvrState = PVR_STATE_INITIALIZATION;
-    gvrApi->InitializeGl();
-    //auto fjdkl = gvrApi->IsFeatureSupported(GVR_FEATURE_MULTIVIEW);
 
-    ::offFov = offFov;
-    ::reproj = reproj;
-    debugMode = debug;
+    unsigned int videoTex;
+    try {
+        pvrState = PVR_STATE_INITIALIZATION;
+        gvrApi->InitializeGl();
+        //auto fjdkl = gvrApi->IsFeatureSupported(GVR_FEATURE_MULTIVIEW);
 
-    InitGVRRendering();
+        ::offFov = offFov;
+        ::reproj = reproj;
+        debugMode = debug;
 
-    //block until receive nal headers. todo: optimize timing
-    SendAdditionalData({(uint16_t)maxW, (uint16_t)maxH}, leftQuad,
-                       gvrApi->GetEyeFromHeadMatrix(GVR_LEFT_EYE).m[0][3] * 2); // extracting IPD
+        InitGVRRendering();
 
-    auto videoTex = genTexture(true);
-    videoRdr[0].reset(new Renderer({{videoTex, true}}, FS_PT, 0.0f, 0.5f));
-    videoRdr[1].reset(new Renderer({{videoTex, true}}, FS_PT, 0.5f, 1.0f));
+        //block until receive nal headers. todo: optimize timing
+        SendAdditionalData({(uint16_t) maxW, (uint16_t) maxH}, leftQuad,
+                           gvrApi->GetEyeFromHeadMatrix(GVR_LEFT_EYE).m[0][3] *
+                           2); // extracting IPD
 
-    gvrApi->ResumeTracking();
+        videoTex = genTexture(true);
+        videoRdr[0].reset(new Renderer({{videoTex, true}}, FS_PT, 0.0f, 0.5f));
+        videoRdr[1].reset(new Renderer({{videoTex, true}}, FS_PT, 0.5f, 1.0f));
+
+        gvrApi->ResumeTracking();
+    }
+    catch(exception e) {
+        PVR_DB("PVRRenderer_InitGVRRendering:: Caught Exception: " + string(e.what()));
+    }
 
     return videoTex;
 }
 
 void PVRRender(int64_t pts) {
-    PVR_DB("Rendering " + to_string(pts));
     try {
+        PVR_DB("Rendering " + to_string(pts));
         if (pvrState == PVR_STATE_RUNNING) {
             static Clk::time_point oldtime = Clk::now();
 
