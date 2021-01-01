@@ -94,13 +94,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
         }
     }
     catch( exception e){
-        PVR_DB("JNI_OnLoad::FindClass:: Caught Exception: " + string(e.what()));
+        PVR_DB_I("JNI_OnLoad::FindClass:: Caught Exception: " + string(e.what()));
     }
-    catch (...)
-    {
-        PVR_DB("JNI_OnLoad::FindClass:: Caught Exception: dunno wtf is caught");
-    }
-
     return JNI_VERS;
 }
 
@@ -158,10 +153,7 @@ void callJavaMethod(const char *name) {
         }
     }
     catch(exception e){
-        PVR_DB("JNI_callJavaMethod::GetStaticMethodID:: Caught Exception: " + string(e.what()));
-    }
-    catch(...){
-        PVR_DB("JNI_callJavaMethod::GetStaticMethodID:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_callJavaMethod::GetStaticMethodID:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -170,7 +162,7 @@ extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3,
         float ctd1, float ctd2,
         int td1, int td2)
 {
-    PVR_DB("JNI Calling updataJavaTextViewFPS: " + to_string(f1) + " " + to_string(f2) + " " + to_string(f3)+ " " + to_string(cf1) + " " + to_string(cf2)+ " " + to_string(cf3) +" " + to_string(cf4));
+    PVR_DB_I("JNI Calling updataJavaTextViewFPS: " + to_string(f1) + " " + to_string(f2) + " " + to_string(f3)+ " " + to_string(cf1) + " " + to_string(cf2)+ " " + to_string(cf3) +" " + to_string(cf4));
     try {
         bool isMainThread = true;
         JNIEnv *env;
@@ -243,10 +235,7 @@ extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3,
         }
     }
     catch(exception e){
-        PVR_DB("JNI_updataJavaTextViewFPS::GetStaticMethodID:: Caught Exception: " + string(e.what()));
-    }
-    catch(...){
-        PVR_DB("JNI_updataJavaTextViewFPS::GetStaticMethodID:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_updataJavaTextViewFPS::GetStaticMethodID:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -255,7 +244,7 @@ SUB(setExtDirectory)(JNIEnv *env, jclass, jstring jExtDir, jint len) {
     try {
         const char *resultOfGetStringUTFChars = env->GetStringUTFChars(jExtDir, nullptr);
         if (resultOfGetStringUTFChars == NULL) {
-            PVR_DB("JNI_setExtDirectory::GetStringUTFChars:: resultOfGetStringUTFChars is " + to_string(resultOfGetStringUTFChars));
+            PVR_DB_I("JNI_setExtDirectory::GetStringUTFChars:: resultOfGetStringUTFChars is " + to_string(resultOfGetStringUTFChars));
         }
 
         auto dir = resultOfGetStringUTFChars;
@@ -278,10 +267,7 @@ SUB(setExtDirectory)(JNIEnv *env, jclass, jstring jExtDir, jint len) {
         PVR_DB_I("JNI setExtDirectory: len: " + to_string(len) + ", copdstr: " + ExtDirectory);
     }
     catch(exception e){
-        PVR_DB("JNI_setExtDirectory:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_setExtDirectory:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_setExtDirectory:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -290,7 +276,7 @@ SUB(startAnnouncer)(JNIEnv *env, jclass, jstring jIP, jint port) {
     try {
         auto ip = env->GetStringUTFChars(jIP, nullptr);
         if (ip == NULL) {
-            PVR_DB("JNI_startAnnouncer::GetStringUTFChars:: resultOfGetStringUTFChars is " + to_string(
+            PVR_DB_I("JNI_startAnnouncer::GetStringUTFChars:: resultOfGetStringUTFChars is " + to_string(
                     ip));
         }
 
@@ -305,10 +291,7 @@ SUB(startAnnouncer)(JNIEnv *env, jclass, jstring jIP, jint port) {
         env->ReleaseStringUTFChars(jIP, ip);
     }
     catch(exception e){
-        PVR_DB("JNI_startAnnouncer:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_startAnnouncer:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_startAnnouncer:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -318,12 +301,8 @@ SUB(stopAnnouncer)() {
         PVRStopAnnouncer();
     }
     catch(exception e){
-        PVR_DB("JNI_stopAnnouncer:: Caught Exception: " + string(e.what()));
+        PVR_DB_I("JNI_stopAnnouncer:: Caught Exception: " + string(e.what()));
     }
-    catch(...) {
-        PVR_DB("JNI_stopAnnouncer:: Caught Exception: from Generic Handler");
-    }
-
 }
 
 ////////////////////////////////////// orientation ///////////////////////////////////////////////
@@ -347,10 +326,7 @@ SUB(startSendSensorData)(JNIEnv *env, jclass, jint port) {
         });
     }
     catch(exception e){
-        PVR_DB("JNI_startSendSensorData:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_startSendSensorData:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_startSendSensorData:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -365,10 +341,7 @@ SUB(setAccData)(JNIEnv *env, jclass, jfloatArray jarr) {
         env->ReleaseFloatArrayElements(jarr, accArr, JNI_ABORT);
     }
     catch(exception e){
-        PVR_DB("JNI_setAccData:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_setAccData:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_setAccData:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -379,10 +352,7 @@ SUB(createRenderer)(JNIEnv *, jclass, jlong jGvrApi) {
         PVRCreateGVR(reinterpret_cast<gvr_context *>(jGvrApi));
     }
     catch(exception e){
-        PVR_DB("JNI_createRenderer:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_createRenderer:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_createRenderer:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -392,10 +362,7 @@ SUB(onPause)() {
         PVRPause();
     }
     catch(exception e){
-        PVR_DB("JNI_onPause:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_onPause:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_onPause:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -405,10 +372,7 @@ SUB(onTriggerEvent)() {
         PVRTrigger();
     }
     catch(exception e){
-        PVR_DB("JNI_onTriggerEvent:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_onTriggerEvent:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_onTriggerEvent:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -418,10 +382,7 @@ SUB(onResume)() {
         PVRResume();
     }
     catch(exception e){
-        PVR_DB("JNI_onResume:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_onResume:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_onResume:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -432,10 +393,7 @@ SUB(setVStreamPort)(JNIEnv *, jclass, jint port) {
         vPort = (uint16_t) port;
     }
     catch(exception e){
-        PVR_DB("JNI_setVStreamPort:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_setVStreamPort:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_setVStreamPort:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -445,10 +403,7 @@ SUB(startStream)() {// cannot pass parameter here or else sigabrit on getting fr
         PVRStartReceiveStreams((uint16_t) vPort);
     }
     catch(exception e){
-        PVR_DB("JNI_startStream:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_startStream:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_startStream:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -487,7 +442,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
                             uint8_t *buf = AMediaCodec_getInputBuffer(codec, (size_t) idx, &bufSz);
                             PVREnqueueVideoBuf(
                                     {buf, static_cast<int>(idx), bufSz}); // into emptyVbuf
-                            PVR_DB("[MediaCodec th] Getting MCInputMedia Buf[ " + to_string(bufSz) +
+                            PVR_DB_I("[MediaCodec th] Getting MCInputMedia Buf[ " + to_string(bufSz) +
                                    "] @ idx:" + to_string(idx) + ". into emptyVbuf");
                         }
                     }
@@ -498,7 +453,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
                         AMediaCodec_queueInputBuffer(codec, (size_t) fBuf.idx, 0, fBuf.pktSz,
                                                      fBuf.pts,
                                                      0); //AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM
-                        PVR_DB("[MediaCodec th] Getting filledVBuf Buf[ " + to_string(fBuf.pktSz) +
+                        PVR_DB_I("[MediaCodec th] Getting filledVBuf Buf[ " + to_string(fBuf.pktSz) +
                                "] @ idx:" + to_string(fBuf.idx) + ", pts:" + to_string(fBuf.pts) +
                                ". into MCqInputBuf");
                     }
@@ -507,7 +462,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
                     auto outIdx = AMediaCodec_dequeueOutputBuffer(codec, &info,
                                                                   1000); // 1ms timeout
                     if (outIdx >= 0) {
-                        PVR_DB("[MediaCodec th] Output: " +
+                        PVR_DB_I("[MediaCodec th] Output: " +
                                to_string(
                                        AMediaFormat_toString(AMediaCodec_getOutputFormat(codec))));
 
@@ -534,7 +489,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
 
                         fpsStreamDecoder = (1000000000.0 / (Clk::now() - oldtime).count());
                         oldtime = Clk::now();
-                        PVR_DB("[MediaCodec th] MCreleaseOutputBuffer Buf @ idx:" +
+                        PVR_DB_I("[MediaCodec th] MCreleaseOutputBuffer Buf @ idx:" +
                                to_string(outIdx) +
                                ", pts:" +
                                (render ? ("Rendered " + to_string(vOutPts)) : "NotRendered") +
@@ -544,18 +499,12 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
                 }
             }
             catch(exception e){
-                PVR_DB("JNI_startMediaCodec:: Thread:: Caught Exception: " + string(e.what()));
-            }
-            catch(...) {
-                PVR_DB("JNI_startMediaCodec:: Thread:: Caught Exception: from Generic Handler");
+                PVR_DB_I("JNI_startMediaCodec:: Thread:: Caught Exception: " + string(e.what()));
             }
         });
     }
     catch(exception e){
-        PVR_DB("JNI_startMediaCodec:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_startMediaCodec:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_startMediaCodec:: Caught Exception: " + string(e.what()));
     }
     pvrState = PVR_STATE_RUNNING;
 
@@ -583,10 +532,7 @@ SUB(stopAll)(JNIEnv *) {
         pvrState = PVR_STATE_IDLE;
     }
     catch(exception e){
-        PVR_DB("JNI_stopAll:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_stopAll:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_stopAll:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -600,10 +546,7 @@ FUNC(jint, initSystem)(JNIEnv *, jclass, jint x, jint y, jint resMul, jfloat off
         return PVRInitSystem(maxWidth, maxHeight, offFov, reproj, debug);
     }
     catch(exception e){
-        PVR_DB("JNI_initSystem:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_initSystem:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_initSystem:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -612,10 +555,7 @@ SUB(drawFrame)(JNIEnv *env, jclass, jlong pts) {
         PVRRender(pts);
     }
     catch(exception e){
-        PVR_DB("JNI_drawFrame:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("JNI_drawFrame:: Caught Exception: from Generic Handler");
+        PVR_DB_I("JNI_drawFrame:: Caught Exception: " + string(e.what()));
     }
 }
 

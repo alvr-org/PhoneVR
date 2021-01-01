@@ -315,7 +315,7 @@ void PVRStartReceiveStreams(uint16_t port) {
                 while (ec.value() != 0 && pvrState != PVR_STATE_SHUTDOWN)
                     skt.connect({address::from_string(pcIP), port}, ec);
 
-                PVR_DB("[StreamReceiver th] sock connected @p" + to_string(port));
+                PVR_DB_I("[StreamReceiver th] sock connected @p" + to_string(port));
 
                 function<void(const asio::error_code &, size_t)> handler = [&](
                         const asio::error_code &err, size_t) { ec = err; };
@@ -345,7 +345,7 @@ void PVRStartReceiveStreams(uint16_t port) {
                     auto networkDelay = (int) ((duration_cast<microseconds>(
                             system_clock::now().time_since_epoch()).count() - *timestamp) / 1000);
 
-                    PVR_DB("[StreamReceiver th] recvd 28maxBs with Error: " +
+                    PVR_DB_I("[StreamReceiver th] recvd 28maxBs with Error: " +
                            to_string(ec.value()) +
                            ", pts: " + to_string(*pts) + ", pktSz" + to_string(*pktSz));
 
@@ -361,12 +361,12 @@ void PVRStartReceiveStreams(uint16_t port) {
                             svc.run();
                             svc.reset();
 
-                            PVR_DB("[StreamReceiver th] emptyVBufs.size: " +
+                            PVR_DB_I("[StreamReceiver th] emptyVBufs.size: " +
                                    to_string(emptyVBufs.size()) + ", Reading sock for " +
                                    to_string(*pktSz) + "Bs");
                             if (ec.value() == 0) {
                                 filledVBufs.push({eBuf.idx, *pktSz, (uint64_t) *pts});
-                                PVR_DB("[StreamReceiver th] pushing onto filledVBufs idx: " +
+                                PVR_DB_I("[StreamReceiver th] pushing onto filledVBufs idx: " +
                                        to_string(eBuf.idx) + ", size: " + to_string(*pktSz) +
                                        ", pts:" +
                                        to_string(*pts) + "...pop eVbuf ");
@@ -379,7 +379,7 @@ void PVRStartReceiveStreams(uint16_t port) {
 
                     //PVR_DB_I("Time: "+ to_string( (duration_cast<microseconds>(system_clock::now().time_since_epoch()).count() - *timestamp) ));
                     fpsStreamRecver = (1000000000.0 / (Clk::now() - oldtime).count());
-                    PVR_DB("[StreamReceiver th] ------------------- Stream Receiving @ FPS: " +
+                    PVR_DB_I("[StreamReceiver th] ------------------- Stream Receiving @ FPS: " +
                            to_string(fpsStreamRecver) + " De-coding @ FPS : " +
                            to_string(fpsStreamDecoder) + " Rendering @ FPS : " +
                            to_string(fpsRenderer));

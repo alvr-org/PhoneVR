@@ -42,10 +42,7 @@ namespace {
             }
         }
         catch(exception e) {
-            PVR_DB("PVRRenderer_gvrToEigenMat:: Caught Exception: " + string(e.what()));
-        }
-        catch(...) {
-            PVR_DB("PVRRenderer_gvrToEigenMat:: Caught Exception: from Generic Handler");
+            PVR_DB_I("PVRRenderer_gvrToEigenMat:: Caught Exception: " + string(e.what()));
         }
         return eMat;
     }
@@ -72,10 +69,7 @@ namespace {
             res(3, 2) = -1;
         }
         catch(exception e) {
-            PVR_DB("PVRRenderer_Perspectivet:: Caught Exception: " + string(e.what()));
-        }
-        catch(...) {
-            PVR_DB("PVRRenderer_Perspective:: Caught Exception: from Generic Handler");
+            PVR_DB_I("PVRRenderer_Perspectivet:: Caught Exception: " + string(e.what()));
         }
 
         return res;
@@ -135,10 +129,7 @@ namespace {
             }
         }
         catch(exception e) {
-            PVR_DB("PVRRenderer_InitGVRRendering:: Caught Exception: " + string(e.what()));
-        }
-        catch(...) {
-            PVR_DB("PVRRenderer_InitGVRRendering:: Caught Exception: from Generic Handler");
+            PVR_DB_I("PVRRenderer_InitGVRRendering:: Caught Exception: " + string(e.what()));
         }
     }
 
@@ -172,7 +163,7 @@ unsigned int PVRInitSystem(int maxW, int maxH, float offFov, bool reproj, bool d
         gvrApi->ResumeTracking();
     }
     catch(exception e) {
-        PVR_DB("PVRRenderer_InitGVRRendering:: Caught Exception: " + string(e.what()));
+        PVR_DB_I("PVRRenderer_InitGVRRendering:: Caught Exception: " + string(e.what()));
     }
 
     return videoTex;
@@ -180,7 +171,7 @@ unsigned int PVRInitSystem(int maxW, int maxH, float offFov, bool reproj, bool d
 
 void PVRRender(int64_t pts) {
     try {
-        PVR_DB("Rendering " + to_string(pts));
+        PVR_DB_I("Rendering " + to_string(pts));
         if (pvrState == PVR_STATE_RUNNING) {
             static Clk::time_point oldtime = Clk::now();
 
@@ -231,10 +222,7 @@ void PVRRender(int64_t pts) {
         }
     }
     catch(exception e) {
-        PVR_DB("PVRRenderer_PVRRender:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("PVRRenderer_PVRRender:: Caught Exception: from Generic Handler");
+        PVR_DB_I("PVRRenderer_PVRRender:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -248,10 +236,7 @@ void PVRPause() {
         }
     }
     catch(exception e) {
-        PVR_DB("PVRRenderer_PVRPause:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("PVRRenderer_PVRPause:: Caught Exception: from Generic Handler");
+        PVR_DB_I("PVRRenderer_PVRPause:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -264,10 +249,7 @@ void PVRResume() {
         }
     }
     catch(exception e) {
-        PVR_DB("PVRRenderer_PVRResume:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("PVRRenderer_PVRResume:: Caught Exception: from Generic Handler");
+        PVR_DB_I("PVRRenderer_PVRResume:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -276,10 +258,7 @@ void PVRCreateGVR(gvr_context *ctx) {
         gvrApi = GvrApi::WrapNonOwned(ctx);
     }
     catch(exception e) {
-        PVR_DB("PVRRenderer_PVRCreateGVR:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("PVRRenderer_PVRCreateGVR:: Caught Exception: from Generic Handler");
+        PVR_DB_I("PVRRenderer_PVRCreateGVR:: Caught Exception: " + string(e.what()));
     }
 }
 
@@ -288,10 +267,7 @@ void PVRDestroyGVR() {
         gvr_destroy(&gvrCtx);
     }
     catch(exception e) {
-        PVR_DB("PVRRenderer_PVRDestroyGVR:: Caught Exception: " + string(e.what()));
-    }
-    catch(...) {
-        PVR_DB("PVRRenderer_PVRDestroyGVR:: Caught Exception: from Generic Handler");
+        PVR_DB_I("PVRRenderer_PVRDestroyGVR:: Caught Exception: " + string(e.what()));
     }
 }
 
