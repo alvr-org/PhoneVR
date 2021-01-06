@@ -1,7 +1,7 @@
 ---
 name: Issue/Bug report Template
 about: Create a Issue/bug report to help us improve
-title: "[Issue] "
+title: "[Issue] <Your Issue one description here>"
 labels: ''
 assignees: ''
 
