@@ -94,7 +94,7 @@ public:
 			EndThread(thr);
 	}
 
-	TimeBomb(std::chrono::microseconds timer, std::function<void()> boomCb = [] {}) : tm(timer), cb(boomCb), loop(true) {}
+	TimeBomb(std::chrono::microseconds timer, std::function<void()> boomCb = [] {}) : cb(boomCb), tm(timer), loop(true) {}
 
 	void defuse()
 	{

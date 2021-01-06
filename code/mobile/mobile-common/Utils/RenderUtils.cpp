@@ -105,7 +105,7 @@ void Renderer::initProg(vector<pair<GLuint, bool>> texs, std::string vs, string 
 
 // This is the actuall Constructor
 Renderer::Renderer(vector<pair<GLuint, bool>> texs, string frag, float xStart, float xEnd)
-        : rtt(false), frmBuf(0), maxLod(0){
+        : frmBuf(0), rtt(false), maxLod(0){
     char vs[512];
     sprintf(vs, VS_REPR, xStart, xEnd);
     initProg(texs, vs, frag);
@@ -114,7 +114,7 @@ Renderer::Renderer(vector<pair<GLuint, bool>> texs, string frag, float xStart, f
 
 Renderer::Renderer(int width, int height, vector<pair<GLuint, bool>> texs, string frag, GLenum fmt,
                    GLint mag, GLuint rdrBuf, int max) : width(width), height(height),
-                                                        size(width * height * 4), rtt(true), maxLod(max) {
+                                                        size(width * height * 4), maxLod(max), rtt(true) {
     initProg(texs, VS_PT, frag);
     outTex = fmt == 0 ? rdrBuf : genTexture(false, width, height, fmt, mag, max);
     glGenFramebuffers(1, &frmBuf);
