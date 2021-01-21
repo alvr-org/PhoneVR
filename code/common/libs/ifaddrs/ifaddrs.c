@@ -33,6 +33,8 @@
 #include <netinet/in.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
+#include <linux/if_packet.h> // struct sockaddr_ll
+#include <stddef.h> // offsetof
 
 typedef struct NetlinkList
 {
@@ -97,8 +99,11 @@ static int netlink_recv(int p_socket, void *p_buffer, size_t p_len)
         l_msg.msg_control = NULL;
         l_msg.msg_controllen = 0;
         l_msg.msg_flags = 0;
-        int l_result = recvmsg(p_socket, &l_msg, 0);
+        int l_result = recvmsg(p_socket, &l_msg, MSG_PEEK | MSG_TRUNC);
+        if (l_result > p_len)// buffer was too small
+            return -1;
 
+        l_result = recvmsg(p_socket, &l_msg, 0);
         if(l_result < 0)
         {
             if(errno == EINTR)
@@ -106,11 +111,6 @@ static int netlink_recv(int p_socket, void *p_buffer, size_t p_len)
                 continue;
             }
             return -2;
-        }
-
-        if(l_msg.msg_flags & MSG_TRUNC)
-        { // buffer was too small
-            return -1;
         }
         return l_result;
     }
@@ -516,9 +516,9 @@ static void interpret(int p_socket, NetlinkList *p_netlinkList, struct ifaddrs *
     }
 }
 
-static unsigned countLinks(int p_socket, NetlinkList *p_netlinkList)
+static unsigned get_max_ifi_index(int p_socket, NetlinkList *p_netlinkList)
 {
-    unsigned l_links = 0;
+    unsigned l_max_ifi_index  = 0;
     pid_t l_pid = getpid();
     for(; p_netlinkList; p_netlinkList = p_netlinkList->m_next)
     {
@@ -538,12 +538,14 @@ static unsigned countLinks(int p_socket, NetlinkList *p_netlinkList)
 
             if(l_hdr->nlmsg_type == RTM_NEWLINK)
             {
-                ++l_links;
+                struct ifinfomsg *l_info = (struct ifinfomsg *)NLMSG_DATA(l_hdr);
+                if (l_max_ifi_index < l_info->ifi_index)
+                    l_max_ifi_index = l_info->ifi_index;
             }
         }
     }
 
-    return l_links;
+    return l_max_ifi_index;
 }
 
 int getifaddrs(struct ifaddrs **ifap)
@@ -575,9 +577,9 @@ int getifaddrs(struct ifaddrs **ifap)
         return -1;
     }
 
-    unsigned l_numLinks = countLinks(l_socket, l_linkResults) + countLinks(l_socket, l_addrResults);
-    struct ifaddrs *l_links[l_numLinks];
-    memset(l_links, 0, l_numLinks * sizeof(struct ifaddrs *));
+    unsigned l_max_ifi_index = get_max_ifi_index(l_socket, l_linkResults) + get_max_ifi_index(l_socket, l_addrResults);
+    struct ifaddrs *l_links[l_max_ifi_index];
+    memset(l_links, 0, l_max_ifi_index * sizeof(struct ifaddrs *));
 
     interpret(l_socket, l_linkResults, l_links, ifap);
     interpret(l_socket, l_addrResults, l_links, ifap);
