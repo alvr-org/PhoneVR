@@ -48,7 +48,7 @@ namespace {
                 glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
                 if (!compiled) {
                     glGetShaderInfoLog(shader, sizeof(errorLog), nullptr, errorLog);
-                    PVR_DB_I("RenderUtils::loadShader:: Error has Occurred while Compliing Shader Object: ErrorLog: " + errorLog[sizeof(errorLog)]);
+                    PVR_DB_I("RenderUtils::loadShader:: Error has Occurred while Compling Shader Object: ErrorLog: " + string(errorLog));
                     exit(1);
                 }
             }
@@ -75,7 +75,7 @@ namespace {
             glGetProgramiv(prog, GL_LINK_STATUS, &linked);
             if (!linked) {
                 glGetProgramInfoLog(prog, sizeof(errorLog), nullptr, errorLog);
-                PVR_DB_I("RenderUtils::genProg:: Error has Occurred while Linking to Program Object: ErrorLog: " + errorLog[sizeof(errorLog)]);
+                PVR_DB_I("RenderUtils::genProg:: Error has Occurred while Linking to Program Object: ErrorLog: " + + string(errorLog));
                 exit(1);
             }
         }
