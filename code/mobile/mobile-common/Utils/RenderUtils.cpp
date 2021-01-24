@@ -273,13 +273,12 @@ void PBO::download() {
 
 void glCheckError( string glFuncName ) {
     try {
-        GLenum error;
+        static GLenum error = 0;
         while ((error = glGetError()) != GL_NO_ERROR) {
-            PVR_DB_I("RenderUtils::glCheckError Caught Error: " + error + string("at Function") + glFuncName);
-            //PVR_DB_I("RenderUtils::glCheckError Caught Error at: " + glFuncName);
+            PVR_DB_I("RenderUtils::glCheckError Caught Error:" + to_string(error) + string(" at Function:") + glFuncName);
         }
     }
-    catch( exception e){
+    catch( exception &e){
         PVR_DB_I("RenderUtils::glCheckError:: Caught Exception: " + string(e.what()));
     }
 }
