@@ -54,7 +54,7 @@ namespace {
                 if (!compiled) {
                     glGetShaderInfoLog(shader, sizeof(errorLog), nullptr, errorLog);
                     glCheckError("loadShader::glGetShaderInfoLog");
-                    PVR_DB_I("RenderUtils::loadShader:: Error has Occurred while Compling Shader Object: ErrorLog: " + string(errorLog));
+                    PVR_DB_I("RenderUtils::loadShader:: Error has Occurred while compiling Shader Object: ErrorLog: " + string(errorLog) + "\nProg: " + text);
                     exit(1);
                 }
             }
