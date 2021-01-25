@@ -40,7 +40,7 @@ namespace {
         try {
             shader = glCreateShader(type);
             if( shader == GL_INVALID_ENUM || shader == GL_NO_ERROR) {
-                PVR_DB_I("RenderUtils::loadShader:: Error Creating Shader Object, Retured: " + (shader)?"GL_INVALID_ENUM":"GL_NO_ERROR");
+                PVR_DB_I("RenderUtils::loadShader:: Error Creating Shader Object, Returned: " + string(((shader)?"GL_INVALID_ENUM":"GL_NO_ERROR")));
                 return shader;
             } else {
                 const char *str = text.c_str();
@@ -54,7 +54,7 @@ namespace {
                 if (!compiled) {
                     glGetShaderInfoLog(shader, sizeof(errorLog), nullptr, errorLog);
                     glCheckError("loadShader::glGetShaderInfoLog");
-                    PVR_DB_I("RenderUtils::loadShader:: Error has Occurred while Compling Shader Object: ErrorLog: " + string(errorLog));
+                    PVR_DB_I("RenderUtils::loadShader:: Error has Occurred while compiling Shader Object: ErrorLog: " + string(errorLog) + "\nProg: " + text);
                     exit(1);
                 }
             }
@@ -70,7 +70,7 @@ namespace {
         try {
             prog = glCreateProgram();
             if( prog == 0 ) {
-                PVR_DB_I("RenderUtils::genProg:: Error Creating Program Object, Retured: " + prog);
+                PVR_DB_I("RenderUtils::genProg:: Error Creating Program Object, Returned: " + to_string(prog));
                 return prog;
             }
             glAttachShader(prog, loadShader(GL_VERTEX_SHADER, vs));

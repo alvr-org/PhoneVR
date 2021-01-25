@@ -162,7 +162,7 @@ extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3,
         float ctd1, float ctd2,
         int td1, int td2)
 {
-    PVR_DB_I("JNI Calling updataJavaTextViewFPS: " + to_string(f1) + " " + to_string(f2) + " " + to_string(f3)+ " " + to_string(cf1) + " " + to_string(cf2)+ " " + to_string(cf3) +" " + to_string(cf4));
+    PVR_DB("JNI Calling updataJavaTextViewFPS: " + to_string(f1) + " " + to_string(f2) + " " + to_string(f3)+ " " + to_string(cf1) + " " + to_string(cf2)+ " " + to_string(cf3) +" " + to_string(cf4));
     try {
         bool isMainThread = true;
         JNIEnv *env;
@@ -170,17 +170,17 @@ extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3,
         jint result = jVM->GetEnv((void **) &env, JNI_VERS);
         if (result != JNI_OK) {
             if (result == JNI_EDETACHED) {
-                PVR_DB_I("JNI_updataJavaTextViewFPS:: JNI Not attached");
+                PVR_DB("JNI_updataJavaTextViewFPS:: JNI Not attached");
             } else if (result == JNI_EVERSION) {
-                PVR_DB_I("JNI_updataJavaTextViewFPS:: JNI Version not supported");
+                PVR_DB("JNI_updataJavaTextViewFPS:: JNI Version not supported");
             } else {
-                PVR_DB_I("JNI_updataJavaTextViewFPS:: JNI Unknown error");
+                PVR_DB("JNI_updataJavaTextViewFPS:: JNI Unknown error");
             }
             isMainThread = false;
             jint thread_result = jVM->AttachCurrentThread(&env, nullptr);
 
             if (thread_result != JNI_OK) {
-                PVR_DB_I("JNI_updataJavaTextViewFPS:: Fail to AttachCurrentThread " +
+                PVR_DB("JNI_updataJavaTextViewFPS:: Fail to AttachCurrentThread " +
                          to_string(thread_result));
             }
         }
@@ -204,7 +204,7 @@ extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3,
         jthrowable exc;
         jmethodID resultOfMethodID = (env->GetStaticMethodID(javaWrap, "updateTextViewFPS",
                                                              "(FFFFFFFFFFII)V"));
-        if (env->ExceptionCheck()) {
+        /*if (env->ExceptionCheck()) {
             //jclass jClassFormErr = env->FindClass("java/lang/ClassFormatError");
             exc = env->ExceptionOccurred();
             env->ExceptionClear();
@@ -216,10 +216,10 @@ extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3,
             const char *utf = (*env).GetStringUTFChars(s, &isCopy);
 
             PVR_DB_I("JNI_callJavaMethod:: Exception Caught: " + string(utf));
-        }
+        }*/
 
         if (resultOfMethodID == NULL) {
-            PVR_DB_I("JNI_updataJavaTextViewFPS:: Fail to GetStaticMethodID of updateTextViewFPS");
+            PVR_DB("JNI_updataJavaTextViewFPS:: Fail to GetStaticMethodID of updateTextViewFPS");
         }
 
         env->CallStaticVoidMethod(javaWrap, resultOfMethodID, jf1, jf2, jf3,
@@ -229,7 +229,7 @@ extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3,
         if (!isMainThread) {
             jint resultOfDetachCurrentThread = jVM->DetachCurrentThread();
             if (resultOfDetachCurrentThread != JNI_OK) {
-                PVR_DB_I("JNI_updataJavaTextViewFPS:: Fail DetachCurrentThread with error code " +
+                PVR_DB("JNI_updataJavaTextViewFPS:: Fail DetachCurrentThread with error code " +
                          to_string(resultOfDetachCurrentThread));
             }
         }
@@ -442,7 +442,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
                             uint8_t *buf = AMediaCodec_getInputBuffer(codec, (size_t) idx, &bufSz);
                             PVREnqueueVideoBuf(
                                     {buf, static_cast<int>(idx), bufSz}); // into emptyVbuf
-                            PVR_DB_I("[MediaCodec th] Getting MCInputMedia Buf[ " + to_string(bufSz) +
+                            PVR_DB("[MediaCodec th] Getting MCInputMedia Buf[ " + to_string(bufSz) +
                                    "] @ idx:" + to_string(idx) + ". into emptyVbuf");
                         }
                     }
@@ -453,7 +453,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
                         AMediaCodec_queueInputBuffer(codec, (size_t) fBuf.idx, 0, fBuf.pktSz,
                                                      fBuf.pts,
                                                      0); //AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM
-                        PVR_DB_I("[MediaCodec th] Getting filledVBuf Buf[ " + to_string(fBuf.pktSz) +
+                        PVR_DB("[MediaCodec th] Getting filledVBuf Buf[ " + to_string(fBuf.pktSz) +
                                "] @ idx:" + to_string(fBuf.idx) + ", pts:" + to_string(fBuf.pts) +
                                ". into MCqInputBuf");
                     }
@@ -462,7 +462,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
                     auto outIdx = AMediaCodec_dequeueOutputBuffer(codec, &info,
                                                                   1000); // 1ms timeout
                     if (outIdx >= 0) {
-                        PVR_DB_I("[MediaCodec th] Output: " +
+                        PVR_DB("[MediaCodec th] Output: " +
                                to_string(
                                        AMediaFormat_toString(AMediaCodec_getOutputFormat(codec))));
 
@@ -489,7 +489,7 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
 
                         fpsStreamDecoder = (1000000000.0 / (Clk::now() - oldtime).count());
                         oldtime = Clk::now();
-                        PVR_DB_I("[MediaCodec th] MCreleaseOutputBuffer Buf @ idx:" +
+                        PVR_DB("[MediaCodec th] MCreleaseOutputBuffer Buf @ idx:" +
                                to_string(outIdx) +
                                ", pts:" +
                                (render ? ("Rendered " + to_string(vOutPts)) : "NotRendered") +

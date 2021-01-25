@@ -171,7 +171,7 @@ unsigned int PVRInitSystem(int maxW, int maxH, float offFov, bool reproj, bool d
 
 void PVRRender(int64_t pts) {
     try {
-        PVR_DB_I("Rendering " + to_string(pts));
+        PVR_DB("PVRRender:: Rendering " + to_string(pts));
         if (pvrState == PVR_STATE_RUNNING) {
             static Clk::time_point oldtime = Clk::now();
 
