@@ -129,7 +129,7 @@ PVRAnnounceToAllInterfaces(udp::socket &skt, uint8_t *buf, const uint16_t &port)
                     static uint32 ifaAddr, dstAddr;
 
                     ifaAddr = SockAddrToUint32(p->ifa_addr);
-                    dstAddr = SockAddrToUint32(p->ifa_dstaddr);
+                    dstAddr = ifaAddr | ~(SockAddrToUint32(p->ifa_netmask));
 
                     if (ifaAddr > 0) {
                         static char ifaAddrStr[32], dstAddrStr[32];
@@ -211,7 +211,8 @@ void PrintNetworkInterfaceInfos() {
             while (p) {
                 uint32 ifaAddr = SockAddrToUint32(p->ifa_addr);
                 uint32 maskAddr = SockAddrToUint32(p->ifa_netmask);
-                uint32 dstAddr = SockAddrToUint32(p->ifa_dstaddr);
+                uint32 dstAddr = ifaAddr | ~maskAddr;
+
                 if (ifaAddr > 0) {
                     char ifaAddrStr[32];
                     Inet_NtoA(ifaAddr, ifaAddrStr);
