@@ -48,7 +48,7 @@ public:
 
     // needed to inject uniforms values during rendering
     GLuint getProg() { return prog; };
-
+    void PVRPrintGLDesc();
 };
 
 class PBO {
