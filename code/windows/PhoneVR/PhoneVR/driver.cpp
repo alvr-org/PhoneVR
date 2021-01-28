@@ -56,9 +56,10 @@ class HMD : public ITrackedDeviceServerDriver, public IVRDisplayComponent, publi
 public:
 	HMD(string ip) : talker(PVRProp<uint16_t>({ CONN_PORT_KEY }), [=](auto msgType, auto data)
 	{
+		PVR_DB_I("[HMD::talker]: recvd MSG_ID: " + to_string(msgType));
 		if (msgType == PVR_MSG::DISCONNECT) {
 			// TODO: send remove device event
-			PVR_DB_I("HMD phone disconnected, closing server");
+			PVR_DB_I("[HMD::talker]: phone disconnected, closing server");
 			terminate();
 		}
 		else if (msgType == PVR_MSG::ADDITIONAL_DATA) {
@@ -121,6 +122,7 @@ public:
 
 		vstreamDT = 1'000'000us / PVRProp<int>({ GAME_FPS_KEY });
 
+		PVR_DB_I("HMD Sending PAIR_ACCEPT TCP msg to " + ip);
 		talker.send(PVR_MSG::PAIR_ACCEPT);
 
 		PVRInitDX();
