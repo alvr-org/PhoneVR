@@ -17,7 +17,7 @@ android {
             keyPassword "test1234"
         }
     }
-    android.ndkVersion "21.3.6528147"
+    android.ndkVersion '22.0.7026061'
     compileSdkVersion 30
     defaultConfig {
         applicationId "viritualisres.phonevr"

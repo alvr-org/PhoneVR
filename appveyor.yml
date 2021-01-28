@@ -93,7 +93,7 @@ for:
         
         yes | sdkmanager --update
         
-        yes | sdkmanager --install "ndk;21.3.6528147" > null
+        yes | sdkmanager --install "ndk;22.0.7026061" > null
         
         yes | sdkmanager --licenses > null
         
