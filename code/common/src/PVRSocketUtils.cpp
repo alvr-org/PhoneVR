@@ -69,7 +69,7 @@ TCPTalker::TCPTalker(uint16_t port,
 
 				function<void(const asio::error_code &, size_t)> handle = [&](const asio::error_code &/*err*/, size_t len) 
 				{
-					PVR_DB_I("[TCPTalker::TCPTalker] Revd some data... Interpreting...");
+					//PVR_DB_I("[TCPTalker::TCPTalker] Revd some data... Interpreting...");
 					stream.insert(stream.end(), buf, buf + len);
 					bool loop = true;
 					while (loop) 
