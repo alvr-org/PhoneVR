@@ -88,7 +88,6 @@ class GameActivity : Activity(), SensorEventListener {
 
         Wrap.setGameView(this)
 
-        setImmersiveSticky()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.decorView.setOnApplyWindowInsetsListener { _, insets ->
@@ -140,6 +139,8 @@ class GameActivity : Activity(), SensorEventListener {
         Wrap.startSendSensorData(prefs.getInt(posePortKey, posePortDef))
 
         //Log.d("--PVR-Java--", "main Layout Orientation : (" + mainActRot +")" /*+ mainLayout.rotation.toString() + ", GVR: "*/ + windowManager.defaultDisplay.rotation);
+
+        setImmersiveSticky()
 
         if(prefs.getBoolean(debugKey, debugDef)) {
             uiFPSTextViewUpdatethread = object : Thread() {

@@ -81,8 +81,11 @@ void PVRStartConnectionListener(function<void(string, PVR_MSG)> callback) {
 			uint8_t buf[256];
 			while (connRunning) {
 				function<void(const asio::error_code &, size_t)> handle = [&](auto err, auto pktSz) {
-					if ( err.value() )
+					if (err.value())
+					{
 						PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Error listening (" + to_string(err.value()) + "): " + err.message());
+					}
+					//PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Recvd data... Interpreting...");
 
 					if (pktSz == 8 && string(buf, buf + 3) == "pvr") {
 						auto ip = remEP.address().to_string();

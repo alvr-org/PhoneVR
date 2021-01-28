@@ -69,6 +69,7 @@ TCPTalker::TCPTalker(uint16_t port,
 
 				function<void(const asio::error_code &, size_t)> handle = [&](const asio::error_code &/*err*/, size_t len) 
 				{
+					//PVR_DB_I("[TCPTalker::TCPTalker] Revd some data... Interpreting...");
 					stream.insert(stream.end(), buf, buf + len);
 					bool loop = true;
 					while (loop) 
@@ -146,13 +147,23 @@ bool TCPTalker::send(PVR_MSG msgType, vector<uint8_t> data)
 	bool success = false;
 	safeDispatch([&] 
 	{
-		if (_skt->is_open()) 
+		if (_skt->is_open())
 		{
 			asio::error_code ec;
 			write(*_skt, buffer(buf), ec);
 			success = ec.value() == 0;
-			if( ec.value() )
-				PVR_DB_I("[TCPTalker::send] Error Sending EC("+ to_string(ec.value()) +"): " + ec.message())
+			if (ec.value())
+			{
+				PVR_DB_I("[TCPTalker::send] Error Sending EC(" + to_string(ec.value()) + "): " + ec.message());
+			}
+			else
+			{
+				PVR_DB_I("[TCPTalker::send] Msg Sent with ID:" + to_string(buf[3]));
+			}
+		}
+		else
+		{
+			PVR_DB_I("[TCPTalker::send] Error Sending: Socket is not open");
 		}
 	});
 	return success;

@@ -5,7 +5,7 @@
 #ifdef __cplusplus
 
 #include <vector>
-#include "ifaddrs.h"
+#include "pvr_google_ifaddrs.h"
 
 #include "PVRRenderer.h"
 

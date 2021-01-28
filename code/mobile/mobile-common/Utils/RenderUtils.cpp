@@ -10,29 +10,29 @@ namespace {
     char errorLog[256];
 
     //fbo and screen vertex shaders must have different axis convention, why??
-    string VS_PT = R"glsl(
-        #version 300 es
-        const vec2 verts[4] = vec2[4](vec2(-1, -1), vec2(-1, 1), vec2(1, 1), vec2(1, -1));
-        const vec2 coords[4] = vec2[4](vec2(0, 0), vec2(0, 1), vec2(1, 1), vec2(1, 0));
-        out vec2 coord;
-        void main() {
-            gl_Position = vec4(verts[gl_VertexID], 0, 1);
-            coord = coords[gl_VertexID];
-        }
+    string VS_PT =
+    R"glsl( #version 300 es
+            const vec2 verts[4] = vec2[4](vec2(-1, -1), vec2(-1, 1), vec2(1, 1), vec2(1, -1));
+            const vec2 coords[4] = vec2[4](vec2(0, 0), vec2(0, 1), vec2(1, 1), vec2(1, 0));
+            out vec2 coord;
+            void main() {
+                gl_Position = vec4(verts[gl_VertexID], 0, 1);
+                coord = coords[gl_VertexID];
+            }
     )glsl";
 
-    const char *VS_REPR = R"glsl(
-        #version 300 es
-        uniform mat4 mvp;
-        #define XSTART %f
-        #define XEND %f
-        const vec2 verts[4] = vec2[4](vec2(-1, 1), vec2(-1, -1), vec2(1, -1), vec2(1, 1));
-        const vec2 coords[4] = vec2[4](vec2(XSTART, 0), vec2(XSTART, 1), vec2(XEND, 1), vec2(XEND, 0));
-        out vec2 coord;
-        void main() {
-            gl_Position = mvp * vec4(verts[gl_VertexID], 0, 1);
-            coord = coords[gl_VertexID];
-        }
+    string VS_REPR =
+    R"glsl( #version 300 es
+            uniform mat4 mvp;
+            #define XSTART %f
+            #define XEND %f
+            const vec2 verts[4] = vec2[4](vec2(-1, 1), vec2(-1, -1), vec2(1, -1), vec2(1, 1));
+            const vec2 coords[4] = vec2[4](vec2(XSTART, 0), vec2(XSTART, 1), vec2(XEND, 1), vec2(XEND, 0));
+            out vec2 coord;
+            void main() {
+                gl_Position = mvp * vec4(verts[gl_VertexID], 0, 1);
+                coord = coords[gl_VertexID];
+            }
     )glsl";
 
     GLuint loadShader(GLenum type, string text) {
@@ -54,7 +54,7 @@ namespace {
                 if (!compiled) {
                     glGetShaderInfoLog(shader, sizeof(errorLog), nullptr, errorLog);
                     glCheckError("loadShader::glGetShaderInfoLog");
-                    PVR_DB_I("RenderUtils::loadShader:: Error has Occurred while compiling Shader Object: ErrorLog: " + string(errorLog) + "\nProg: " + text);
+                    PVR_DB_I("RenderUtils::loadShader:: Error has Occurred while compiling Shader Object: ErrorLog: " + string(errorLog) + "\nProg: '" + text + "'");
                     exit(1);
                 }
             }
@@ -135,12 +135,12 @@ void setupRTS(int w, int h) {
 }
 
 void Renderer::initProg(vector<pair<GLuint, bool>> texs, std::string vs, string frag) {
-    string fs = R"glsl(
-        #version 300 es
-        #extension GL_OES_EGL_image_external_essl3 : require
-        precision highp float;
-        in vec2 coord;
-        out vec4 color;
+    string fs =
+    R"glsl( #version 300 es
+            #extension GL_OES_EGL_image_external_essl3 : require
+            precision highp float;
+            in vec2 coord;
+            out vec4 color;
     )glsl";
     try {
         for (int i = 0; i < texs.size(); i++)
@@ -163,12 +163,46 @@ void Renderer::initProg(vector<pair<GLuint, bool>> texs, std::string vs, string 
     }
 }
 
+std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+    return str;
+}
+
+void Renderer::PVRPrintGLDesc()
+{
+    const GLubyte *sVendor, *sRenderer, *sVersion, *sExts;
+
+    if((sVendor = glGetString(GL_VENDOR)) == nullptr)
+        glCheckError("Renderer::PVRPrintGLDesc::glGetString(GL_VENDOR)");
+    if((sRenderer = glGetString(GL_RENDERER)) == nullptr)
+        glCheckError("Renderer::PVRPrintGLDesc::glGetString(GL_RENDERER)");
+    if((sVersion = glGetString(GL_VERSION)) == nullptr)
+        glCheckError("Renderer::PVRPrintGLDesc::glGetString(GL_VERSION)");
+    if((sExts = glGetString(GL_EXTENSIONS)) == nullptr)
+        glCheckError("Renderer::PVRPrintGLDesc::glGetString(GL_EXTENSIONS)");
+
+    string strExts = string((const char*)sExts);
+    strExts = ReplaceAll(strExts, " ", ", ");
+
+    PVR_DB_I("Renderer::PVRPrintGLDesc: glVendor : " + string((const char*)sVendor) +
+                ", glRenderer : " + string((const char*)sRenderer) +
+                ", glVersion : " + string((const char*)sVersion) );
+    PVR_DB_I( "Renderer::PVRPrintGLDesc: glExts : " + strExts );
+}
+
+
 // This is the actuall Constructor
 Renderer::Renderer(vector<pair<GLuint, bool>> texs, string frag, float xStart, float xEnd)
         : frmBuf(0), rtt(false), maxLod(0){
     try {
+        PVRPrintGLDesc();
+
         char vs[512];
-        sprintf(vs, VS_REPR, xStart, xEnd);
+        sprintf(vs, VS_REPR.c_str(), xStart, xEnd);
         initProg(texs, vs, frag);
         matUnif = glGetUniformLocation(prog, "mvp");
         glCheckError("Renderer::Renderer::glGetUniformLocation");
@@ -182,6 +216,8 @@ Renderer::Renderer(int width, int height, vector<pair<GLuint, bool>> texs, strin
                    GLint mag, GLuint rdrBuf, int max) : width(width), height(height),
                                                         size(width * height * 4), maxLod(max), rtt(true) {
     try {
+        PVRPrintGLDesc();
+
         initProg(texs, VS_PT, frag);
         outTex = fmt == 0 ? rdrBuf : genTexture(false, width, height, fmt, mag, max);
         glGenFramebuffers(1, &frmBuf);
