@@ -26,6 +26,16 @@
         android:theme="@style/AppTheme"
         android:name=".ErrorReporting">
 
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths_app" />
+        </provider>
+
         <activity android:name=".MainActivity"
             android:label="@string/app_name">
             <!--android:theme="@style/AppTheme.NoActionBar"-->

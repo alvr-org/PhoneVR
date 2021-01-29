@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    >
+    android:fillViewport="true">
     <!--android:scrollbars="none"-->
+
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -24,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:text="PC IP"
+        android:text="@string/pc_ip"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView4"
@@ -39,7 +37,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:ems="10"
-        android:hint="Auto"
+        android:hint="@string/auto"
         android:inputType="textPersonName"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -56,7 +54,7 @@
         android:layout_marginRight="8dp"
         android:ems="10"
         android:inputType="number"
-        android:text="00000"
+        android:text="@string/_00000"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView"
@@ -70,7 +68,7 @@
         android:layout_marginRight="8dp"
         android:ems="10"
         android:inputType="number"
-        android:text="00000"
+        android:text="@string/_00000"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView5"
@@ -85,7 +83,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Resolution factor (height / 8)"
+        android:text="@string/resolution_factor_height_8"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/posePort" />
@@ -99,7 +97,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Motion to photon latency [s]"
+        android:text="@string/motion_to_photon_latency_s"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/debug" />
@@ -113,7 +111,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Additional off screen FOV [deg]"
+        android:text="@string/additional_off_screen_fov_deg"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/mt2ph" />
@@ -128,7 +126,7 @@
         android:layout_marginStart="8dp"
         android:ems="10"
         android:inputType="numberDecimal"
-        android:text="0.000"
+        android:text="@string/_0_000"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
@@ -144,7 +142,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="0dp"
         android:inputType="number"
-        android:text="000"
+        android:text="@string/_000"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView7"
@@ -156,7 +154,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:text="Pose stream port"
+        android:text="@string/pose_stream_port"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/videoPort"
@@ -170,7 +168,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:text="The device is not discoverable right now. Go back to let it be discoverable again"
+        android:text="@string/the_device_is_not_discoverable_right_now_go_back_to_let_it_be_discoverable_again"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -181,7 +179,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:text="Pairing port"
+        android:text="@string/pairing_port"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pcIp"
@@ -197,7 +195,7 @@
         android:layout_marginRight="8dp"
         android:ems="10"
         android:inputType="number"
-        android:text="00000"
+        android:text="@string/_00000"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView6"
@@ -209,7 +207,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:text="Video stream port"
+        android:text="@string/video_stream_port"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/connPort"
@@ -224,7 +222,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginRight="8dp"
-        android:text="Stats"
+        android:text="@string/stats"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/warp" />
@@ -237,7 +235,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginRight="8dp"
         android:checked="false"
-        android:text="Warp/reprojection"
+        android:text="@string/warp_reprojection"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/resMul" />
@@ -253,12 +251,42 @@
         android:layout_marginTop="0dp"
         android:ems="10"
         android:inputType="numberDecimal"
-        android:text="00.0"
+        android:text="@string/_00_0"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView8"
         android:digits="0123456789.," />
+
+    <LinearLayout
+        android:id="@+id/btLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="0dp"
+        tools:layout_editor_absoluteX="20dp"
+        tools:layout_editor_absoluteY="637dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/offFov">
+
+    <Button
+        android:id="@+id/btOpenLogs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight=".45"
+        android:text="@string/open_logs"/>
+
+    <Button
+        android:id="@+id/btShareLogs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight=".45"
+        android:text="@string/share_logs"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/textViewLog"
@@ -266,10 +294,10 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:text="Log (Recent 100 lines)"
+        android:text="@string/log_recent_100_lines"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/offFov"
+        app:layout_constraintTop_toBottomOf="@+id/btLayout"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp" />
@@ -283,7 +311,7 @@
         android:layout_marginRight="8dp"
         android:background="#BFEFECEC"
         android:paddingRight="16dp"
-        android:text="Log"
+        android:text="@string/log"
         android:textColor="@android:color/black"
         android:textIsSelectable="true"
         android:textSize="12sp"
