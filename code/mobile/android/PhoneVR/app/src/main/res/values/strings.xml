@@ -1,4 +1,28 @@
 <resources>
     <string name="app_name">PhoneVR</string>
     <string name="app_crash_toast">Oh no :( PVR has unfortunately crashed. Dev team will be notified. You can create an issue on Github or Discord.</string>
+    <string name="pc_ip">PC IP</string>
+    <string name="auto">Auto</string>
+    <string name="_00000">00000</string>
+    <string name="resolution_factor_height_8">Resolution factor (height / 8)</string>
+    <string name="motion_to_photon_latency_s">Motion to photon latency [s]</string>
+    <string name="additional_off_screen_fov_deg">Additional off screen FOV [deg]</string>
+    <string name="_0_000">0.000</string>
+    <string name="_000">000</string>
+    <string name="pose_stream_port">Pose stream port</string>
+    <string name="the_device_is_not_discoverable_right_now_go_back_to_let_it_be_discoverable_again">The device is not discoverable right now. Go back to let it be discoverable again</string>
+    <string name="pairing_port">Pairing port</string>
+    <string name="video_stream_port">Video stream port</string>
+    <string name="stats">Stats</string>
+    <string name="warp_reprojection">Warp/reprojection</string>
+    <string name="_00_0">00.0</string>
+    <string name="share_logs">Share Logs</string>
+    <string name="open_logs">Open Full Log</string>
+    <string name="log_recent_100_lines">Log (Recent 100 lines)</string>
+    <string name="log">Log</string>
+    <string name="pick_logfile">Pick a log file to open</string>
+    <string-array name="logsFiles">
+        <item>pvrlog.txt</item>
+        <item>pvrDebuglog.txt</item>
+    </string-array>
 </resources>
