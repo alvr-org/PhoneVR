@@ -472,7 +472,9 @@ public:
 
 static ServerProvider server;
 
+#ifdef _WIN32
 extern "C" __declspec(dllexport)
+#endif
 void *HmdDriverFactory(const char *iName, int *retCode) {
 	/*if (PVRCheckIfExpired()) {
 		PVR_DB("This version of PhoneVR driver has expired. Please install a more recent version");
