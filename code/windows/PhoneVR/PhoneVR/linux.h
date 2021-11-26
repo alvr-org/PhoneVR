@@ -1,4 +1,5 @@
 #pragma once
+#if __linux__
 
 #define _stricmp strcasecmp
 #define _wfopen wfopen
@@ -24,3 +25,5 @@ FILE* wfopen(const wchar_t* fileName, const wchar_t* mode)
     wcstombs(modeBuffer, mode, __LINUX_PATH_SIZE__);
     return fopen(fileNameBuffer, modeBuffer);
 }
+
+#endif
