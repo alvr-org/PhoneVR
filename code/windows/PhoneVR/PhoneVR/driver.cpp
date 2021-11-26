@@ -1,7 +1,14 @@
 #include "openvr_driver.h"
 
+#ifdef __linux__
+#include "linux.h"
+#else
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+
+#endif
+
 #include <set>
 
 #include "PVRSockets.h"
