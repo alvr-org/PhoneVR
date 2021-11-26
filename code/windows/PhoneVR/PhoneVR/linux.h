@@ -3,6 +3,12 @@
 #define _stricmp strcasecmp
 #define _wfopen wfopen
 #define __LINUX_PATH_SIZE__ 1024
+// https://bugzilla.redhat.com/show_bug.cgi?id=467172 says maybe this isnt correct
+// but they have not considered I am lazy
+#undef __THROW
+#define __THROW
+
+
 
 #include <stdio.h>
 #include <wchar.h>
