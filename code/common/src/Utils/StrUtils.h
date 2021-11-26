@@ -114,6 +114,6 @@ namespace {
 #pragma warning(pop)
 #endif
 
-#if _WIN32
+#if _WIN32 or __ANDROID__
 #define crypt(String) ( CXorString<ConstructIndexList<sizeof( String ) - 1>::Result>( String ).decrypt() )
 #endif
