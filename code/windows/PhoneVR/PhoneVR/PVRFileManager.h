@@ -7,7 +7,6 @@
 
 #include "PVRGlobals.h"
 
-
 //global char* need to be double const
 typedef const char *const ccc;
 
@@ -123,7 +122,7 @@ T PVRProp(std::vector<std::string> propPath)
 		fullPath += propPath[i] + (i < propPath.size() - 1 ? "." : "");
 	}
 	T res = j;
-	PVR_DB_I("Using default setting value: " + fullPath + " = " + to_string(res));
+	PVR_DB_I("Using default setting value: " + fullPath + " = " + std::to_string(res));
 	return res;
 }
 
