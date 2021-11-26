@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 #include <fstream>
 #include "nlohmann/json.hpp" //awesome lib!
 #include <string>
@@ -62,12 +63,13 @@ namespace
 
 	//const wchar_t *const setsFile = L"C:\\Program Files\\PhoneVR\\pvrsettings.json";
 	const wchar_t *const setsFile = L"\\..\\..\\drivers\\PVRServer\\pvrsettings.json";
+        
 	
 	nlohmann::json PVRGetSets() 
 	{
 		try 
 		{
-			return nlohmann::json::parse(std::ifstream( std::wstring(_GetExePath() + std::wstring(setsFile)).c_str() ));
+			return nlohmann::json::parse(std::ifstream( std::filesystem::path(_GetExePath() + std::wstring(setsFile))   ));
 		}
 		catch (const std::exception& err)
 		{
@@ -82,7 +84,7 @@ namespace
 
 	void PVRSaveSets(nlohmann::json j) 
 	{
-		std::ofstream(setsFile) << j.dump(4);
+		std::ofstream(std::filesystem::path(setsFile)) << j.dump(4);
 	}
 }
 
