@@ -50,7 +50,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="landscape"
             android:enableVrMode="@string/gvr_vr_mode_component"
-            android:theme="@style/VrActivityTheme"
+            android:theme="@style/GameTheme"
             android:resizeableActivity="false"/>
 
         <activity
