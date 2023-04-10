@@ -56,7 +56,7 @@ body:
 
 - type: textarea
   attributes:
-    label: Environment (please complete the following information):
+    label: Environment (please complete the following information)
     description: The devices software you are using to run PhoneVR
     placeholder: | 
       Eg.
