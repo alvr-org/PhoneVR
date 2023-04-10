@@ -1,8 +1,6 @@
 name: Issue/Bug report Template
 description: Create a Issue/bug report to help us improve
 title: "[Issue/Bug] Title"
-labels: ''
-assignees: ''
 body:
 
 - type: checkboxes
