@@ -11,6 +11,14 @@ body:
     - label: I have searched the existing issues
       required: true
 
+- type: checkboxes
+  attributes:
+    label: Is this issue has already been addressed in documentation?
+    description: Please read the readme file [Here](https://github.com/PhoneVR-Developers/PhoneVR/blob/master/README.md)
+    options:
+    - label: I have read the readme file
+      required: true
+
 - type: textarea
   attributes:
     label: Describe the bug/issue
