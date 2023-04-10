@@ -1,0 +1,80 @@
+name: Issue/Bug report Template
+description: Create a Issue/bug report to help us improve
+title: "[Issue/Bug] Title"
+labels: ''
+assignees: ''
+body:
+
+- type: checkboxes
+  attributes:
+    label: Is there an existing issue for this?
+    description: Please search to see if an issue already exists for the bug you encountered.
+    options:
+    - label: I have searched the existing issues
+      required: true
+
+- type: textarea
+  attributes:
+    label: Describe the bug/issue
+    description: A concise description of what you're experiencing.
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Local (your) Time when Issue has occurred
+    description: for example - 1-Jan-2021, 15:30:00 Hrs
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: How To Reproduce your issue
+    description: Steps to reproduce the behavior.
+    placeholder: |
+     Steps to reproduce the behaviour:
+     1. Go to '...'
+     2. Click on '....'
+     3. Scroll down to '....'
+     4. See error
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Expected behaviour
+    description: A clear and concise description of what you expected to happen.
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Screenshots
+    description: If applicable, add screenshots to help explain your problem.
+  validations:
+    required: false
+
+- type: textarea
+  attributes:
+    label: Environment (please complete the following information):
+    description: The devices software you are using to run PhoneVR
+    placeholder: | Eg.
+     - Desktop OS: [e.g. Windows 10 1680 etc..]
+     - Android OS: [e.g. 7.1, 9, 11 etc..]
+     - Mobile Device Model [e.g. Xiaomi Mi Note10] 
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Additional context
+    description: Add any other extra information about the problem here
+  validations:
+    required: false
+
+- type: textarea
+  attributes:
+    label: Attached Logs
+    description: Attach required logs(yes literally nothing can be fixed without logs) from your Desktop and Mobile end. ([Here](https://github.com/ShootingKing-AM/PhoneVR#issue--bug-reporting) is how to get logs)
+  validations:
+    required: false
