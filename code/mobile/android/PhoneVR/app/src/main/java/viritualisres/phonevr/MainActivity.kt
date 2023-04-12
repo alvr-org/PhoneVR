@@ -14,6 +14,7 @@ import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import kotlinx.android.synthetic.main.activity_settings.*
 
 import viritualisres.phonevr.BuildConfig;
 
@@ -24,6 +25,16 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+
+        // TODO: Add log to file, by making some util
+        Log.d("PhoneVR", "Running PVR on FINGERPRINT:${Build.FINGERPRINT}\n" +
+            "MODEL:${Build.MODEL}\n" +
+            "MANUFACTURER:${Build.MANUFACTURER}\n" +
+            "BRAND:${Build.BRAND}\n" +
+            "DEVICE:${Build.DEVICE}\n" +
+            "BOARD:${Build.BOARD}\n" +
+            "HOST:${Build.HOST}\n" +
+            "PRODUCT:${Build.PRODUCT}\n");
 
         setExtDirinJNI();
 
