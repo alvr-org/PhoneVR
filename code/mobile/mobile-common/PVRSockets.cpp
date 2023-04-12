@@ -75,7 +75,13 @@ void PVRStartAnnouncer(const char *ip, uint16_t port, void(*segueCb)(),
                 talker = new TCPTalker(port, [=](PVR_MSG msgType, vector<uint8_t> data) {
                     if (msgType == PVR_MSG::PAIR_ACCEPT) {
                         PVRStopAnnouncer();
-                        pcIP = talker->getIP();
+                        if ( pcIP.length() == 0 ){
+                            pcIP = talker->getIP(); // Set pcIP from addr only if pcIP is empty (override not set in android app settings)
+                        } else
+                        {
+                            PVR_DB_I("[PVRSockets::PVRStartAnnouncer] TCPTalker, got pcIP from network as " +
+                                             to_string(talker->getIP()) + " but using override ip from settings(" + pcIP + ")");
+                        }
                         segueCb();
                     } else if (msgType == PVR_MSG::HEADER_NALS) {
                         headerCb(&data[0], data.size());
@@ -243,6 +249,8 @@ void PVRStopAnnouncer() {
 
 void PVRStartSendSensorData(uint16_t port, bool(*getSensorData)(float *, float *)) {
     try {
+        PVR_DB_I("[PVRStartSendSensorData] sending sensor data on UDP port : " + to_string(port) + ", ip: " +
+                         to_string(pcIP));
         std::thread([=] {
             try {
                 io_service svc;
@@ -313,10 +321,14 @@ void PVRStartReceiveStreams(uint16_t port) {
                 //udp::socket skt(svc, {udp::v4(), port});
                 tcp::socket skt(svc);
                 asio::error_code ec = error::fault;
+                PVR_DB_I("[StreamReceiver th] Connecting to pcIP " + pcIP + ":" +
+                                 to_string(port));
+                // TODO: Add max retries or timeout, connect will block until connected
                 while (ec.value() != 0 && pvrState != PVR_STATE_SHUTDOWN)
                     skt.connect({address::from_string(pcIP), port}, ec);
 
-                PVR_DB("[StreamReceiver th] sock connected @p" + to_string(port));
+                PVR_DB_I("[StreamReceiver th] socket connected pcIP " + pcIP + ":" +
+                       to_string(port));
 
                 function<void(const asio::error_code &, size_t)> handler = [&](
                         const asio::error_code &err, size_t) { ec = err; };
