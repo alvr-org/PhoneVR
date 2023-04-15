@@ -15,6 +15,7 @@ Use Steam VR-enabled applications with your phone as HMD (*Head-mounted display*
 
 | Tabs | Links |
 | --- | --- |
+| Roadmap/Plan | [**Project Kanban**](https://github.com/orgs/PhoneVR-Developers/projects/1/views/1) | 
 | Latest Release | [`Github Release`](https://github.com/ShootingKing-AM/PhoneVR/releases/latest) |
 | Previous Builds | [`Appveyor Previous Builds`](https://ci.appveyor.com/project/ShootingKing-AM/phonevr/history) |
 | Issues | [`Github Issue Tracker`](https://github.com/ShootingKing-AM/PhoneVR/issues) |
