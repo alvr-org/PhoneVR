@@ -85,7 +85,7 @@ void PVRStartConnectionListener(function<void(string, PVR_MSG)> callback) {
 					{
 						PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Error listening (" + to_string(err.value()) + "): " + err.message());
 					}
-					//PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Recvd data... Interpreting...");
+					//PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Recvd data... Interpreting... pktSz = " + to_string(pktSz) + "; from ip = " + remEP.address().to_string() + " buf = '" + string(buf, buf + 3) + "'" );
 
 					if (pktSz == 8 && string(buf, buf + 3) == "pvr") {
 						auto ip = remEP.address().to_string();
@@ -125,7 +125,7 @@ void PVRStopConnectionListener() {
 void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(vector<uint8_t>)> headerCb, function<void()> onErrCb) {
 	videoRunning = true;
 	videoThr = new std::thread([=] {
-		PVR_DB("[PVRStartStreamer th] Setting encoder");
+		PVR_DB_I("[PVRStartStreamer th] Setting encoder");
 		auto S = ENCODER_SECT;
 		int fps = PVRProp<int>({ GAME_FPS_KEY });
 
@@ -209,8 +209,8 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 
 		x264_param_t outPar;
 		x264_encoder_parameters(enc, &outPar);
-		PVR_DB("[PVRStartStreamer th] Render size: " + to_string(width) + "x" + to_string(height));
-		PVR_DB("[PVRStartStreamer th] Using encoding level: " + to_string(outPar.i_level_idc));
+		PVR_DB_I("[PVRStartStreamer th] Render size: " + to_string(width) + "x" + to_string(height));
+		PVR_DB_I("[PVRStartStreamer th] Using encoding level: " + to_string(outPar.i_level_idc));
 
 		x264_nal_t *nals;
 		int nNals;
@@ -223,7 +223,10 @@ void PVRStartStreamer(string ip, uint16_t width, uint16_t height, function<void(
 		io_service svc;
 		tcp::socket skt(svc);
 		tcp::acceptor acc(svc, { tcp::v4(), PVRProp<uint16_t>({ VIDEO_PORT_KEY }) });
+		PVR_DB_I("[PVRStartStreamer th] accepting connections on TCP port " + to_string(PVRProp<uint16_t>({ VIDEO_PORT_KEY })) + ", waiting for device to connect");
+		// TODO: Add max retries or timeout, accept will block until connected
 		acc.accept(skt);
+		PVR_DB_I("[PVRStartStreamer th] Client device connected on TCP port " + to_string(PVRProp<uint16_t>({ VIDEO_PORT_KEY })) + ", sending stream ... ");
 
 		//udp::socket skt(svc);
 		//udp::endpoint remEP(address::from_string(ip), port);
