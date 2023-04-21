@@ -21,6 +21,9 @@
     <string name="log_recent_100_lines">Log (Recent 100 lines)</string>
     <string name="log">Log</string>
     <string name="pick_logfile">Pick a log file to open</string>
+    <string name="use_phonevr_legacy_streamer">Use PhoneVR legacy Streamer</string>
+    <string name="use_alvr_streamer_recommended">Use ALVR Streamer (recommended)</string>
+    <string name="phonevr_support_packages">PhoneVR supports two streamer packages, ALVR-Cardboard or PhoneVR-GVR. Choose either one based on your setup.</string>
     <string-array name="logsFiles">
         <item>pvrlog.txt</item>
         <item>pvrDebuglog.txt</item>

@@ -22,7 +22,6 @@ using namespace gvr;
 using namespace PVR;
 
 #define JNI_VERS JNI_VERSION_1_6
-#define FUNC(type, func) extern "C" JNIEXPORT type JNICALL Java_viritualisres_phonevr_Wrap_##func
 #define SUB(func) FUNC(void, func)
 
 JavaVM *jVM;

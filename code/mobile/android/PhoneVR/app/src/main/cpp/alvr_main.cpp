@@ -163,7 +163,7 @@ void inputThread() {
 //}
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_google_cardboard_VrActivity_initializeNative(JNIEnv *env, jobject obj,
+Java_viritualisres_phonevr_ALVRActivity_initializeNative(JNIEnv *env, jobject obj,
                                                       jint screenWidth, jint screenHeight) {
     CTX.javaContext = env->NewGlobalRef(obj);
 
@@ -180,7 +180,7 @@ Java_com_google_cardboard_VrActivity_initializeNative(JNIEnv *env, jobject obj,
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_google_cardboard_VrActivity_destroyNative(JNIEnv *, jobject) {
+Java_viritualisres_phonevr_ALVRActivity_destroyNative(JNIEnv *, jobject) {
     alvr_destroy();
 
     CardboardHeadTracker_destroy(CTX.headTracker);
@@ -189,7 +189,7 @@ Java_com_google_cardboard_VrActivity_destroyNative(JNIEnv *, jobject) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_google_cardboard_VrActivity_resumeNative(JNIEnv *, jobject) {
+Java_viritualisres_phonevr_ALVRActivity_resumeNative(JNIEnv *, jobject) {
     CardboardHeadTracker_resume(CTX.headTracker);
 
     CTX.renderingParamsChanged = true;
@@ -208,7 +208,7 @@ Java_com_google_cardboard_VrActivity_resumeNative(JNIEnv *, jobject) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_google_cardboard_VrActivity_pauseNative(JNIEnv *, jobject) {
+Java_viritualisres_phonevr_ALVRActivity_pauseNative(JNIEnv *, jobject) {
     alvr_pause();
 
     if (CTX.running) {
@@ -219,14 +219,14 @@ Java_com_google_cardboard_VrActivity_pauseNative(JNIEnv *, jobject) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_google_cardboard_VrActivity_surfaceCreatedNative(JNIEnv *, jobject) {
+Java_viritualisres_phonevr_ALVRActivity_surfaceCreatedNative(JNIEnv *, jobject) {
     alvr_initialize_opengl();
 
     CTX.glContextRecreated = true;
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_google_cardboard_VrActivity_setScreenResolutionNative(JNIEnv *, jobject, jint width,
+Java_viritualisres_phonevr_ALVRActivity_setScreenResolutionNative(JNIEnv *, jobject, jint width,
                                                                jint height) {
     CTX.screenWidth = width;
     CTX.screenHeight = height;
@@ -235,7 +235,7 @@ Java_com_google_cardboard_VrActivity_setScreenResolutionNative(JNIEnv *, jobject
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_google_cardboard_VrActivity_renderNative(JNIEnv *, jobject) {
+Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *, jobject) {
     if (CTX.renderingParamsChanged) {
         info("renderingParamsChanged, processing new params");
         uint8_t *buffer;
@@ -419,6 +419,6 @@ Java_com_google_cardboard_VrActivity_renderNative(JNIEnv *, jobject) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_google_cardboard_VrActivity_switchViewerNative(JNIEnv *, jobject) {
+Java_viritualisres_phonevr_ALVRActivity_switchViewerNative(JNIEnv *, jobject) {
     CardboardQrCode_scanQrCodeAndSaveDeviceParams();
 }
