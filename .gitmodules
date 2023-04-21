@@ -1,0 +1,3 @@
+[submodule "code/mobile/android/PhoneVR/ALVR"]
+	path = code/mobile/android/PhoneVR/ALVR
+	url = https://github.com/PhoneVR-Developers/ALVR-phonevr

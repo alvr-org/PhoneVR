@@ -138,6 +138,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         init {
             System.loadLibrary("gvr")
+            System.loadLibrary("alvr_client_core")
             System.loadLibrary("native-lib")
         }
     }

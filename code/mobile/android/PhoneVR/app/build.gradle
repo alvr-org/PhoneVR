@@ -17,18 +17,19 @@ android {
             keyPassword System.getenv("Key")
         }
     }
-    android.ndkVersion '22.0.7026061'
-    compileSdkVersion 30
+    compileSdkVersion 33
+    buildToolsVersion = "33.0.0"
     defaultConfig {
         applicationId "viritualisres.phonevr"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode Integer.valueOf(System.env.APPVEYOR_BUILD_NUMBER ?: 1)
         versionName System.getenv("APPVEYOR_PVR_TAG")
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         externalNativeBuild {
             cmake {
                 arguments ""
+                cppFlags "-std=c++17 -fexceptions -frtti"
             }
         }
 
@@ -52,6 +53,11 @@ android {
                     cppFlags += "-D_DEBUG=1"
                 }
             }
+        }
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ["libraries/jni", "../ALVR/build/alvr_client_core"]
         }
     }
     externalNativeBuild {
@@ -81,6 +87,8 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    namespace 'viritualisres.phonevr'
+    ndkVersion '25.1.8937393'
 }
 
 dependencies {
@@ -104,3 +112,31 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:26.0.0')
     implementation 'com.google.firebase:firebase-analytics-ktx'
 }
+
+// The dependencies for NDK builds live inside the .aar files so they need to
+// be extracted before NDK targets can link against.
+task extractNdk(type: Copy)  {
+    copy {
+        from zipTree("../cardboard/cardboard-sdk.aar")
+        into "libraries/"
+        include "jni/**/libGfxPluginCardboard.so"
+    }
+}
+
+task deleteNdk(type: Delete) {
+    delete "libraries/"
+}
+
+task buildClientLib {
+    doLast {
+        exec {
+            workingDir '../ALVR'
+            commandLine 'cargo', 'xtask', 'build-client-lib', '--release', '--no-stdcpp'
+        }
+    }
+}
+
+build.dependsOn(extractNdk)
+build.dependsOn(buildClientLib)
+clean.dependsOn(deleteNdk)
+preBuild.dependsOn(buildClientLib)

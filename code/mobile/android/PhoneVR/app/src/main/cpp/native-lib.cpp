@@ -14,6 +14,8 @@
 #include <sys/stat.h>
 #include <android/log.h>
 
+#include "common.h"
+
 using namespace std;
 using namespace Eigen;
 using namespace gvr;
@@ -23,8 +25,9 @@ using namespace PVR;
 #define FUNC(type, func) extern "C" JNIEXPORT type JNICALL Java_viritualisres_phonevr_Wrap_##func
 #define SUB(func) FUNC(void, func)
 
+JavaVM *jVM;
+
 namespace {
-    JavaVM *jVM;
     jclass javaWrap;
 
     float newAcc[3];
