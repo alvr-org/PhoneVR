@@ -23,7 +23,7 @@ android {
         applicationId "viritualisres.phonevr"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode Integer.valueOf(System.env.APPVEYOR_BUILD_NUMBER ?: 0)
+        versionCode Integer.valueOf(System.env.APPVEYOR_BUILD_NUMBER ?: 1)
         versionName System.getenv("APPVEYOR_PVR_TAG")
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         externalNativeBuild {
