@@ -25,16 +25,4 @@
     </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <!-- <string name="app_name">ALVR</string> -->
-    <string name="title_activity_vr">ALVR</string>
-    <string name="read_storage_permission">
-            Hello Cardboard requires to read your external storage to load device parameters.
-    </string>
-    <string name="low_storage_error">
-            Detector dependencies cannot be downloaded due to low device storage
-    </string>
-    <string name="switch_viewer">
-            Switch Cardboard viewer
-    </string>
 </resources>
