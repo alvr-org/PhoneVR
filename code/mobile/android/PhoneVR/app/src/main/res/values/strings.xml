@@ -21,8 +21,21 @@
     <string name="log_recent_100_lines">Log (Recent 100 lines)</string>
     <string name="log">Log</string>
     <string name="pick_logfile">Pick a log file to open</string>
+    <string name="use_phonevr_legacy_streamer">Use PhoneVR(GoogleVR API) legacy Server</string>
+    <string name="use_alvr_streamer_recommended">Use ALVR(Cardboard API) Server (recommended)</string>
+    <string name="phonevr_support_packages">PhoneVR supports two VR packages, ALVR-CardboardAPI or PhoneVR-GvrAPI. You can read more about these packages in https://github.com/PhoneVR-Developers/PhoneVR#readme. Select either one based on your setup.</string>
     <string-array name="logsFiles">
         <item>pvrlog.txt</item>
         <item>pvrDebuglog.txt</item>
     </string-array>
+    <string name="title_activity_vr">ALVR</string>
+    <string name="read_storage_permission">
+            Hello Cardboard requires to read your external storage to load device parameters.
+    </string>
+    <string name="low_storage_error">
+            Detector dependencies cannot be downloaded due to low device storage
+    </string>
+    <string name="switch_viewer">
+            Switch Cardboard viewer
+    </string>
 </resources>

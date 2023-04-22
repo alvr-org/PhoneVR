@@ -17,18 +17,21 @@ android {
             keyPassword System.getenv("Key")
         }
     }
-    android.ndkVersion '22.0.7026061'
-    compileSdkVersion 30
+    compileSdkVersion 33
+    buildToolsVersion = "33.0.0"
+    namespace 'viritualisres.phonevr'
+    ndkVersion '25.1.8937393'
     defaultConfig {
         applicationId "viritualisres.phonevr"
-        minSdkVersion 21
-        targetSdkVersion 30
+        minSdkVersion 24
+        targetSdkVersion 33
         versionCode Integer.valueOf(System.env.APPVEYOR_BUILD_NUMBER ?: 1)
         versionName System.getenv("APPVEYOR_PVR_TAG")
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         externalNativeBuild {
             cmake {
                 arguments ""
+                cppFlags "-std=c++17 -fexceptions -frtti"
             }
         }
 
@@ -44,6 +47,7 @@ android {
             signingConfig signingConfigs.releaseconfig
         }
         debug {
+            debuggable true
             jniDebuggable true
             renderscriptDebuggable true
             minifyEnabled false
@@ -54,6 +58,11 @@ android {
             }
         }
     }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ["libraries/jni", "../ALVR/build/alvr_client_core"]
+        }
+    }
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
@@ -62,11 +71,11 @@ android {
 
     flavorDimensions "arch"
     productFlavors {
-        arm7 {
+        arm {
             dimension "arch"
             ndk.abiFilter 'armeabi-v7a'
         }
-        arm8 {
+        arm64 {
             dimension "arch"
             ndk.abiFilters 'arm64-v8a'
         }
@@ -74,6 +83,11 @@ android {
             dimension "arch"
             ndk.abiFilter 'x86'
         }
+        // x86_64 {
+        //      dimension "arch"
+        //      ndk.abiFilter 'x86_64'
+        // }
+        // GVR lib dosent distb x86
     }
     // CompileOptions required for ARCA
     compileOptions
@@ -86,7 +100,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     //noinspection GradleDynamicVersion
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.google.android.material:material:1.2.1'
@@ -95,7 +109,10 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
-    implementation 'com.google.vr:sdk-base:1.101.0'
+    implementation 'com.google.vr:sdk-base:1.200.0@aar'
+    implementation 'com.google.cardboard.sdk:cardboard-sdk:1.17.0@aar'
+    implementation 'com.google.android.gms:play-services-vision:20.1.3'
+    implementation 'com.google.protobuf:protobuf-javalite:3.19.4'
 
     def acraVersion = '5.7.0'
     implementation "ch.acra:acra-mail:$acraVersion"
@@ -104,3 +121,38 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:26.0.0')
     implementation 'com.google.firebase:firebase-analytics-ktx'
 }
+
+// The dependencies for NDK builds live inside the .aar files so they need to
+// be extracted before NDK targets can link against.
+task extractNdk(type: Copy)  {
+    copy {
+        from zipTree("../cardboard/cardboard-sdk.aar")
+        into "libraries/"
+        include "jni/**/libGfxPluginCardboard.so"
+    }
+    copy {
+        from zipTree("../gvr-android-sdk-1.200/libraries/sdk-base-1.200.0.aar")
+        into "libraries/"
+        include "headers/vr/gvr/capi/**/*h"
+        include "jni/**/libgvr_audio.so"
+        include "jni/**/libgvr.so"
+    }
+}
+
+task deleteNdk(type: Delete) {
+    delete "libraries/"
+}
+
+task buildClientLib {
+    doLast {
+        exec {
+            workingDir '../ALVR'
+            commandLine 'cargo', 'xtask', 'build-client-lib', '--release', '--no-stdcpp'
+        }
+    }
+}
+
+build.dependsOn(extractNdk)
+build.dependsOn(buildClientLib)
+clean.dependsOn(deleteNdk)
+preBuild.dependsOn(buildClientLib)

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".InitActivity">
+
+
+    <Button
+        android:id="@+id/alvr_streamer"
+        android:layout_width="232dp"
+        android:layout_height="74dp"
+        android:layout_marginTop="40dp"
+        android:onClick="btOnClickALVRStreamer"
+        android:text="@string/use_alvr_streamer_recommended"
+        android:textAllCaps="false"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.664"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/body" />
+
+    <Button
+        android:id="@+id/pvr_streamer"
+        android:layout_width="232dp"
+        android:layout_height="74dp"
+        android:layout_marginTop="44dp"
+        android:onClick="btOnClickPVRStreamer"
+        android:text="@string/use_phonevr_legacy_streamer"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.664"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/alvr_streamer" />
+
+    <TextView
+        android:id="@+id/head"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="76dp"
+        android:text="PhoneVR"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/body"
+        android:layout_width="324dp"
+        android:layout_height="86dp"
+        android:layout_marginTop="36dp"
+        android:text="@string/phonevr_support_packages"
+        android:textAlignment="textStart"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/head" />
+
+    <ImageView
+        android:id="@+id/pvr_logo"
+        android:layout_width="63dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/head"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@mipmap/ic_launcher" />
+
+    <ImageView
+        android:id="@+id/pvr_icon"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp"
+        app:layout_constraintEnd_toStartOf="@+id/pvr_streamer"
+        app:layout_constraintHorizontal_bias="0.796"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/pvr_streamer"
+        app:srcCompat="@mipmap/ic_launcher" />
+
+    <ImageView
+        android:id="@+id/alvr_icon"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintEnd_toStartOf="@+id/alvr_streamer"
+        app:layout_constraintHorizontal_bias="0.636"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/alvr_streamer"
+        app:srcCompat="@mipmap/ic_launcher_alvr" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

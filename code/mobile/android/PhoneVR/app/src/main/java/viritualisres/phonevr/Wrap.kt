@@ -22,7 +22,7 @@ internal object Wrap {
     @JvmStatic
     fun segueToGame() {
         val rotation = mainRef?.get()?.windowManager?.defaultDisplay?.rotation
-        //Log.d("--PVR-Java--", "Wrapper Class Layout Orientation : " /*+ mainLayout.rotation.toString() + ", GVR: "*/ + rotation);
+        Log.d("PVR-Java", "wrap/segueToGame: Wrapper Class Layout Orientation : " /*+ mainLayout.rotation.toString()*/ + ", GVR: " + rotation);
         val intent = Intent(mainRef?.get(), GameActivity::class.java)
         intent.putExtra("MAINLAYOUT_ROT", rotation)
         mainRef?.get()?.startActivity(intent)

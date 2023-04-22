@@ -137,7 +137,6 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         init {
-            System.loadLibrary("gvr")
             System.loadLibrary("native-lib")
         }
     }
