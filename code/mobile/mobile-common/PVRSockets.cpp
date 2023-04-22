@@ -169,7 +169,7 @@ PVRAnnounceToAllInterfaces(udp::socket &skt, uint8_t *buf, const uint16_t &port)
                     }
                     p = p->ifa_next;
                 }
-                usleep(10000); // 10ms
+                usleep(500000); // 500ms
                 p = start;
             }
             freeifaddrs(ifap);

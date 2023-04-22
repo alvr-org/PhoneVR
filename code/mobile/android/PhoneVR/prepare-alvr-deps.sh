@@ -37,3 +37,9 @@ mkdir cardboard
 mv "${CARB_REPO_NAME}/sdk/build/outputs/aar/sdk-release.aar" cardboard/cardboard-sdk.aar
 cp "${CARB_REPO_NAME}/sdk/include/cardboard.h" cardboard/cardboard.h
 rm -r "${CARB_REPO_NAME}"
+
+rm -r "gvr-android-sdk-1.200"
+curl -sLS "https://github.com/googlevr/gvr-android-sdk/releases/download/v1.200/gvr-android-sdk-1.200.zip" > download.zip
+unzip download.zip
+rm download.zip
+

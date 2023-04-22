@@ -70,7 +70,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
             }
         }
 
-        PVR_DB_I("JNI_OnLoad::FindClass:: Finding ....");
+        PVR_DB_I("JNI_OnLoad::FindClass:: Finding viritualisres/phonevr/Wrap ....");
         jthrowable exc;
         jclass jWrapClass = env->FindClass("viritualisres/phonevr/Wrap");
         if (env->ExceptionCheck()) {
@@ -93,6 +93,9 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
         javaWrap = (jclass) env->NewGlobalRef(jWrapClass);
         if (javaWrap == NULL) {
             PVR_DB_I("JNI_OnLoad::GlobalRef:: System ran out of memory");
+        }
+        else {
+            PVR_DB_I("JNI_OnLoad:: Found.");
         }
     }
     catch( exception e){
@@ -147,6 +150,8 @@ void callJavaMethod(const char *name) {
         }
 
         env->CallStaticVoidMethod(javaWrap, resultOfMethodID);
+        PVR_DB_I("JNI_callJavaMethod:: Success calling " + to_string(name) + "()");
+
         if (!isMainThread) {
             jint resultOfDetachCurrentThread = jVM->DetachCurrentThread();
             if( resultOfDetachCurrentThread != JNI_OK ) {

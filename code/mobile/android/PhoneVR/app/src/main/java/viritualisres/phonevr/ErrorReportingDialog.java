@@ -42,7 +42,7 @@ public class ErrorReportingDialog extends Activity {
                 .setMessage(Html.fromHtml("Unfortunately, PhoneVR has been crashed recently. Developers will be notified.<br/><br/>" +
                         "<b>Exception Message:</b><p style=\"color:red\">" + ExceptionMsg +
                         "</p><br/>You can help us by making an issue in Github's " +
-                        "<a href=\"https://github.com/ShootingKing-AM/PhoneVR/issues/new?title=Phone%20VR%20crash%20Issue...&amp;body="+
+                        "<a href=\"https://github.com/PhoneVR-Developers/PhoneVR/issues/new?title=Phone%20VR%20crash%20Issue...&amp;body="+
                         URLEncoder.encode("Hi, PVR Devs, I am facing a crash with the following Error:\n\n ```ml\n" + ExceptionMsg + "\n```" +
                         "\n\nYou are doing a good job. Hope this helps ;)" , "UTF-8") +
                         "\">Issue Tracker</a>" +

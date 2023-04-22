@@ -43,7 +43,9 @@ target_include_directories(native-lib
 
 target_link_libraries(native-lib
     log android EGL GLESv3 mediandk OpenMAXAL #todo remove OpenMaxal?
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../libraries/jni/${ANDROID_ABI}/libgvr.so
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../../libraries/jni/${ANDROID_ABI}/libgvr.so # TODO: Remove from src tree
     ${alvr_build_dir}/${ANDROID_ABI}/libalvr_client_core.so
     ${libs_dir}/jni/${ANDROID_ABI}/libGfxPluginCardboard.so
+    ${libs_dir}/jni/${ANDROID_ABI}/libgvr.so
+    ${libs_dir}/jni/${ANDROID_ABI}/libgvr_audio.so
 )

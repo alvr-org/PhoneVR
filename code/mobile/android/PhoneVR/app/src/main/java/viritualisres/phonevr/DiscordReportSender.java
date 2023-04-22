@@ -81,7 +81,7 @@ public class DiscordReportSender implements ReportSender {
                 int firstLetter = Character.codePointAt(((JSONObject)reportsData.get("INITIAL_CONFIGURATION")).get("locale").toString(), 3) - 0x41 + 0x1F1E6;
                 int secondLetter = Character.codePointAt(((JSONObject)reportsData.get("INITIAL_CONFIGURATION")).get("locale").toString(), 4) - 0x41 + 0x1F1E6;
 
-                String gitFileUrl = "https://github.com/ShootingKing-AM/PhoneVR/blob/master/code/mobile/android/PhoneVR/app/src/main/java/viritualisres/phonevr/";
+                String gitFileUrl = "https://github.com/PhoneVR-Developers/PhoneVR/blob/master/code/mobile/android/PhoneVR/app/src/main/java/viritualisres/phonevr/";
 
                 Pattern p = Pattern.compile("(viritualisres\\.phonevr[^{}():\\n\\t]*?\\(.*?:[0-9]*?\\).*?)\\n");
                 Matcher m = p.matcher(reportsData.get("STACK_TRACE").toString());

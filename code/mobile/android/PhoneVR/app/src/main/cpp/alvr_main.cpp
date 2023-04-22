@@ -44,7 +44,7 @@ struct Pose {
 };
 
 struct NativeContext {
-    JavaVM *javaVm = jVM;
+    JavaVM *javaVm = nullptr;
     jobject javaContext = nullptr;
 
     CardboardHeadTracker *headTracker = nullptr;
@@ -165,6 +165,7 @@ void inputThread() {
 extern "C" JNIEXPORT void JNICALL
 Java_viritualisres_phonevr_ALVRActivity_initializeNative(JNIEnv *env, jobject obj,
                                                       jint screenWidth, jint screenHeight) {
+    CTX.javaVm = jVM;
     CTX.javaContext = env->NewGlobalRef(obj);
 
     uint32_t viewWidth = std::max(screenWidth, screenHeight) / 2;
