@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "date_today=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
           ls -alh
-          cd "code\mobile\android\PhoneVR"
+          cd "code/mobile/android/PhoneVR"
 
       - name: Prepare deps
         run: |
