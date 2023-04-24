@@ -41,6 +41,7 @@ jobs:
           ls -alh
           chmod +x prepare-alvr-deps.sh
           bash prepare-alvr-deps.sh
+          cargo xtask prepare-deps --platform android --ci
 
       # Set Repository Name As Env Variable
       - name: Set repository name as env variable
