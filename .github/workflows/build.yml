@@ -5,7 +5,10 @@ env:
   main_project_module: app
 
   # The name of the Play Store
-  playstore_name: PhoneVR
+  project_name: PhoneVR
+
+  SOLUTION_FILE_PATH: code\windows\PhoneVR\PhoneVR.sln
+  SOLUTION_DIR: code\windows\PhoneVR\
 
 on:
   # Triggers the workflow on push or pull request events but only for default and protected branches
@@ -21,7 +24,51 @@ defaults:
     working-directory: ./code/mobile/android/PhoneVR
 
 jobs:
-  Build:
+  Build_PVR_Server:
+    name: Build PhoneVR Server
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [Release, Debug]
+        platform: [x64, x86]
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # https://github.com/actions/runner-images/issues/842#issuecomment-1495115166
+    - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
+      shell: powershell
+      run: |
+        $VS_BTOOLS_EXE="vs_buildtools.exe"
+        $VS_BTOOLS_URI="https://aka.ms/vs/15/release/vs_buildtools.exe"
+        Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
+        Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
+        "--add", "Microsoft.VisualStudio.Component.VC.140", `
+        "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
+        "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Building ${{matrix.platform}}-${{matrix.config}}
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Upload Build outputs
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.project_name }}-Server-${{ matrix.config }}
+        path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
+  
+  Build_APK:
+    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
@@ -33,54 +80,65 @@ jobs:
       - name: Set current date as env variable
         run: |
           echo "date_today=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-          # cd "code/mobile/android/PhoneVR"
           ls -alh
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      - uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25c # 25.2.9519653
 
       - name: Prepare deps
         run: |          
           ls -alh
           chmod +x prepare-alvr-deps.sh
+          
+          sudo apt update
+          sudo apt install build-essential pkg-config nasm libva-dev libdrm-dev libvulkan-dev libx264-dev libx265-dev cmake libasound2-dev libjack-jackd2-dev libxrandr-dev libunwind-dev
+          
+          sudo apt remove cmake
+          pip install cmake --upgrade
+          cmake --version
+          
           bash prepare-alvr-deps.sh
-
-      # Set Repository Name As Env Variable
-      - name: Set repository name as env variable
-        run: echo "repository_name=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')" >> $GITHUB_ENV
-
-      - name: Set Up JDK
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
 
       - name: Change gradle wrapper permissions
         run: chmod +x ./gradlew
 
       # Run Tests Build
       - name: Run gradle tests
-        run: ./gradlew test
+        run: | 
+          ls -alh
+          ./gradlew test
 
       # Run Build Project
       - name: Build gradle project
-        run: ./gradlew build
+        run: | 
+          ls -alh
+          ./gradlew build
 
       # Create APK Debug
-      - name: Build apk debug project (APK) - ${{ env.main_project_module }} module
+      - name: Build apk debug project (APK)
         run: ./gradlew assembleDebug
 
       # Create APK Release
-      - name: Build apk release project (APK) - ${{ env.main_project_module }} module
+      - name: Build apk release project (APK)
         run: ./gradlew assemble
 
       # Upload Artifact Build
       # Noted For Output [main_project_module]/build/outputs/apk/debug/
-      - name: Upload APK Debug - ${{ env.repository_name }}
+      - name: Upload APK Debug
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.date_today }}-${{ env.playstore_name }}-debug
+          name: ${{ env.date_today }}-${{ env.project_name }}-debug
           path: ${{ env.main_project_module }}/build/outputs/apk/debug/
 
       # Noted For Output [main_project_module]/build/outputs/apk/release/
-      - name: Upload APK Release - ${{ env.repository_name }}
+      - name: Upload APK Release
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.date_today }}-${{ env.playstore_name }}-release
+          name: ${{ env.date_today }}-${{ env.project_name }}-release
           path: ${{ env.main_project_module }}/build/outputs/apk/release/

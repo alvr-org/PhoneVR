@@ -20,7 +20,7 @@ android {
     compileSdkVersion 33
     buildToolsVersion = "33.0.0"
     namespace 'viritualisres.phonevr'
-    ndkVersion '25.1.8937393'
+    ndkVersion '25.2.9519653' // r25c
     defaultConfig {
         applicationId "viritualisres.phonevr"
         minSdkVersion 24
