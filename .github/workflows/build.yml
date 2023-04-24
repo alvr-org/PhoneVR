@@ -16,6 +16,10 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: ./code/mobile/android/PhoneVR
+
 jobs:
   Build:
     runs-on: ubuntu-latest
@@ -29,7 +33,7 @@ jobs:
       - name: Set current date as env variable
         run: |
           echo "date_today=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-          cd "code/mobile/android/PhoneVR"
+          # cd "code/mobile/android/PhoneVR"
           ls -alh
 
       - name: Prepare deps
