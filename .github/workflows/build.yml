@@ -33,8 +33,9 @@ jobs:
           ls -alh
 
       - name: Prepare deps
-        run: |
-          chmod +x ./prepare-alvr-deps.sh
+        run: |          
+          ls -alh
+          chmod +x prepare-alvr-deps.sh
           bash prepare-alvr-deps.sh
 
       # Set Repository Name As Env Variable
