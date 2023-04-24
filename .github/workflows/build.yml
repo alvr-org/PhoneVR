@@ -29,8 +29,8 @@ jobs:
       - name: Set current date as env variable
         run: |
           echo "date_today=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-          cd "code\mobile\android\PhoneVR"
           ls -alh
+          cd "code\mobile\android\PhoneVR"
 
       - name: Prepare deps
         run: |
