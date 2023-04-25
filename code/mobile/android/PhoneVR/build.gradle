@@ -1,14 +1,13 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.6.21'
+    ext.kotlin_version = '1.7.10'
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.0.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.google.gms:google-services:4.3.15'
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.18'
@@ -22,11 +21,6 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
-        maven {
-            // For Android support library components.
-            url "https://maven.google.com"
-        }
         mavenCentral()
         flatDir {
             dirs '../cardboard', '../gvr-android-sdk-1.200/libraries'

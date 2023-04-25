@@ -1,27 +1,25 @@
-name: Build CI
+name: CI
 
 env:
-  # The name of the main module repository
-  main_project_module: app
-
-  # The name of the Play Store
-  project_name: PhoneVR
+  MAIN_PROJECT_MODULE: app
+  PROJECT_NAME: PhoneVR
 
   SOLUTION_FILE_PATH: code\windows\PhoneVR\PhoneVR.sln
   SOLUTION_DIR: code\windows\PhoneVR\
 
+  GRADLE_DIR: code/mobile/android/PhoneVR
+  ORG_FULL: PhoneVR-Developers/PhoneVR
+
 on:
-  # Triggers the workflow on push or pull request events but only for default and protected branches
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: ./code/mobile/android/PhoneVR
+# defaults:
+#   run:
+#     working-directory: code/mobile/android/PhoneVR
 
 jobs:
   Build_PVR_Server:
@@ -64,7 +62,7 @@ jobs:
     - name: Upload Build outputs
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ env.project_name }}-Server-${{ matrix.config }}
+        name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
         path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
   
   Build_APK:
@@ -78,67 +76,178 @@ jobs:
 
       # Set Current Date As Env Variable
       - name: Set current date as env variable
+        id: vars
+        shell: bash
         run: |
-          echo "date_today=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-          ls -alh
+          echo "date_today=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
       - name: Set Up JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
-          java-version: 17
-
-      - uses: nttld/setup-ndk@v1
+          distribution: 'oracle'
+          java-version: '17'
+     
+      # Only for Testing github-actions
+      - uses: actions-rs/toolchain@v1
+        if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
         with:
-          ndk-version: r25c # 25.2.9519653
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
+        with:
+          cache-on-failure: true
+          workspaces: ${{env.GRADLE_DIR}}/ALVR/
+      
+      - uses: gradle/gradle-build-action@v2
+        if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
+        with:
+          build-root-directory: ${{env.GRADLE_DIR}}
+          cache-read-only: ${{ false }}
 
       - name: Prepare deps
         run: |          
           ls -alh
+          cd code/mobile/android/PhoneVR
           chmod +x prepare-alvr-deps.sh
-          
-          sudo apt update
-          sudo apt install build-essential pkg-config nasm libva-dev libdrm-dev libvulkan-dev libx264-dev libx265-dev cmake libasound2-dev libjack-jackd2-dev libxrandr-dev libunwind-dev
-          
-          sudo apt remove cmake
-          pip install cmake --upgrade
-          cmake --version
-          
           bash prepare-alvr-deps.sh
-
+      
       - name: Change gradle wrapper permissions
-        run: chmod +x ./gradlew
-
-      # Run Tests Build
-      - name: Run gradle tests
-        run: | 
+        run: |
+          cd code/mobile/android/PhoneVR
+          chmod +x ./gradlew
           ls -alh
-          ./gradlew test
-
-      # Run Build Project
-      - name: Build gradle project
-        run: | 
-          ls -alh
-          ./gradlew build
+          ls -alh app
 
       # Create APK Debug
       - name: Build apk debug project (APK)
-        run: ./gradlew assembleDebug
+        run:  |
+          cd code/mobile/android/PhoneVR
+          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleDebug --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
 
       # Create APK Release
       - name: Build apk release project (APK)
-        run: ./gradlew assemble
+        env:
+          Key: ${{ secrets.KEY }}
+          Store: ${{ secrets.STORE }}
+        run:  |
+          cd code/mobile/android/PhoneVR
+          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assemble --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
 
       # Upload Artifact Build
-      # Noted For Output [main_project_module]/build/outputs/apk/debug/
+      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/debug/
       - name: Upload APK Debug
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.date_today }}-${{ env.project_name }}-debug
-          path: ${{ env.main_project_module }}/build/outputs/apk/debug/
+          name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/debug/
 
-      # Noted For Output [main_project_module]/build/outputs/apk/release/
+      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/release/
       - name: Upload APK Release
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.date_today }}-${{ env.project_name }}-release
-          path: ${{ env.main_project_module }}/build/outputs/apk/release/
+          name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/release/
+  
+      - name: Upload Build outputs on failure
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-files
+          path: ${{ env.GRADLE_DIR }}/app/.cxx/
+
+  # Test_APK:
+  #   name: Test APK
+  #   runs-on: macos-latest
+  #   strategy:
+  #     matrix:
+  #       api-level: [29]
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         submodules: 'true'
+
+  #     - name: Set Up JDK
+  #       uses: actions/setup-java@v3
+  #       with:
+  #         distribution: 'oracle'
+  #         java-version: 17
+
+  #     # Only for Testing github-actions
+  #     - uses: actions-rs/toolchain@v1
+  #       if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
+  #       with:
+  #         profile: minimal
+  #         toolchain: stable
+  #         override: true
+  #         components: clippy
+  #     - uses: Swatinem/rust-cache@v2
+  #       if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
+  #       with:
+  #         cache-on-failure: true
+  #         workspaces: ${{env.GRADLE_DIR}}/ALVR/
+      
+  #     - uses: gradle/gradle-build-action@v2
+  #       if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
+  #       with:
+  #         build-root-directory: ${{env.GRADLE_DIR}}
+  #         cache-read-only: ${{ false }}
+
+  #     - name: Prepare deps
+  #       shell: bash
+  #       run: |          
+  #         ls -alh
+  #         cd code/mobile/android/PhoneVR
+  #         chmod +x prepare-alvr-deps.sh
+  #         bash prepare-alvr-deps.sh
+
+  #     - name: Change gradle wrapper permissions
+  #       run: |
+  #         cd code/mobile/android/PhoneVR
+  #         chmod +x ./gradlew
+  #         ls -alh
+  #         ls -alh app
+
+  #     - name: AVD cache
+  #       uses: actions/cache@v3
+  #       id: avd-cache
+  #       with:
+  #         path: |
+  #           ~/.android/avd/*
+  #           ~/.android/adb*
+  #         key: avd-${{ matrix.api-level }}
+      
+  #     # Cache APK Debug
+  #     - name: Build apk debug project (APK)
+  #       run:  |
+  #         cd code/mobile/android/PhoneVR
+  #         ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleDebug --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+
+  #     - name: create AVD and generate snapshot for caching
+  #       if: steps.avd-cache.outputs.cache-hit != 'true'
+  #       uses: reactivecircus/android-emulator-runner@v2
+  #       with:
+  #         working-directory: ${{env.GRADLE_DIR}}
+  #         api-level: ${{ matrix.api-level }}
+  #         force-avd-creation: false
+  #         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+  #         disable-animations: false
+  #         script: echo "Generated AVD snapshot for caching."
+
+  #     - name: Run tests
+  #       uses: reactivecircus/android-emulator-runner@v2
+  #       with:
+  #         working-directory: ${{env.GRADLE_DIR}}
+  #         api-level: ${{ matrix.api-level }}
+  #         force-avd-creation: false
+  #         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+  #         disable-animations: true
+  #         script: |
+  #           adb logcat -v color &
+  #           ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+  #           adb logcat > mobile/build/logcat.log
