@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.4.3)
 
 #use rtti, exceptions for asio library ## -std=c++17
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -frtti -fexceptions -Wc++11-narrowing -Wreorder")
@@ -29,7 +29,7 @@ set(alvr_build_dir ${CMAKE_CURRENT_SOURCE_DIR}/../ALVR/build/alvr_client_core)
 target_include_directories(native-lib
     PUBLIC ../../libraries/headers
     PUBLIC ../../../../common/libs/asio
-    PUBLIC ../../../../common/libs/Eigen
+    PUBLIC ../../../../common/libs/eigen
     PUBLIC ../../../../common/libs/ifaddrs
 
     # my headers

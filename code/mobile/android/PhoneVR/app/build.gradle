@@ -20,7 +20,7 @@ android {
     compileSdkVersion 33
     buildToolsVersion = "33.0.0"
     namespace 'viritualisres.phonevr'
-    ndkVersion '25.1.8937393'
+    ndkVersion '25.2.9519653' // r25c
     defaultConfig {
         applicationId "viritualisres.phonevr"
         minSdkVersion 24
@@ -30,10 +30,12 @@ android {
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         externalNativeBuild {
             cmake {
-                arguments ""
-                cppFlags "-std=c++17 -fexceptions -frtti"
+                cppFlags "-std=c++17 -fexceptions -frtti" //-DANDROID_USE_LEGACY_TOOLCHAIN_FILE=ON"
             }
         }
+
+        //noinspection ChromeOsAbiSupport
+        ndk.abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86'
 
         defaultPublishConfig 'release'
         publishNonDefault true
@@ -58,6 +60,9 @@ android {
             }
         }
     }
+    buildFeatures {
+        buildConfig = true // TODO: Remove BuildConifg, Gradle suggests this usage is inefficient > v8 disabled by default
+    }
     sourceSets {
         main {
             jniLibs.srcDirs = ["libraries/jni", "../ALVR/build/alvr_client_core"]
@@ -65,30 +70,11 @@ android {
     }
     externalNativeBuild {
         cmake {
+            // version "3.6.4"
             path "CMakeLists.txt"
         }
     }
 
-    flavorDimensions "arch"
-    productFlavors {
-        arm {
-            dimension "arch"
-            ndk.abiFilter 'armeabi-v7a'
-        }
-        arm64 {
-            dimension "arch"
-            ndk.abiFilters 'arm64-v8a'
-        }
-        x86 {
-            dimension "arch"
-            ndk.abiFilter 'x86'
-        }
-        // x86_64 {
-        //      dimension "arch"
-        //      ndk.abiFilter 'x86_64'
-        // }
-        // GVR lib dosent distb x86
-    }
     // CompileOptions required for ARCA
     compileOptions
     {
