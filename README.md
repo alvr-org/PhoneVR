@@ -6,7 +6,7 @@
 <img src="./.github/rep1.png" width="50%"><img src="./.github/rep2.jpg" width="50%">
 <sup>Pictures used for representational purposes</sup>
 
-[![Build status](https://ci.appveyor.com/api/projects/status/1eyjmo51o4c86r07?svg=true)](https://ci.appveyor.com/project/ShootingKing-AM/phonevr)
+[![Build status](https://github.com/PhoneVR-Developers/PhoneVR/actions/workflows/build.yml/badge.svg)](https://github.com/PhoneVR-Developers/PhoneVR/actions)
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ShootingKing-AM/PhoneVR?color=orange&include_prereleases)
 [![Discord](https://img.shields.io/discord/745688786410930296?label=Discuss&logo=Discord&logoColor=white)](https://discord.gg/pNYtBNk)
 
