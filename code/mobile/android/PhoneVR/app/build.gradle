@@ -27,7 +27,10 @@ android {
         targetSdkVersion 33
         versionCode Integer.valueOf(System.env.APPVEYOR_BUILD_NUMBER ?: 1)
         versionName System.getenv("APPVEYOR_PVR_TAG")
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments useTestStorageService: 'true'
+
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++17 -fexceptions -frtti" //-DANDROID_USE_LEGACY_TOOLCHAIN_FILE=ON"
@@ -76,10 +79,12 @@ android {
     }
 
     // CompileOptions required for ARCA
-    compileOptions
-    {
+    compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
     }
 }
 
@@ -87,13 +92,16 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    //noinspection GradleDynamicVersion
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.google.android.material:material:1.2.1'
-    //noinspection GradleDynamicVersion
-    testImplementation 'junit:junit:4.13'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    implementation "androidx.tracing:tracing:1.1.0"
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation "androidx.test.ext:junit-ktx:$extJUnitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestUtil "androidx.test.services:test-services:$servicesVersion"
 
     implementation 'com.google.vr:sdk-base:1.200.0@aar'
     implementation 'com.google.cardboard.sdk:cardboard-sdk:1.17.0@aar'
