@@ -2,6 +2,11 @@
 
 buildscript {
     ext.kotlin_version = '1.7.10'
+    ext.extJUnitVersion = "1.2.0-alpha01"
+    ext.espressoVersion = "3.6.0-alpha01"
+    ext.servicesVersion = "1.5.0-alpha01"
+    ext.androidXTestVersion = '1.4.0'
+
     repositories {
         google()
         mavenCentral()
