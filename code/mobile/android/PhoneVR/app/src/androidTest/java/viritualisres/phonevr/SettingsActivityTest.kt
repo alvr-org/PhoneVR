@@ -42,7 +42,7 @@ class SettingsActivityTest {
     @Throws(IOException::class)
     fun saveDeviceScreenBitmap() {
         onView(isRoot())
-        sleep(100)
+        sleep(1000)
 
         takeScreenshot()
             .writeToTestStorage("${javaClass.simpleName}_${nameRule.methodName}")

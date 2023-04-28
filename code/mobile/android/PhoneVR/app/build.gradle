@@ -101,6 +101,7 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit-ktx:$extJUnitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestImplementation "androidx.test:rules:$androidXTestVersion"
     androidTestUtil "androidx.test.services:test-services:$servicesVersion"
 
     implementation 'com.google.vr:sdk-base:1.200.0@aar'
@@ -146,7 +147,12 @@ task buildClientLib {
     }
 }
 
+// run /src/androidTest/java/viritualisres/phonevr/utils/pvr-adb-telnet.sh before starting connectedAndroidTest
+// TODO: Automate with gradle tasks
+//connectedAndroidTest.dependsOn(runPVRADBTelnetServer)
+
+preBuild.dependsOn(buildClientLib)
 build.dependsOn(extractNdk)
 build.dependsOn(buildClientLib)
 clean.dependsOn(deleteNdk)
-preBuild.dependsOn(buildClientLib)
+
