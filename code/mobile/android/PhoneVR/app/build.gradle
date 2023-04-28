@@ -12,10 +12,6 @@ android {
     signingConfigs {
         releaseconfig {
             if( System.env.github && System.env.github.event_name && System.env.github.event_name == 'pull_request' ) {
-//                storeFile(System.env.github.event_name == 'pull_request' ? file("PhoneVRKeyStorePR.jks") : file(keystoreProperties['storeFile']))
-//                storePassword(System.env.github.event_name == 'pull_request' ? "test1234" : System.getenv("Store"))
-//                keyAlias keystoreProperties['keyAlias']
-//                keyPassword(System.env.github.event_name == 'pull_request' ? "test1234" : System.getenv("Key"))
                 // If its a PR Supply a dummy KeySigningConfig
                 storeFile file("PhoneVRKeyStorePR.jks")
                 storePassword "test1234"
