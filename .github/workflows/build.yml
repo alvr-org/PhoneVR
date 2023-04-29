@@ -263,7 +263,7 @@ jobs:
           path: |
             **/app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*
       
-      # build/reports/androidTests/connected
+      # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
       - name: Publish Test Results in Comment
         uses: EnricoMi/publish-unit-test-result-action@v2
         # if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && always()
@@ -274,7 +274,7 @@ jobs:
           deduplicate_classes_by_file_name: true          
           comment_title: '🛠 Test Results'
           files: |
-            app/build/reports/androidTests/connected/**/*.xml
+            app/build/outputs/androidTest-results/**/TEST-*.xml
       
       - uses: iterative/setup-cml@v1
         if: always()
@@ -288,7 +288,7 @@ jobs:
           body-includes: '# 📷 Screenshots of tests:'
           direction: last
           comment-author: 'github-actions[bot]'
-      # TODO
+
       - name: Publish Screenshots - build comment
         if: always()
         env:
@@ -300,53 +300,28 @@ jobs:
           echo "# 📷 Screenshots of tests:" >> comment.md
           echo "" >> comment.md
 
-          for ss_test in logs/**/; do 
-            ss_test_desc=$(basename "$ss_test" .png)
-            
-            if [ "$ss_test_desc" == "test-reports" ]; then
-              continue
-            fi
+          # for each AVD Image
+          for ss_test_avd in app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*; do 
+
+            $ss_test_avd_desc=$(basename "$ss_test_avd")
 
             echo "" >> comment.md
-            echo "### 🔧 $ss_test_desc" >> comment.md
+            echo "### 📱 $ss_test_avd_desc" >> comment.md
             echo "" >> comment.md
 
-            echo '<details><summary>Pre Test</summary>' >> comment.md
+            # for each .png in that AVD folder
+            for ss_test in "app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/$ss_test_avd/"*.png; do 
+              
+              ss_test_desc=$(basename "$ss_test" .png)
+              
+              echo "#### 🔧 $ss_test_desc" >> comment.md
 
-            for ss in "$ss_test"*Pre*.png; do 
               echo '<p float="left">' >> comment.md
-              cml-publish "$ss" | sed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
+              cml-publish "$ss_test" | sed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
               echo '</p>' >> comment.md
-            done 
-            
-            echo '</details><details><summary>Post Test</summary>' >> comment.md
 
-            for ss in "$ss_test"*Post*.png; do 
-              echo '<p float="left">' >> comment.md
-              cml-publish "$ss" | sed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
-              echo '</p>' >> comment.md
-            done 
-
-            echo '</details>' >> comment.md
+            done
           done
-
-          # for ss_test in tests/test_config/*.png logs/*.png; do 
-          #   ss_test_desc=$(basename "$ss_test" .png)
-
-          #   # echo "<details><summary>$ss_test_desc</summary>" >> comment.md
-          #   # echo '<p float="left">' >> comment.md
-          #   # cml-publish "$ss_test" | sed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
-          #   # # echo "![](./$ss_test)" >> comment.md
-          #   # echo '</p></details>' >> comment.md
-
-          #   echo "" >> comment.md
-          #   echo "### $ss_test_desc" >> comment.md
-          #   echo "" >> comment.md
-          #   echo '<p float="left">' >> comment.md
-          #   cml-publish "$ss_test" | sed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
-          #   # echo "![](./$ss_test)" >> comment.md
-          #   echo '</p>' >> comment.md
-          # done
 
           if [ "$EVENT" == 'pull_request' ]
           then
