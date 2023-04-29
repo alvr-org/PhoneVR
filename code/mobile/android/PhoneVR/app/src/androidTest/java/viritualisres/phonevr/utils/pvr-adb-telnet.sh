@@ -3,12 +3,14 @@
 cmdFile="/data/data/viritualisres.phonevr/files/pvr-adb-telnet" # Will made and written by Android; Deleted by Server
 lockFile="/sdcard/pvr-adb-telnet.lock" # will be made, written and deleted by Server
 shutdownFile="/data/data/viritualisres.phonevr/files/pvr-adb-telnet.sd" # will be made by Android; Deleted by Server
+shutdownFile2="pvr-adb-telnet.sd" # made by host (the one who runs this server)
+
 lenShutdownFile=0
 
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-while [ $lenShutdownFile -eq 0 ]
+while [ $lenShutdownFile -eq 0 ] && [ ! -e $shutdownFile2 ]
 do
     cmd=$(adb shell "run-as viritualisres.phonevr cat $cmdFile")
     len=${#cmd}
@@ -45,4 +47,5 @@ done
 
 echo "Shutting down Server..."
 adb shell "run-as viritualisres.phonevr rm -f $shutdownFile"
+rm -f $shutdownFile2
 echo "Server down."
