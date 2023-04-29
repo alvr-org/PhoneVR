@@ -248,7 +248,7 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
-            chmod +x /app/src/androidTest/java/viritualisres/phonevr/utils/pvr-adb-telnet.sh
+            chmod +x app/src/androidTest/java/viritualisres/phonevr/utils/pvr-adb-telnet.sh
             bash app/src/androidTest/java/viritualisres/phonevr/utils/pvr-adb-telnet.sh &
 
             adb logcat -v color &
@@ -257,7 +257,7 @@ jobs:
 
       # build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/GPlay_Pixel_2_API_30(AVD) - 11/ALVRActivityTest_saveDeviceScreenBitmap.png
       - uses: actions/upload-artifact@v3
-        if: ${{ success() || steps.test.conclusion == 'failure'}}
+        if: always()
         with:
           name: screenshots
           path: |
