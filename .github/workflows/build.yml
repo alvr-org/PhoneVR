@@ -258,7 +258,7 @@ jobs:
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
             adb logcat >> logcat.log
 
-            echo meow >> app/src/androidTest/java/viritualisres/phonevr/utils/pvr-adb-telnet.sd
+            echo meow >> pvr-adb-telnet.sd
 
       # build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/GPlay_Pixel_2_API_30(AVD) - 11/ALVRActivityTest_saveDeviceScreenBitmap.png
       - uses: actions/upload-artifact@v3
@@ -267,6 +267,9 @@ jobs:
           name: screenshots
           path: |
             **/app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*
+            **/app/build/reports
+            **/app/build/test-results
+            **/app/build/outputs/androidTest-results
       
       # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
       - name: Publish Test Results in Comment
