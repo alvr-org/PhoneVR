@@ -245,6 +245,7 @@ jobs:
         with:
           working-directory: ${{env.GRADLE_DIR}}
           api-level: ${{ matrix.api-level }}
+          target: playstore # google_apis
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -no-boot-anim # -noaudio -camera-back none
           disable-animations: true
