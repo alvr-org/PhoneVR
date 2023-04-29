@@ -22,143 +22,143 @@ on:
 #     working-directory: code/mobile/android/PhoneVR
 
 jobs:
-  Build_PVR_Server:
-    name: Build PhoneVR Server
-    strategy:
-      fail-fast: false
-      matrix:
-        config: [Release, Debug]
-        platform: [x64, x86]
-    runs-on: windows-latest
+  # Build_PVR_Server:
+  #   name: Build PhoneVR Server
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       config: [Release, Debug]
+  #       platform: [x64, x86]
+  #   runs-on: windows-latest
 
-    steps:
-    - uses: actions/checkout@v3
+  #   steps:
+  #   - uses: actions/checkout@v3
 
-    # https://github.com/actions/runner-images/issues/842#issuecomment-1495115166
-    - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
-      shell: powershell
-      run: |
-        $VS_BTOOLS_EXE="vs_buildtools.exe"
-        $VS_BTOOLS_URI="https://aka.ms/vs/15/release/vs_buildtools.exe"
-        Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
-        Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
-        "--add", "Microsoft.VisualStudio.Component.VC.140", `
-        "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
-        "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
+  #   # https://github.com/actions/runner-images/issues/842#issuecomment-1495115166
+  #   - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
+  #     shell: powershell
+  #     run: |
+  #       $VS_BTOOLS_EXE="vs_buildtools.exe"
+  #       $VS_BTOOLS_URI="https://aka.ms/vs/15/release/vs_buildtools.exe"
+  #       Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
+  #       Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
+  #       "--add", "Microsoft.VisualStudio.Component.VC.140", `
+  #       "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
+  #       "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
 
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+  #   - name: Add MSBuild to PATH
+  #     uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Restore NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+  #   - name: Restore NuGet packages
+  #     working-directory: ${{env.GITHUB_WORKSPACE}}
+  #     run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
-    - name: Building ${{matrix.platform}}-${{matrix.config}}
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
+  #   - name: Building ${{matrix.platform}}-${{matrix.config}}
+  #     working-directory: ${{env.GITHUB_WORKSPACE}}
+  #     # Add additional options to the MSBuild command line here (like platform or verbosity level).
+  #     # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+  #     run: msbuild /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
 
-    - name: Upload Build outputs
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
-        path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
+  #   - name: Upload Build outputs
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
+  #       path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
   
-  Build_APK:
-    name: Build Android APK
-    runs-on: ubuntu-latest
+  # Build_APK:
+  #   name: Build Android APK
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: 'true'
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: 'true'
 
-      # Set Current Date As Env Variable
-      - name: Set current date as env variable
-        id: vars
-        shell: bash
-        run: |
-          echo "date_today=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
-          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+  #     # Set Current Date As Env Variable
+  #     - name: Set current date as env variable
+  #       id: vars
+  #       shell: bash
+  #       run: |
+  #         echo "date_today=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
+  #         echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+  #         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
-      - name: Set Up JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'oracle'
-          java-version: '17'
+  #     - name: Set Up JDK
+  #       uses: actions/setup-java@v3
+  #       with:
+  #         distribution: 'oracle'
+  #         java-version: '17'
      
-      # Only for Testing github-actions
-      - uses: actions-rs/toolchain@v1
-        if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-          components: clippy
-      - uses: Swatinem/rust-cache@v2
-        if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
-        with:
-          cache-on-failure: true
-          workspaces: ${{env.GRADLE_DIR}}/ALVR/
+  #     # Only for Testing github-actions
+  #     - uses: actions-rs/toolchain@v1
+  #       if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
+  #       with:
+  #         profile: minimal
+  #         toolchain: stable
+  #         override: true
+  #         components: clippy
+  #     - uses: Swatinem/rust-cache@v2
+  #       if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
+  #       with:
+  #         cache-on-failure: true
+  #         workspaces: ${{env.GRADLE_DIR}}/ALVR/
       
-      - uses: gradle/gradle-build-action@v2
-        if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
-        with:
-          build-root-directory: ${{env.GRADLE_DIR}}
-          cache-read-only: ${{ false }}
+  #     - uses: gradle/gradle-build-action@v2
+  #       if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
+  #       with:
+  #         build-root-directory: ${{env.GRADLE_DIR}}
+  #         cache-read-only: ${{ false }}
 
-      - name: Prepare deps
-        run: |          
-          ls -alh
-          cd code/mobile/android/PhoneVR
-          chmod +x prepare-alvr-deps.sh
-          bash prepare-alvr-deps.sh
+  #     - name: Prepare deps
+  #       run: |          
+  #         ls -alh
+  #         cd code/mobile/android/PhoneVR
+  #         chmod +x prepare-alvr-deps.sh
+  #         bash prepare-alvr-deps.sh
       
-      - name: Change gradle wrapper permissions
-        run: |
-          cd code/mobile/android/PhoneVR
-          chmod +x ./gradlew
-          ls -alh
-          ls -alh app
+  #     - name: Change gradle wrapper permissions
+  #       run: |
+  #         cd code/mobile/android/PhoneVR
+  #         chmod +x ./gradlew
+  #         ls -alh
+  #         ls -alh app
 
-      # Create APK Debug
-      - name: Build apk debug project (APK)
-        run:  |
-          cd code/mobile/android/PhoneVR
-          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleDebug --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+  #     # Create APK Debug
+  #     - name: Build apk debug project (APK)
+  #       run:  |
+  #         cd code/mobile/android/PhoneVR
+  #         ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleDebug --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
 
-      # Create APK Release
-      - name: Build apk release project (APK)
-        env:
-          Key: ${{ secrets.KEY }}
-          Store: ${{ secrets.STORE }}
-        run:  |
-          cd code/mobile/android/PhoneVR
-          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assemble --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+  #     # Create APK Release
+  #     - name: Build apk release project (APK)
+  #       env:
+  #         Key: ${{ secrets.KEY }}
+  #         Store: ${{ secrets.STORE }}
+  #       run:  |
+  #         cd code/mobile/android/PhoneVR
+  #         ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assemble --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
 
-      # Upload Artifact Build
-      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/debug/
-      - name: Upload APK Debug
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
-          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/debug/
+  #     # Upload Artifact Build
+  #     # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/debug/
+  #     - name: Upload APK Debug
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+  #         path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/debug/
 
-      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/release/
-      - name: Upload APK Release
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
-          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/release/
+  #     # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/release/
+  #     - name: Upload APK Release
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+  #         path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/release/
   
-      - name: Upload Build outputs on failure
-        if: failure()
-        uses: actions/upload-artifact@v2
-        with:
-          name: build-files
-          path: ${{ env.GRADLE_DIR }}/app/.cxx/
+  #     - name: Upload Build outputs on failure
+  #       if: failure()
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: build-files
+  #         path: ${{ env.GRADLE_DIR }}/app/.cxx/
 
   Test_APK:
     name: Test APK
@@ -234,9 +234,9 @@ jobs:
         with:
           working-directory: ${{env.GRADLE_DIR}}
           api-level: ${{ matrix.api-level }}
-          target: google_apis
+          target: playstore # google_apis
           force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-window -gpu swiftshader_indirect -no-boot-anim # -noaudio -camera-back none
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
 
@@ -246,7 +246,7 @@ jobs:
           working-directory: ${{env.GRADLE_DIR}}
           api-level: ${{ matrix.api-level }}
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -no-boot-anim # -noaudio -camera-back none
           disable-animations: true
           script: |
             brew install telnet
@@ -270,6 +270,7 @@ jobs:
             **/app/build/reports
             **/app/build/test-results
             **/app/build/outputs/androidTest-results
+            code/mobile/android/PhoneVR/
       
       # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
       - name: Publish Test Results in Comment
