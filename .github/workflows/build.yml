@@ -280,7 +280,7 @@ jobs:
           deduplicate_classes_by_file_name: true          
           comment_title: '🛠 Test Results'
           files: |
-            app/build/outputs/androidTest-results/**/TEST-*.xml
+            code/mobile/android/PhoneVR/app/build/outputs/androidTest-results/**/TEST-*.xml
       
       - uses: iterative/setup-cml@v1
         if: always()
@@ -302,6 +302,7 @@ jobs:
           EVENT: ${{ github.event_name }}
           REF: ${{ github.ref }}
         shell: bash
+        working-directory: ${{env.GRADLE_DIR}}
         run: |
           echo "# 📷 Screenshots of tests:" >> comment.md
           echo "" >> comment.md
