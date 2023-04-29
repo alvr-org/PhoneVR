@@ -240,6 +240,14 @@ jobs:
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
 
+      - name: Start PVR ADB-Telnet Server
+        working-directory: ${{env.GRADLE_DIR}}/app/src/androidTest/java/viritualisres/phonevr/utils/
+        run: |
+          brew install telnet
+
+          chmod +x pvr-adb-telnet.sh
+          bash pvr-adb-telnet.sh &>> log.txt &
+
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -250,16 +258,15 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -no-boot-anim # -noaudio -camera-back none
           disable-animations: true
           script: |
-            brew install telnet
-
-            chmod +x app/src/androidTest/java/viritualisres/phonevr/utils/pvr-adb-telnet.sh
-            bash app/src/androidTest/java/viritualisres/phonevr/utils/pvr-adb-telnet.sh &
-
             adb logcat -v color &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
             adb logcat >> logcat.log
 
-            echo meow >> pvr-adb-telnet.sd
+      - name: Shutdown PVR ADB-Telnet Server and log
+        working-directory: ${{env.GRADLE_DIR}}/app/src/androidTest/java/viritualisres/phonevr/utils/
+        run: |
+            echo "shutdown meow !" >> pvr-adb-telnet.sd
+            cat log.txt
 
       # build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/GPlay_Pixel_2_API_30(AVD) - 11/ALVRActivityTest_saveDeviceScreenBitmap.png
       - uses: actions/upload-artifact@v3
