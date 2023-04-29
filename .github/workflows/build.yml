@@ -249,7 +249,7 @@ jobs:
           disable-animations: true
           script: |
             chmod +x /app/src/androidTest/java/viritualisres/phonevr/utils/pvr-adb-telnet.sh
-            bash /app/src/androidTest/java/viritualisres/phonevr/utils/pvr-adb-telnet.sh &
+            bash app/src/androidTest/java/viritualisres/phonevr/utils/pvr-adb-telnet.sh &
 
             adb logcat -v color &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
@@ -265,7 +265,7 @@ jobs:
       
       # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
       - name: Publish Test Results in Comment
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action/composite@v2
         # if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && always()
         if: always()
         with:
@@ -303,7 +303,7 @@ jobs:
           # for each AVD Image
           for ss_test_avd in app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*; do 
 
-            $ss_test_avd_desc=$(basename "$ss_test_avd")
+            ss_test_avd_desc=$(basename "$ss_test_avd")
 
             echo "" >> comment.md
             echo "### 📱 $ss_test_avd_desc" >> comment.md
