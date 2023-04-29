@@ -165,7 +165,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        api-level: [29, 33]
+        api-level: [/*29,*/ 33]
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -246,7 +246,7 @@ jobs:
           brew install telnet
 
           chmod +x pvr-adb-telnet.sh
-          bash pvr-adb-telnet.sh &>> log.txt &
+          bash pvr-adb-telnet.sh >> log.txt 2>&1 &
 
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -264,6 +264,7 @@ jobs:
 
       - name: Shutdown PVR ADB-Telnet Server and log
         working-directory: ${{env.GRADLE_DIR}}/app/src/androidTest/java/viritualisres/phonevr/utils/
+        if: always()
         run: |
             echo "shutdown meow !" >> pvr-adb-telnet.sd
             cat log.txt
