@@ -180,7 +180,6 @@ class ALVRActivityTest {
             // View is not in hierarchy - which is okay
         }
 
-        Log.d(TAG, "saveDeviceScreenBitmap: Test")
         rotateAVDLandscape()
         waitForADBTelnetServer() // Wait for ADBTelnetServer to execute rotation
 
@@ -189,6 +188,7 @@ class ALVRActivityTest {
         // Wait for Rendering to settle
         sleep(1000)
 
+        Log.d(TAG, "saveDeviceScreenBitmap: Executed AVD Commands, Taking screenshot...")
         takeScreenshot()
             .writeToTestStorage("${javaClass.simpleName}_${nameRule.methodName}")
 
