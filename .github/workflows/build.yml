@@ -234,6 +234,7 @@ jobs:
         with:
           working-directory: ${{env.GRADLE_DIR}}
           api-level: ${{ matrix.api-level }}
+          target: google_apis
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
@@ -248,12 +249,17 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
+            brew install telnet
+
             chmod +x app/src/androidTest/java/viritualisres/phonevr/utils/pvr-adb-telnet.sh
             bash app/src/androidTest/java/viritualisres/phonevr/utils/pvr-adb-telnet.sh &
 
             adb logcat -v color &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb logcat > mobile/build/logcat.log
+            adb logcat >> logcat.log
+
+            killall `ps -aux | grep pvr-adb-telnet | grep -v grep | awk '{ print $1 }'` && killall inotifywait
+
 
       # build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/GPlay_Pixel_2_API_30(AVD) - 11/ALVRActivityTest_saveDeviceScreenBitmap.png
       - uses: actions/upload-artifact@v3

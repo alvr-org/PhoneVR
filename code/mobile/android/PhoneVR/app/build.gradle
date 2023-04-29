@@ -11,18 +11,21 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 android {
     signingConfigs {
         releaseconfig {
-            if( System.env.github && System.env.github.event_name && System.env.github.event_name == 'pull_request' ) {
+            if( System.getenv('GITHUB_EVENT_NAME') == 'pull_request' || System.getenv("Store") == null || System.getenv("Key") == null ) {
                 // If its a PR Supply a dummy KeySigningConfig
+                // Or in Local env if Store and Keys are not present in ENV Vars do the same
                 storeFile file("PhoneVRKeyStorePR.jks")
                 storePassword "test1234"
                 keyAlias "PhoneVRKeyPR"
                 keyPassword "test1234"
+                println "Configuring releaseconfigs for testing a PR..."
             }
             else {
                 storeFile file(keystoreProperties['storeFile'])
                 storePassword System.getenv("Store")
                 keyAlias keystoreProperties['keyAlias']
                 keyPassword System.getenv("Key")
+                println "Configuring releaseconfigs for release (push) (not a PR)"
             }
         }
     }
