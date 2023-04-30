@@ -279,7 +279,7 @@ jobs:
             **/app/build/reports
             **/app/build/test-results
             **/app/build/outputs/androidTest-results
-            code/mobile/android/PhoneVR/
+            ${{env.GRADLE_DIR}}/logcat.log
       
       # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
       - name: Publish Test Results in Comment
