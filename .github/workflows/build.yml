@@ -198,6 +198,15 @@ jobs:
           build-root-directory: ${{env.GRADLE_DIR}}
           cache-read-only: ${{ false }}
 
+      - name: AVD cache
+        uses: actions/cache@v3
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}
+      
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
@@ -226,16 +235,6 @@ jobs:
           chmod +x ./gradlew
           ls -alh
           ls -alh app
-
-      - name: AVD cache
-        uses: actions/cache@v3
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-${{ matrix.api-level }}
-      
       
       # Cache APK gradle tasks
       - name: Build apk debug project (APK)
@@ -368,3 +367,12 @@ jobs:
           body-file: comment.md
           edit-mode: replace
           issue-number: ${{ github.event.number }}
+      
+      - name: Save AVD Cache
+        uses: actions/cache/save@v3
+        if: always() && !steps.avd-cache.outputs.cache-hit
+        with:
+          path: |
+              ~/.android/avd/*
+              ~/.android/adb*
+          key: ${{ steps.avd-cache.outputs.cache-primary-key }}
