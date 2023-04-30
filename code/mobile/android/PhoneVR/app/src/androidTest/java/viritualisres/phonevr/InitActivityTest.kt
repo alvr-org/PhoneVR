@@ -9,6 +9,10 @@ import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
@@ -27,6 +31,19 @@ import java.lang.Thread.sleep
  */
 @RunWith(AndroidJUnit4::class)
 class InitActivityTest {
+    companion object {
+        // This is a specific fix for CIs (github-actions, etc) to close ANR dialog
+        @JvmStatic
+        @BeforeClass
+        fun dismissANRSystemDialog() {
+            val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+            // If running the device in English Locale
+            val waitButton = device.findObject(UiSelector().textContains("wait"))
+            if (waitButton.exists()) {
+                waitButton.click()
+            }
+        }
+    }
     // a handy JUnit rule that stores the method name, so it can be used to generate unique
     // screenshot files per test method
     @get:Rule

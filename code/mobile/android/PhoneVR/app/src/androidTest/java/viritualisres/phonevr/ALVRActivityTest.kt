@@ -1,7 +1,6 @@
 package viritualisres.phonevr
 
 import android.annotation.SuppressLint
-import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.util.Log
 import androidx.test.core.app.takeScreenshot
 import androidx.test.core.graphics.writeToTestStorage
@@ -13,7 +12,12 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.rule.GrantPermissionRule
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObjectNotFoundException
+import androidx.test.uiautomator.UiSelector
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
@@ -166,9 +170,21 @@ class ALVRActivityTest {
         // set gravity acceleration g in Y Direction - real Mock
         sendADBCommand("sensor set acceleration 9.77622:0:0");
     }
-    /**
-     * Captures and saves an image of the entire device screen to storage.
-     */
+
+    companion object {
+        // This is a specific fix for CIs (github-actions, etc) to close ANR dialog
+        @JvmStatic
+        @BeforeClass
+        fun dismissANRSystemDialog() {
+            val device = UiDevice.getInstance(getInstrumentation())
+            // If running the device in English Locale
+            val waitButton = device.findObject(UiSelector().textContains("wait"))
+            if (waitButton.exists()) {
+                waitButton.click()
+            }
+        }
+    }
+
     @SuppressLint("CheckResult")
     @Test
     @Throws(IOException::class)
