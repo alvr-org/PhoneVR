@@ -238,7 +238,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -no-boot-anim # -noaudio -camera-back none
           disable-animations: false
-          profile: 'Pixel 2'
+          profile: pixel_2
           avd-name: 'Pixel 2'
           script: echo "Generated AVD snapshot for caching."
 
@@ -259,7 +259,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -no-boot-anim # -noaudio -camera-back none
           disable-animations: true
-          profile: 'Pixel 2'
+          profile: pixel_2
           avd-name: 'Pixel 2'
           script: |
             adb logcat -v color &
