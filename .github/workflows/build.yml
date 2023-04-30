@@ -261,7 +261,7 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -no-boot-anim # -noaudio -camera-back none
           disable-animations: true
           profile: pixel_2
-          avd-name: 'Pixel 2'
+          avd-name: Pixel_2
           script: |
             adb logcat -v color &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
