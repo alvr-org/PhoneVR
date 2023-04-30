@@ -222,12 +222,6 @@ jobs:
             ~/.android/adb*
           key: avd-${{ matrix.api-level }}
       
-      # Cache APK gradle tasks
-      - name: Build apk debug project (APK)
-        run:  |
-          cd code/mobile/android/PhoneVR
-          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleDebug --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
@@ -239,8 +233,14 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-boot-anim # -noaudio -camera-back none
           disable-animations: false
           profile: pixel_2
-          avd-name: 'Pixel 2'
+          avd-name: Pixel_2
           script: echo "Generated AVD snapshot for caching."
+      
+      # Cache APK gradle tasks
+      - name: Build apk debug project (APK)
+        run:  |
+          cd code/mobile/android/PhoneVR
+          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleDebug --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
 
       - name: Start PVR ADB-Telnet Server
         working-directory: ${{env.GRADLE_DIR}}/app/src/androidTest/java/viritualisres/phonevr/utils/
