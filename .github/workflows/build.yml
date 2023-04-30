@@ -238,6 +238,8 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -no-boot-anim # -noaudio -camera-back none
           disable-animations: false
+          profile: 'Pixel 2'
+          avd-name: 'Pixel 2'
           script: echo "Generated AVD snapshot for caching."
 
       - name: Start PVR ADB-Telnet Server
@@ -257,6 +259,8 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -no-boot-anim # -noaudio -camera-back none
           disable-animations: true
+          profile: 'Pixel 2'
+          avd-name: 'Pixel 2'
           script: |
             adb logcat -v color &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
