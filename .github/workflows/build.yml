@@ -377,4 +377,4 @@ jobs:
           path: |
               ~/.android/avd/*
               ~/.android/adb*
-          key: ${{ steps.avd-cache.outputs.cache-primary-key }}
+          key: avd-${{ matrix.api-level }}
