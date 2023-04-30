@@ -317,6 +317,7 @@ jobs:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EVENT: ${{ github.event_name }}
           REF: ${{ github.ref }}
+          WK_DIR: ${{env.GRADLE_DIR}}
         shell: bash
         working-directory: ${{env.GRADLE_DIR}}
         run: |
@@ -340,8 +341,9 @@ jobs:
               echo "#### 🔧 $ss_test_desc" >> comment.md
 
               echo '<p float="left">' >> comment.md
-              cml-publish "$ss_test" | sed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
+              cml-publish "$WK_DIR/$ss_test" | sed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
               echo '</p>' >> comment.md
+              echo "$WK_DIR/$ss_test"
 
             done
           done
