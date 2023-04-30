@@ -263,9 +263,9 @@ jobs:
           profile: pixel_2
           avd-name: Pixel_2
           script: |
-            adb logcat -v color &
+            adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb logcat >> logcat.log
+            adb shell "logcat" >> logcat.log
 
       - name: Shutdown PVR ADB-Telnet Server and log
         working-directory: ${{env.GRADLE_DIR}}/app/src/androidTest/java/viritualisres/phonevr/utils/
@@ -334,7 +334,7 @@ jobs:
             echo "" >> comment.md
 
             # for each .png in that AVD folder
-            for ss_test in "app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/$ss_test_avd/"*.png; do 
+            for ss_test in "app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/$ss_test_avd_desc/"*.png; do 
               
               ss_test_desc=$(basename "$ss_test" .png)
               
