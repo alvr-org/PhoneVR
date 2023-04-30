@@ -22,6 +22,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
+import viritualisres.phonevr.utils.PVRInstrumentationBase
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -38,7 +39,7 @@ import java.lang.Thread.sleep
  * build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/Pixel_2_API_30(AVD) - 11
  */
 @RunWith(AndroidJUnit4::class)
-class ALVRActivityTest {
+class ALVRActivityTest: PVRInstrumentationBase() {
 
     private val TAG: String? = javaClass.simpleName
 
@@ -50,26 +51,6 @@ class ALVRActivityTest {
 
     @get:Rule
     var perms7: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.CAMERA);
-    /*@get:Rule
-    var perms3: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.VIBRATE);
-
-    @get:Rule
-    var perms1:GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.READ_EXTERNAL_STORAGE);
-
-    @get:Rule
-    var perms4: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.NFC);
-
-    @get:Rule
-    var perms5: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.INTERNET);
-
-    @get:Rule
-    var perms6: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.READ_LOGS);
-
-    @get:Rule
-    var perms9: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.WAKE_LOCK);
-
-    @get:Rule
-    var perms10: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.ACCESS_WIFI_STATE);*/
 
     @get:Rule
     var nameRule = TestName()
@@ -169,20 +150,6 @@ class ALVRActivityTest {
     private fun rotateAVDLandscape() {
         // set gravity acceleration g in Y Direction - real Mock
         sendADBCommand("sensor set acceleration 9.77622:0:0");
-    }
-
-    companion object {
-        // This is a specific fix for CIs (github-actions, etc) to close ANR dialog
-        @JvmStatic
-        @BeforeClass
-        fun dismissANRSystemDialog() {
-            val device = UiDevice.getInstance(getInstrumentation())
-            // If running the device in English Locale
-            val waitButton = device.findObject(UiSelector().textContains("wait"))
-            if (waitButton.exists()) {
-                waitButton.click()
-            }
-        }
     }
 
     @SuppressLint("CheckResult")

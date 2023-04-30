@@ -10,23 +10,10 @@ import org.junit.runner.RunWith
 
 import org.junit.Assert.*
 import org.junit.BeforeClass
+import viritualisres.phonevr.utils.PVRInstrumentationBase
 
 @RunWith(AndroidJUnit4::class)
-class AppPackageTest {
-
-    companion object {
-        // This is a specific fix for CIs (github-actions, etc) to close ANR dialog
-        @JvmStatic
-        @BeforeClass
-        fun dismissANRSystemDialog() {
-            val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-            // If running the device in English Locale
-            val waitButton = device.findObject(UiSelector().textContains("wait"))
-            if (waitButton.exists()) {
-                waitButton.click()
-            }
-        }
-    }
+class AppPackageTest: PVRInstrumentationBase() {
     @Test
     fun useAppContext() {
         // Context of the app under test.

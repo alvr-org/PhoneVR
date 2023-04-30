@@ -15,6 +15,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
+import viritualisres.phonevr.utils.PVRInstrumentationBase
 import java.io.IOException
 import java.lang.Thread.sleep
 
@@ -29,20 +30,7 @@ import java.lang.Thread.sleep
  * build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/Pixel_2_API_30(AVD) - 11
  */
 @RunWith(AndroidJUnit4::class)
-class SettingsActivityTest {
-    companion object {
-        // This is a specific fix for CIs (github-actions, etc) to close ANR dialog
-        @JvmStatic
-        @BeforeClass
-        fun dismissANRSystemDialog() {
-            val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-            // If running the device in English Locale
-            val waitButton = device.findObject(UiSelector().textContains("wait"))
-            if (waitButton.exists()) {
-                waitButton.click()
-            }
-        }
-    }
+class SettingsActivityTest: PVRInstrumentationBase() {
     // a handy JUnit rule that stores the method name, so it can be used to generate unique
     // screenshot files per test method
     @get:Rule
