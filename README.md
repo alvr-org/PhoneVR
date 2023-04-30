@@ -1,13 +1,13 @@
 <br/><br/>
-[![PhonveVR](./.github/LogoPVR.png)](https://github.com/ShootingKing-AM/PhoneVR/releases)<br/><br/><br/>
-[![PhonveVR](./.github/LogoPVRCotent.png)](https://github.com/ShootingKing-AM/PhoneVR/releases)<br/>
+[![PhonveVR](./.github/LogoPVR.png)](https://github.com/PhoneVR-Developers/PhoneVR/releases)<br/><br/><br/>
+[![PhonveVR](./.github/LogoPVRCotent.png)](https://github.com/PhoneVR-Developers/PhoneVR/releases)<br/>
 <br/><br/><br/>
 
 <img src="./.github/rep1.png" width="50%"><img src="./.github/rep2.jpg" width="50%">
 <sup>Pictures used for representational purposes</sup>
 
 [![Build status](https://github.com/PhoneVR-Developers/PhoneVR/actions/workflows/build.yml/badge.svg)](https://github.com/PhoneVR-Developers/PhoneVR/actions)
-![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ShootingKing-AM/PhoneVR?color=orange&include_prereleases)
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/PhoneVR-Developers/PhoneVR?color=orange&include_prereleases)
 [![Discord](https://img.shields.io/discord/745688786410930296?label=Discuss&logo=Discord&logoColor=white)](https://discord.gg/pNYtBNk)
 
 Use Steam VR-enabled applications with your phone as HMD (*Head-mounted display*). The only Open-Source solution to similar commercial packages like VRidge, Riftcat, Trinus etc etc. *Common-network* can be anytype of network between desktop and android app, even *USB Tethering* and *Mobile Hotspots* are supported.
@@ -15,10 +15,10 @@ Use Steam VR-enabled applications with your phone as HMD (*Head-mounted display*
 
 | Tabs | Links |
 | --- | --- |
-| Roadmap/Plan | [**Project Kanban**](https://github.com/orgs/PhoneVR-Developers/projects/1/views/1) | 
-| Latest Release | [`Github Release`](https://github.com/ShootingKing-AM/PhoneVR/releases/latest) |
-| Previous Builds | [`Appveyor Previous Builds`](https://ci.appveyor.com/project/ShootingKing-AM/phonevr/history) |
-| Issues | [`Github Issue Tracker`](https://github.com/ShootingKing-AM/PhoneVR/issues) |
+| Roadmap/Plan/Future Todo | [**Project Kanban**](https://github.com/orgs/PhoneVR-Developers/projects/1/views/1) | 
+| Latest Release | [`Github Release`](https://github.com/PhoneVR-Developers/PhoneVR/releases/latest) |
+| Previous Builds | [`Github Actions`](https://github.com/PhoneVR-Developers/PhoneVR/actions) |
+| Issues | [`Github Issue Tracker`](https://github.com/PhoneVR-Developers/PhoneVR/issues) |
 | Discuss/Chat/Help/Real-Time Updates/Any - Discord | [`Discord Server Invite Link`](https://discord.com/invite/pNYtBNk) |
 
 ## Contents
@@ -36,9 +36,9 @@ A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or abov
 ## Installation
 
 * Make sure you have Steam and SteamVR installed (To find SteamVR on steam, `Library -> Tools -> SteamVR`).
-* Download latest release [`PhoneVR.zip`](https://github.com/ShootingKing-AM/PhoneVR/releases/latest) of this repository.
+* Download latest release [`PhoneVR.zip`](https://github.com/PhoneVR-Developers/PhoneVR/releases/latest) of this repository.
 * Copy the whole folder `PVRServer` in `driver` folder of zip file into your `SteamVR/drivers` folder. (Default Path: `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers`.
-* Install the Android Apk on your mobile from [`Releases`](https://github.com/ShootingKing-AM/PhoneVR/releases/latest) page.
+* Install the Android Apk on your mobile from [`Releases`](https://github.com/PhoneVR-Developers/PhoneVR/releases/latest) page.
 * Make sure that "Run in Background", "Auto Start"(Restart on Crash) permissions, if exists on your device(espicially Xiaomi users), are given. Also make sure that any kind of 3rd party battery saver app dosen't kill PhoneVR when in background.
 
 To **play**, **first open the Phone App**(SteamVR should also be closed), then run the game of your choice on PC. (Obviously, both PC and Mobile should be on same Network, preferably Wifi 5.0)
@@ -155,9 +155,9 @@ This Project is presently under testing. But, pull requests are welcome.
 
 ## Issue / Bug Reporting
 
-Prior to reporting your Issue/Bug, please check out the ongoing issues ([here](https://github.com/ShootingKing-AM/PhoneVR/issues)), If you have the same issue, you can join and watch that discussion(s).
+Prior to reporting your Issue/Bug, please check out the ongoing issues ([here](https://github.com/PhoneVR-Developers/PhoneVR/issues)), If you have the same issue, you can join and watch that discussion(s).
 
-You can use the [`Github Issues`](https://github.com/ShootingKing-AM/PhoneVR/issues) or [`Discord`](https://discord.gg/pNYtBNk) to submit any issues/bugs related to working of this Project or for any query.
+You can use the [`Github Issues`](https://github.com/PhoneVR-Developers/PhoneVR/issues) or [`Discord`](https://discord.gg/pNYtBNk) to submit any issues/bugs related to working of this Project or for any query.
 For quick resolution you may want to add the following data along with your issue/bug report,
 
 <ins>For Installation-time or SteamVR-and-PhoneVR-linking issues,</ins>
@@ -167,8 +167,8 @@ For quick resolution you may want to add the following data along with your issu
 
 <ins>For networking issues,</ins>
 
-* Network Capture of Desktop `.pcap` file. How-to-get-it-> [Here](https://github.com/ShootingKing-AM/PhoneVR/issues/26#issuecomment-683905486)
-* Network Capture of Android/Mobile `.pcap` file. How-to-get-it-> [Here](https://github.com/ShootingKing-AM/PhoneVR/issues/26#issuecomment-687640757)
+* Network Capture of Desktop `.pcap` file. How-to-get-it-> [Here](https://github.com/PhoneVR-Developers/PhoneVR/issues/26#issuecomment-683905486)
+* Network Capture of Android/Mobile `.pcap` file. How-to-get-it-> [Here](https://github.com/PhoneVR-Developers/PhoneVR/issues/26#issuecomment-687640757)
 
 <ins>If Unexpected android app crashes occur(unexpected means, you did **NOT** get</ins> [this](https://user-images.githubusercontent.com/4137788/102040730-9c168180-3df3-11eb-985a-5d8d6798ea5a.jpg) <ins>screen when PhoneVR crashed),</ins>
 

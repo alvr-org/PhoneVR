@@ -82,6 +82,6 @@ body:
 - type: textarea
   attributes:
     label: Attached Logs
-    description: Attach required logs(yes literally nothing can be fixed without logs) from your Desktop and Mobile end. ([Here](https://github.com/ShootingKing-AM/PhoneVR#issue--bug-reporting) is how to get logs)
+    description: Attach required logs(yes literally nothing can be fixed without logs) from your Desktop and Mobile end. ([Here](https://github.com/PhoneVR-Developers/PhoneVR#issue--bug-reporting) is how to get logs)
   validations:
     required: false
