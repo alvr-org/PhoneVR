@@ -508,7 +508,7 @@ jobs:
       - uses: FedericoCarboni/setup-ffmpeg@v2
         id: setup-ffmpeg
       - run: |
-          ffmpeg -f avfoundation -i 0 -t 120 out_API$SUFFIX.mov &
+          ffmpeg -f gdigrab -framerate 30 -i desktop -t 120 out_API$SUFFIX.mov &
           npm install --global nircmd
           nircmd --help
         shell: bash
