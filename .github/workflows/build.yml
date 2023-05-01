@@ -299,7 +299,7 @@ jobs:
           SUFFIX: ${{ matrix.api-level }}
         run: |
           brew install ffmpeg
-          ffmpeg -f avfoundation -i 0 -t 120 out_API$SUFFIX.mov &
+          ffmpeg -f avfoundation -i 0 -t 840 out_API$SUFFIX.mov &
 
       ## Create AVD with some redundancy - 3 Checks
       - name: Run tests
