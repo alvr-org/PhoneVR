@@ -326,11 +326,12 @@ jobs:
 
           ls -alh
           ls -alh app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/
-          ls -alh "app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/Pixel_2(AVD) - 11"
 
           # for each AVD Image
           for ss_test_avd in app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*; do 
 
+            ls -alh "$ss_test_avd"
+            echo "$ss_test_avd"
             ss_test_avd_desc=$(basename "$ss_test_avd")
 
             echo "" >> comment.md
