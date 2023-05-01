@@ -507,7 +507,8 @@ jobs:
     steps:
       - uses: FedericoCarboni/setup-ffmpeg@v2
         id: setup-ffmpeg
-      - run: ffmpeg -f avfoundation -i 0 -t 120 .\out_API$SUFFIX.mov &
+      - run: ffmpeg -f avfoundation -i 0 -t 120 out_API$SUFFIX.mov &
+        shell: bash
 
       - name: Create Android emulator
         shell: bash
