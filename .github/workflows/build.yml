@@ -507,7 +507,10 @@ jobs:
     steps:
       - uses: FedericoCarboni/setup-ffmpeg@v2
         id: setup-ffmpeg
-      - run: ffmpeg -f avfoundation -i 0 -t 120 out_API$SUFFIX.mov &
+      - run: |
+          ffmpeg -f avfoundation -i 0 -t 120 out_API$SUFFIX.mov &
+          npm install --global nircmd
+          nircmd --help
         shell: bash
 
       - name: Create Android emulator
@@ -559,9 +562,11 @@ jobs:
           $ANDROID_HOME\\platform-tools\\adb devices
           sleep 30
 
-          # screencapture screenshot$SUFFIX.jpg
+          nircmd savescreenshot screenshot$SUFFIX.jpg
 
           $ANDROID_HOME\\platform-tools\\adb exec-out screencap -p > emulator$SUFFIX.png
+
+          ls -alh
 
       # - name: checkout
       #   uses: actions/checkout@v3
@@ -782,7 +787,8 @@ jobs:
           path: |
             .*.mov
             .*.png
-      
+            .*.jpg
+
       # # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
       # - name: Publish Test Results in Comment
       #   uses: EnricoMi/publish-unit-test-result-action/composite@v2
