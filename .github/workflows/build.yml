@@ -294,7 +294,7 @@ jobs:
 
       - name: Install recorder and record session
         env:
-          SUFFIX: ${{ api-level }}
+          SUFFIX: ${{ matrix.api-level }}
         run: |
           brew install ffmpeg
           ffmpeg -f avfoundation -i 0 -t 120 out_API$SUFFIX.mov &
