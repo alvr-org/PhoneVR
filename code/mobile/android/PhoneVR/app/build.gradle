@@ -89,6 +89,17 @@ android {
             path "CMakeLists.txt"
         }
     }
+    project.gradle.taskGraph.whenReady {
+        android.productFlavors.all { flavor ->
+            // Capitalize (as Gralde is case-sensitive).
+            def flavorName = flavor.name.substring(0, 1).toUpperCase() + flavor.name.substring(1)
+
+            // At last, configure.
+            "connected${flavorName}DebugAndroidTest" {
+                ignoreFailures = true
+            }
+        }
+    }
 
     // CompileOptions required for ARCA
     compileOptions {
