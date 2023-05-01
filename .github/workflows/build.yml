@@ -497,7 +497,7 @@ jobs:
       EMU_OPTS: -no-window -gpu swiftshader_indirect -no-boot-anim -verbose -camera-back virtualscene # -noaudio 
       EMU_PROFILE: pixel_2
       EMU_AVD_NAME: Pixel_2
-      EMU_TARGET: playstore # google_apis
+      EMU_TARGET: google_apis_playstore # google_apis
       MATRIX_E_SDK: 30
       MATRIX_AVD: test_win
 
@@ -515,7 +515,7 @@ jobs:
           # brew install intel-haxm
           # Install AVD files
 
-          echo "y" | $ANDROID_HOME\\tools\\bin\\sdkmanager.bat --install 'system-images;android-'$MATRIX_E_SDK';default;x86_64'
+          echo "y" | $ANDROID_HOME\\tools\\bin\\sdkmanager.bat --install 'system-images;android-'$MATRIX_E_SDK';default;x86'
           echo "y" | $ANDROID_HOME\\tools\\bin\\sdkmanager.bat --licenses
           
           echo Creating emulator
