@@ -273,6 +273,8 @@ jobs:
 
       - name: Change gradle wrapper permissions
         run: |
+          echo "GLESDynamicVersion = on" >> ~/.android/advancedFeatures.ini # OpenGL3 Support
+
           cd code/mobile/android/PhoneVR
           chmod +x ./gradlew
           ls -alh
