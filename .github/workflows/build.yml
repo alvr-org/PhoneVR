@@ -750,18 +750,18 @@ jobs:
       #       cat log.txt
 
       # build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/GPlay_Pixel_2_API_30(AVD) - 11/ALVRActivityTest_saveDeviceScreenBitmap.png
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: Test results
-          path: |
             # **/app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*
             # **/app/build/reports
             # **/app/build/test-results
             # **/app/build/outputs/androidTest-results
             # ${{env.GRADLE_DIR}}/logcat.log
-            ./*.mov
             # bugreport.zip
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Test results
+          path: |
+            .\*.mov
       
       # # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
       # - name: Publish Test Results in Comment
