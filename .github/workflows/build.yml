@@ -215,7 +215,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: playstore # google_apis
           force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -no-boot-anim -verbose # -noaudio -camera-back none
+          emulator-options: -no-window -gpu swiftshader_indirect -no-boot-anim -verbose -camera-back virtualscene # -noaudio 
           disable-animations: false
           profile: pixel_2
           avd-name: Pixel_2
@@ -257,7 +257,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: playstore # google_apis
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -no-boot-anim -verbose # -noaudio -camera-back none
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -no-boot-anim -verbose  -camera-back virtualscene # -noaudio
           disable-animations: true
           profile: pixel_2
           avd-name: Pixel_2
