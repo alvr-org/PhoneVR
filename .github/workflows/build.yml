@@ -544,6 +544,24 @@ jobs:
           cat "$emulator_config"
           fi
 
+      - name: Start Android emulator
+        timeout-minutes: 30 # ~4min normal - 3x DOSafety
+        env:
+          SUFFIX: ${{ matrix.android_avd }}-eAPI-${{ matrix.android_emu_version }}-${{ matrix.os }}
+        shell: bash
+        run: |
+          echo "Starting emulator and waiting for boot to complete...."
+          ls -la $ANDROID_HOME\\emulator
+          nohup $ANDROID_HOME\\tools\\emulator -avd $MATRIX_AVD -gpu host -no-audio -no-boot-anim -camera-back none -camera-front none -qemu -m 2048 2>&1 &
+          $ANDROID_HOME\\platform-tools\\adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do echo "wait..."; sleep 1; done; input keyevent 82'
+          echo "Emulator has finished booting"
+          $ANDROID_HOME\\platform-tools\\adb devices
+          sleep 30
+
+          # screencapture screenshot$SUFFIX.jpg
+
+          $ANDROID_HOME\\platform-tools\\adb exec-out screencap -p > emulator$SUFFIX.png
+
       # - name: checkout
       #   uses: actions/checkout@v3
       #   with:
@@ -762,6 +780,7 @@ jobs:
           name: Test results
           path: |
             .*.mov
+            .*.png
       
       # # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
       # - name: Publish Test Results in Comment
