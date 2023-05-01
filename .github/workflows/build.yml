@@ -298,6 +298,12 @@ jobs:
         env:
           SUFFIX: ${{ matrix.api-level }}
         run: |
+          brew install glfw3
+          brew install glew
+          brew install glxinfo
+
+          glxinfo | grep -i opengl
+          
           brew install ffmpeg
           ffmpeg -f avfoundation -i 0 -t 840 out_API$SUFFIX.mov &
 
