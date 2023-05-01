@@ -510,11 +510,11 @@ jobs:
         run: |
           # brew install intel-haxm
           # Install AVD files
-          echo "y" | $ANDROID_HOME\\tools\\bin\\sdkmanager --install 'system-images;android-'$MATRIX_E_SDK';default;x86_64'
-          echo "y" | $ANDROID_HOME\\tools\\bin\\sdkmanager --licenses
+          echo "y" | $ANDROID_HOME\\tools\\bin\\sdkmanager.bat --install 'system-images;android-'$MATRIX_E_SDK';default;x86_64'
+          echo "y" | $ANDROID_HOME\\tools\\bin\\sdkmanager.bat --licenses
           
           # Create emulator
-          $ANDROID_HOME\\tools\\bin\\avdmanager create avd -n $MATRIX_AVD -d pixel --package 'system-images;android-'$MATRIX_E_SDK';default;x86_64'
+          $ANDROID_HOME\\tools\\bin\\avdmanager.bat create avd -n $MATRIX_AVD -d pixel --package 'system-images;android-'$MATRIX_E_SDK';default;x86_64'
           $ANDROID_HOME\\emulator\\emulator -list-avds
           if false; then
           emulator_config=~\\.android\\avd\\$MATRIX_AVD.avd\\config.ini
