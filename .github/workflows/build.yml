@@ -504,24 +504,20 @@ jobs:
       matrix:
         api-level: [30] # 29
     steps:
-      - name: checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: 'true'
 
       - name: Create Android emulator
         shell: bash
         run: |
           # brew install intel-haxm
           # Install AVD files
-          echo "y" | $ANDROID_HOME\tools\bin\sdkmanager --install 'system-images;android-'$MATRIX_E_SDK';default;x86_64'
-          echo "y" | $ANDROID_HOME\tools\bin\sdkmanager --licenses
+          echo "y" | $ANDROID_HOME\\tools\\bin\\sdkmanager --install 'system-images;android-'$MATRIX_E_SDK';default;x86_64'
+          echo "y" | $ANDROID_HOME\\tools\\bin\\sdkmanager --licenses
           
           # Create emulator
-          $ANDROID_HOME\tools\bin\avdmanager create avd -n $MATRIX_AVD -d pixel --package 'system-images;android-'$MATRIX_E_SDK';default;x86_64'
-          $ANDROID_HOME\emulator\emulator -list-avds
+          $ANDROID_HOME\\tools\\bin\\avdmanager create avd -n $MATRIX_AVD -d pixel --package 'system-images;android-'$MATRIX_E_SDK';default;x86_64'
+          $ANDROID_HOME\\emulator\\emulator -list-avds
           if false; then
-          emulator_config=~\.android\avd\$MATRIX_AVD.avd\config.ini
+          emulator_config=~\\.android\\avd\\$MATRIX_AVD.avd\\config.ini
           # The following madness is to support empty OR populated config.ini files,
           # the state of which is dependant on the version of the emulator used (which we don't control),
           # so let's be defensive to be safe.
@@ -543,315 +539,320 @@ jobs:
           cat "$emulator_config"
           fi
 
-      - name: Set Up JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'oracle'
-          java-version: 17
-
-      # Only for Testing github-actions
-      - uses: actions-rs/toolchain@v1
-        if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-          components: clippy
-      - uses: Swatinem/rust-cache@v2
-        if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
-        with:
-          cache-on-failure: true
-          workspaces: ${{env.GRADLE_DIR}}/ALVR/
-      
-      - uses: gradle/gradle-build-action@v2
-        if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
-        with:
-          build-root-directory: ${{env.GRADLE_DIR}}
-          cache-read-only: ${{ false }}
-
-      # - name: AVD cache
-      #   uses: actions/cache@v3
-      #   id: avd-cache
+      # - name: checkout
+      #   uses: actions/checkout@v3
       #   with:
-      #     path: |
-      #       ~/.android/avd/*
-      #       ~/.android/adb*
-      #     key: avd-${{ matrix.api-level }}
-      
-      ## Create AVD with some redundancy - 3 Checks
-      - name: create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        id: avd_create_1
-        continue-on-error: true
-        with:
-          working-directory: ${{env.GRADLE_DIR}}
-          api-level: ${{ matrix.api-level }}
-          target: ${{ env.EMU_TARGET }}
-          force-avd-creation: false
-          emulator-options: ${{ env.EMU_OPTS }}
-          disable-animations: false
-          profile: ${{ env.EMU_PROFILE }}
-          avd-name: ${{ env.EMU_AVD_NAME }}
-          script: echo "Generated AVD snapshot for caching."
-      
-      - name: create AVD and generate snapshot for caching try#2
-        if: steps.avd-cache.outputs.cache-hit != 'true' && steps.avd_create_1.outcome == 'failure'
-        uses: reactivecircus/android-emulator-runner@v2        
-        id: avd_create_2
-        continue-on-error: true
-        with:
-          working-directory: ${{env.GRADLE_DIR}}
-          api-level: ${{ matrix.api-level }}
-          target: ${{ env.EMU_TARGET }}
-          force-avd-creation: false
-          emulator-options: ${{ env.EMU_OPTS }}
-          disable-animations: false
-          profile: ${{ env.EMU_PROFILE }}
-          avd-name: ${{ env.EMU_AVD_NAME }}
-          script: echo "Generated AVD snapshot for caching."
-      
-      - name: create AVD and generate snapshot for caching try#3
-        if: steps.avd-cache.outputs.cache-hit != 'true' && steps.avd_create_2.outcome == 'failure'
-        uses: reactivecircus/android-emulator-runner@v2        
-        id: avd_create_3
-        # continue-on-error: true # Fail if even fail the 3rd try
-        with:
-          working-directory: ${{env.GRADLE_DIR}}
-          api-level: ${{ matrix.api-level }}
-          target: ${{ env.EMU_TARGET }}
-          force-avd-creation: false
-          emulator-options: ${{ env.EMU_OPTS }}
-          disable-animations: false
-          profile: ${{ env.EMU_PROFILE }}
-          avd-name: ${{ env.EMU_AVD_NAME }}
-          script: echo "Generated AVD snapshot for caching."
-      ## Redundancy End
+      #     submodules: 'true'
+    
+      # - name: Set Up JDK
+      #   uses: actions/setup-java@v3
+      #   with:
+      #     distribution: 'oracle'
+      #     java-version: 17
 
-      - name: Prepare deps
-        shell: bash
-        run: |          
-          ls -alh
-          cd code/mobile/android/PhoneVR
-          chmod +x prepare-alvr-deps.sh
-          bash prepare-alvr-deps.sh
+      # # Only for Testing github-actions
+      # - uses: actions-rs/toolchain@v1
+      #   if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
+      #   with:
+      #     profile: minimal
+      #     toolchain: stable
+      #     override: true
+      #     components: clippy
+      # - uses: Swatinem/rust-cache@v2
+      #   if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
+      #   with:
+      #     cache-on-failure: true
+      #     workspaces: ${{env.GRADLE_DIR}}/ALVR/
+      
+      # - uses: gradle/gradle-build-action@v2
+      #   if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
+      #   with:
+      #     build-root-directory: ${{env.GRADLE_DIR}}
+      #     cache-read-only: ${{ false }}
 
-      - name: Change gradle wrapper permissions
-        run: |
-          echo "GLESDynamicVersion = on" >> ~/.android/advancedFeatures.ini # OpenGL3 Support on AVDs
-          cat ~/.android/advancedFeatures.ini
+      # # - name: AVD cache
+      # #   uses: actions/cache@v3
+      # #   id: avd-cache
+      # #   with:
+      # #     path: |
+      # #       ~/.android/avd/*
+      # #       ~/.android/adb*
+      # #     key: avd-${{ matrix.api-level }}
+      
+      # ## Create AVD with some redundancy - 3 Checks
+      # - name: create AVD and generate snapshot for caching
+      #   if: steps.avd-cache.outputs.cache-hit != 'true'
+      #   uses: reactivecircus/android-emulator-runner@v2
+      #   id: avd_create_1
+      #   continue-on-error: true
+      #   with:
+      #     working-directory: ${{env.GRADLE_DIR}}
+      #     api-level: ${{ matrix.api-level }}
+      #     target: ${{ env.EMU_TARGET }}
+      #     force-avd-creation: false
+      #     emulator-options: ${{ env.EMU_OPTS }}
+      #     disable-animations: false
+      #     profile: ${{ env.EMU_PROFILE }}
+      #     avd-name: ${{ env.EMU_AVD_NAME }}
+      #     script: echo "Generated AVD snapshot for caching."
+      
+      # - name: create AVD and generate snapshot for caching try#2
+      #   if: steps.avd-cache.outputs.cache-hit != 'true' && steps.avd_create_1.outcome == 'failure'
+      #   uses: reactivecircus/android-emulator-runner@v2        
+      #   id: avd_create_2
+      #   continue-on-error: true
+      #   with:
+      #     working-directory: ${{env.GRADLE_DIR}}
+      #     api-level: ${{ matrix.api-level }}
+      #     target: ${{ env.EMU_TARGET }}
+      #     force-avd-creation: false
+      #     emulator-options: ${{ env.EMU_OPTS }}
+      #     disable-animations: false
+      #     profile: ${{ env.EMU_PROFILE }}
+      #     avd-name: ${{ env.EMU_AVD_NAME }}
+      #     script: echo "Generated AVD snapshot for caching."
+      
+      # - name: create AVD and generate snapshot for caching try#3
+      #   if: steps.avd-cache.outputs.cache-hit != 'true' && steps.avd_create_2.outcome == 'failure'
+      #   uses: reactivecircus/android-emulator-runner@v2        
+      #   id: avd_create_3
+      #   # continue-on-error: true # Fail if even fail the 3rd try
+      #   with:
+      #     working-directory: ${{env.GRADLE_DIR}}
+      #     api-level: ${{ matrix.api-level }}
+      #     target: ${{ env.EMU_TARGET }}
+      #     force-avd-creation: false
+      #     emulator-options: ${{ env.EMU_OPTS }}
+      #     disable-animations: false
+      #     profile: ${{ env.EMU_PROFILE }}
+      #     avd-name: ${{ env.EMU_AVD_NAME }}
+      #     script: echo "Generated AVD snapshot for caching."
+      # ## Redundancy End
+
+      # - name: Prepare deps
+      #   shell: bash
+      #   run: |          
+      #     ls -alh
+      #     cd code/mobile/android/PhoneVR
+      #     chmod +x prepare-alvr-deps.sh
+      #     bash prepare-alvr-deps.sh
+
+      # - name: Change gradle wrapper permissions
+      #   run: |
+      #     echo "GLESDynamicVersion = on" >> ~/.android/advancedFeatures.ini # OpenGL3 Support on AVDs
+      #     cat ~/.android/advancedFeatures.ini
           
-          cd code/mobile/android/PhoneVR
-          chmod +x ./gradlew
-          ls -alh
-          ls -alh app
+      #     cd code/mobile/android/PhoneVR
+      #     chmod +x ./gradlew
+      #     ls -alh
+      #     ls -alh app
       
-      # Cache APK gradle tasks
-      - name: Build apk debug project (APK)
-        run:  |
-          cd code/mobile/android/PhoneVR
-          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleDebug --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+      # # Cache APK gradle tasks
+      # - name: Build apk debug project (APK)
+      #   run:  |
+      #     cd code/mobile/android/PhoneVR
+      #     ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleDebug --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
 
-      - name: Start PVR ADB-Telnet Server
-        working-directory: ${{env.GRADLE_DIR}}/app/src/androidTest/java/viritualisres/phonevr/utils/
-        run: |
-          brew install telnet
+      # - name: Start PVR ADB-Telnet Server
+      #   working-directory: ${{env.GRADLE_DIR}}/app/src/androidTest/java/viritualisres/phonevr/utils/
+      #   run: |
+      #     brew install telnet
 
-          chmod +x pvr-adb-telnet.sh
-          bash pvr-adb-telnet.sh >> log.txt 2>&1 &
+      #     chmod +x pvr-adb-telnet.sh
+      #     bash pvr-adb-telnet.sh >> log.txt 2>&1 &
 
-      - name: Install recorder and record session
-        env:
-          SUFFIX: ${{ matrix.api-level }}
-        run: |
-          brew install glfw3
-          brew install glew
-          brew install glxinfo
+      # - name: Install recorder and record session
+      #   env:
+      #     SUFFIX: ${{ matrix.api-level }}
+      #   run: |
+      #     brew install glfw3
+      #     brew install glew
+      #     brew install glxinfo
 
-          # glxinfo | grep -i opengl
+      #     # glxinfo | grep -i opengl
 
-          brew install ffmpeg
-          ffmpeg -f avfoundation -i 0 -t 840 out_API$SUFFIX.mov &
+      #     brew install ffmpeg
+      #     ffmpeg -f avfoundation -i 0 -t 840 out_API$SUFFIX.mov &
 
-      ## Create AVD with some redundancy - 3 Checks
-      - name: Run tests
-        uses: reactivecircus/android-emulator-runner@v2        
-        id: avd_run_1
-        continue-on-error: true
-        with:
-          working-directory: ${{env.GRADLE_DIR}}
-          api-level: ${{ matrix.api-level }}
-          target: ${{ env.EMU_TARGET }}
-          force-avd-creation: false
-          emulator-options: ${{ env.EMU_OPTS }}
-          disable-animations: true
-          profile: ${{ env.EMU_PROFILE }}
-          avd-name: ${{ env.EMU_AVD_NAME }}
-          script: |
-            adb shell "logcat -b all -v color" &
-            ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb shell "logcat -b all" >> logcat.log
-      
-      - name: Run tests try#2
-        uses: reactivecircus/android-emulator-runner@v2
-        if: steps.avd_run_1.outcome == 'failure'
-        id: avd_run_2
-        continue-on-error: true
-        with:
-          working-directory: ${{env.GRADLE_DIR}}
-          api-level: ${{ matrix.api-level }}
-          target: ${{ env.EMU_TARGET }}
-          force-avd-creation: false
-          emulator-options: ${{ env.EMU_OPTS }}
-          disable-animations: true
-          profile: ${{ env.EMU_PROFILE }}
-          avd-name: ${{ env.EMU_AVD_NAME }}
-          script: |
-            adb shell "logcat -b all -v color" &
-            ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb shell "logcat -b all" >> logcat.log
-      
-      - name: Run tests try#3
-        uses: reactivecircus/android-emulator-runner@v2   
-        if: steps.avd_run_2.outcome == 'failure'     
-        id: avd_run_3
-        # continue-on-error: true # Fail if even fail the 3rd try
-        with:
-          working-directory: ${{env.GRADLE_DIR}}
-          api-level: ${{ matrix.api-level }}
-          target: ${{ env.EMU_TARGET }}
-          force-avd-creation: false
-          emulator-options: ${{ env.EMU_OPTS }}
-          disable-animations: true
-          profile: ${{ env.EMU_PROFILE }}
-          avd-name: ${{ env.EMU_AVD_NAME }}
-          script: |
-            adb shell "logcat -b all -v color" &
-            ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb shell "logcat -b all" >> logcat.log
-      ## Redundancy End
-
-      - name: Get Bug Report & tombstones
-        if: always()
-        run: |
-          adb bugreport bugreport.zip
-      
-      - name: Shutdown PVR ADB-Telnet Server and log
-        working-directory: ${{env.GRADLE_DIR}}/app/src/androidTest/java/viritualisres/phonevr/utils/
-        if: always()
-        run: |
-            echo "shutdown meow !" >> pvr-adb-telnet.sd
-            cat log.txt
-
-      # build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/GPlay_Pixel_2_API_30(AVD) - 11/ALVRActivityTest_saveDeviceScreenBitmap.png
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: Test results
-          path: |
-            **/app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*
-            **/app/build/reports
-            **/app/build/test-results
-            **/app/build/outputs/androidTest-results
-            ${{env.GRADLE_DIR}}/logcat.log
-            ./*.mov
-            bugreport.zip
-      
-      # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
-      - name: Publish Test Results in Comment
-        uses: EnricoMi/publish-unit-test-result-action/composite@v2
-        # if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && always()
-        if: always()
-        with:
-          report_individual_runs: true
-          report_suite_logs: 'any'
-          deduplicate_classes_by_file_name: true          
-          comment_title: '🛠 Test Results'
-          files: |
-            code/mobile/android/PhoneVR/app/build/outputs/androidTest-results/**/TEST-*.xml
-      
-      - uses: iterative/setup-cml@v1
-        if: always()
-      
-      - name: Publish Screenshots - Find Comment
-        if: always()
-        uses: peter-evans/find-comment@v2
-        id: fc
-        with:
-          issue-number: ${{ github.event.number }}
-          body-includes: '# 📷 Screenshots of tests:'
-          direction: last
-          comment-author: 'github-actions[bot]'
-
-      - name: Publish Screenshots - build comment
-        if: always()
-        env:
-          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EVENT: ${{ github.event_name }}
-          REF: ${{ github.ref }}
-          WK_DIR: ${{env.GRADLE_DIR}}
-        shell: bash
-        working-directory: ${{env.GRADLE_DIR}}
-        run: |
-          echo "# 📷 Screenshots of tests:" >> comment.md
-          echo "" >> comment.md
-
-          ls -alh
-          ls -alh app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/
-
-          # for each AVD Image
-          for ss_test_avd in app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*; do 
-
-            ls -alh "$ss_test_avd"
-            echo "$ss_test_avd"
-            ss_test_avd_desc=$(basename "$ss_test_avd")
-
-            echo "" >> comment.md
-            echo "### 📱 $ss_test_avd_desc" >> comment.md
-            echo "" >> comment.md
-
-            # for each .png in that AVD folder
-            for ss_test in "app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/$ss_test_avd_desc/"*.png; do 
-              
-              ss_test_desc=$(basename "$ss_test" .png)
-              
-              echo "#### 🔧 $ss_test_desc" >> comment.md
-
-              echo "$WK_DIR/$ss_test"
-              echo '<p float="left">' >> comment.md
-              cml-publish "$WK_DIR/$ss_test" | sed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
-              echo '</p>' >> comment.md
-
-            done
-          done
-
-          if [ "$EVENT" == 'pull_request' ]
-          then
-            sha=${{ github.event.pull_request.head.sha}}
-          elif [ "$EVENT" == 'workflow_run' ]
-          then
-            sha=${{ github.event.workflow_run.head_sha}}
-          else
-            sha=$GITHUB_SHA
-          fi
-
-          echo "" >> comment.md
-          echo "###### For commit $sha" >> comment.md
-      
-      - name: Publish Screehnshots - Update or Create Comment
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && always()
-        uses: peter-evans/create-or-update-comment@v3
-        with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          body-file: comment.md
-          edit-mode: replace
-          issue-number: ${{ github.event.number }}
-      
-      # - name: Save AVD Cache
-      #   uses: actions/cache/save@v3
-      #   if: always() && !steps.avd-cache.outputs.cache-hit
+      # ## Create AVD with some redundancy - 3 Checks
+      # - name: Run tests
+      #   uses: reactivecircus/android-emulator-runner@v2        
+      #   id: avd_run_1
+      #   continue-on-error: true
       #   with:
+      #     working-directory: ${{env.GRADLE_DIR}}
+      #     api-level: ${{ matrix.api-level }}
+      #     target: ${{ env.EMU_TARGET }}
+      #     force-avd-creation: false
+      #     emulator-options: ${{ env.EMU_OPTS }}
+      #     disable-animations: true
+      #     profile: ${{ env.EMU_PROFILE }}
+      #     avd-name: ${{ env.EMU_AVD_NAME }}
+      #     script: |
+      #       adb shell "logcat -b all -v color" &
+      #       ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+      #       adb shell "logcat -b all" >> logcat.log
+      
+      # - name: Run tests try#2
+      #   uses: reactivecircus/android-emulator-runner@v2
+      #   if: steps.avd_run_1.outcome == 'failure'
+      #   id: avd_run_2
+      #   continue-on-error: true
+      #   with:
+      #     working-directory: ${{env.GRADLE_DIR}}
+      #     api-level: ${{ matrix.api-level }}
+      #     target: ${{ env.EMU_TARGET }}
+      #     force-avd-creation: false
+      #     emulator-options: ${{ env.EMU_OPTS }}
+      #     disable-animations: true
+      #     profile: ${{ env.EMU_PROFILE }}
+      #     avd-name: ${{ env.EMU_AVD_NAME }}
+      #     script: |
+      #       adb shell "logcat -b all -v color" &
+      #       ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+      #       adb shell "logcat -b all" >> logcat.log
+      
+      # - name: Run tests try#3
+      #   uses: reactivecircus/android-emulator-runner@v2   
+      #   if: steps.avd_run_2.outcome == 'failure'     
+      #   id: avd_run_3
+      #   # continue-on-error: true # Fail if even fail the 3rd try
+      #   with:
+      #     working-directory: ${{env.GRADLE_DIR}}
+      #     api-level: ${{ matrix.api-level }}
+      #     target: ${{ env.EMU_TARGET }}
+      #     force-avd-creation: false
+      #     emulator-options: ${{ env.EMU_OPTS }}
+      #     disable-animations: true
+      #     profile: ${{ env.EMU_PROFILE }}
+      #     avd-name: ${{ env.EMU_AVD_NAME }}
+      #     script: |
+      #       adb shell "logcat -b all -v color" &
+      #       ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+      #       adb shell "logcat -b all" >> logcat.log
+      # ## Redundancy End
+
+      # - name: Get Bug Report & tombstones
+      #   if: always()
+      #   run: |
+      #     adb bugreport bugreport.zip
+      
+      # - name: Shutdown PVR ADB-Telnet Server and log
+      #   working-directory: ${{env.GRADLE_DIR}}/app/src/androidTest/java/viritualisres/phonevr/utils/
+      #   if: always()
+      #   run: |
+      #       echo "shutdown meow !" >> pvr-adb-telnet.sd
+      #       cat log.txt
+
+      # # build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/GPlay_Pixel_2_API_30(AVD) - 11/ALVRActivityTest_saveDeviceScreenBitmap.png
+      # - uses: actions/upload-artifact@v3
+      #   if: always()
+      #   with:
+      #     name: Test results
       #     path: |
-      #         ~/.android/avd/*
-      #         ~/.android/adb*
-      #     key: avd-${{ matrix.api-level }}
+      #       **/app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*
+      #       **/app/build/reports
+      #       **/app/build/test-results
+      #       **/app/build/outputs/androidTest-results
+      #       ${{env.GRADLE_DIR}}/logcat.log
+      #       ./*.mov
+      #       bugreport.zip
+      
+      # # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
+      # - name: Publish Test Results in Comment
+      #   uses: EnricoMi/publish-unit-test-result-action/composite@v2
+      #   # if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && always()
+      #   if: always()
+      #   with:
+      #     report_individual_runs: true
+      #     report_suite_logs: 'any'
+      #     deduplicate_classes_by_file_name: true          
+      #     comment_title: '🛠 Test Results'
+      #     files: |
+      #       code/mobile/android/PhoneVR/app/build/outputs/androidTest-results/**/TEST-*.xml
+      
+      # - uses: iterative/setup-cml@v1
+      #   if: always()
+      
+      # - name: Publish Screenshots - Find Comment
+      #   if: always()
+      #   uses: peter-evans/find-comment@v2
+      #   id: fc
+      #   with:
+      #     issue-number: ${{ github.event.number }}
+      #     body-includes: '# 📷 Screenshots of tests:'
+      #     direction: last
+      #     comment-author: 'github-actions[bot]'
+
+      # - name: Publish Screenshots - build comment
+      #   if: always()
+      #   env:
+      #     REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     EVENT: ${{ github.event_name }}
+      #     REF: ${{ github.ref }}
+      #     WK_DIR: ${{env.GRADLE_DIR}}
+      #   shell: bash
+      #   working-directory: ${{env.GRADLE_DIR}}
+      #   run: |
+      #     echo "# 📷 Screenshots of tests:" >> comment.md
+      #     echo "" >> comment.md
+
+      #     ls -alh
+      #     ls -alh app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/
+
+      #     # for each AVD Image
+      #     for ss_test_avd in app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*; do 
+
+      #       ls -alh "$ss_test_avd"
+      #       echo "$ss_test_avd"
+      #       ss_test_avd_desc=$(basename "$ss_test_avd")
+
+      #       echo "" >> comment.md
+      #       echo "### 📱 $ss_test_avd_desc" >> comment.md
+      #       echo "" >> comment.md
+
+      #       # for each .png in that AVD folder
+      #       for ss_test in "app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/$ss_test_avd_desc/"*.png; do 
+              
+      #         ss_test_desc=$(basename "$ss_test" .png)
+              
+      #         echo "#### 🔧 $ss_test_desc" >> comment.md
+
+      #         echo "$WK_DIR/$ss_test"
+      #         echo '<p float="left">' >> comment.md
+      #         cml-publish "$WK_DIR/$ss_test" | sed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
+      #         echo '</p>' >> comment.md
+
+      #       done
+      #     done
+
+      #     if [ "$EVENT" == 'pull_request' ]
+      #     then
+      #       sha=${{ github.event.pull_request.head.sha}}
+      #     elif [ "$EVENT" == 'workflow_run' ]
+      #     then
+      #       sha=${{ github.event.workflow_run.head_sha}}
+      #     else
+      #       sha=$GITHUB_SHA
+      #     fi
+
+      #     echo "" >> comment.md
+      #     echo "###### For commit $sha" >> comment.md
+      
+      # - name: Publish Screehnshots - Update or Create Comment
+      #   if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && always()
+      #   uses: peter-evans/create-or-update-comment@v3
+      #   with:
+      #     comment-id: ${{ steps.fc.outputs.comment-id }}
+      #     body-file: comment.md
+      #     edit-mode: replace
+      #     issue-number: ${{ github.event.number }}
+      
+      # # - name: Save AVD Cache
+      # #   uses: actions/cache/save@v3
+      # #   if: always() && !steps.avd-cache.outputs.cache-hit
+      # #   with:
+      # #     path: |
+      # #         ~/.android/avd/*
+      # #         ~/.android/adb*
+      # #     key: avd-${{ matrix.api-level }}
