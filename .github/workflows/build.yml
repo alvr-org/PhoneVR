@@ -556,7 +556,7 @@ jobs:
         run: |
           echo "Starting emulator and waiting for boot to complete...."
           ls -la $ANDROID_HOME\\emulator
-          nohup $ANDROID_HOME\\tools\\emulator -avd $MATRIX_AVD -gpu host -no-audio -no-boot-anim -camera-back none -camera-front none -qemu -m 2048 2>&1 &
+          nohup $ANDROID_HOME\\tools\\emulator -avd $MATRIX_AVD -gpu swiftshader_indirect -no-audio -no-boot-anim -camera-back none -camera-front none -qemu -m 2048 2>&1 &
           $ANDROID_HOME\\platform-tools\\adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do echo "wait..."; sleep 1; done; input keyevent 82'
           echo "Emulator has finished booting"
           $ANDROID_HOME\\platform-tools\\adb devices
