@@ -515,8 +515,8 @@ jobs:
           echo "y" | $ANDROID_HOME\\tools\\bin\\sdkmanager.bat --install 'system-images;android-'$MATRIX_E_SDK';default;x86_64'
           echo "y" | $ANDROID_HOME\\tools\\bin\\sdkmanager.bat --licenses
           
-          # Create emulator
-          $ANDROID_HOME\\tools\\bin\\avdmanager.bat create avd -n $MATRIX_AVD -d pixel --package 'system-images;android-'$MATRIX_E_SDK';default;x86_64'
+          echo Creating emulator
+          $ANDROID_HOME\\tools\\bin\\avdmanager.bat create avd -n $MATRIX_AVD -d pixel --package 'system-images;android-'$MATRIX_E_SDK';default;x86'
           $ANDROID_HOME\\emulator\\emulator -list-avds
           if false; then
           emulator_config=~\\.android\\avd\\$MATRIX_AVD.avd\\config.ini
