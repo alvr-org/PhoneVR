@@ -491,13 +491,14 @@ jobs:
       #         ~/.android/adb*
       #     key: avd-${{ matrix.api-level }}
   Test_APK_Win:
-    name: Test APK
+    name: Test APK Win
     runs-on: windows-latest
     env:
       EMU_OPTS: -no-window -gpu swiftshader_indirect -no-boot-anim -verbose -camera-back virtualscene # -noaudio 
       EMU_PROFILE: pixel_2
       EMU_AVD_NAME: Pixel_2
       EMU_TARGET: playstore # google_apis
+      MATRIX_E_SDK: 30
 
     strategy:
       matrix:
@@ -507,6 +508,40 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: 'true'
+
+      - name: Create Android emulator
+        shell: bash
+        run: |
+          # brew install intel-haxm
+          # Install AVD files
+          echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-'$MATRIX_E_SDK';default;x86_64'
+          echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --licenses
+          
+          # Create emulator
+          $ANDROID_HOME/tools/bin/avdmanager create avd -n $MATRIX_AVD -d pixel --package 'system-images;android-'$MATRIX_E_SDK';default;x86_64'
+          $ANDROID_HOME/emulator/emulator -list-avds
+          if false; then
+          emulator_config=~/.android/avd/$MATRIX_AVD.avd/config.ini
+          # The following madness is to support empty OR populated config.ini files,
+          # the state of which is dependant on the version of the emulator used (which we don't control),
+          # so let's be defensive to be safe.
+          # Replace existing config (NOTE we're on MacOS so sed works differently!)
+          # sed -i .bak 's/hw.lcd.density=.*/hw.lcd.density=420/' "$emulator_config"
+          # sed -i .bak 's/hw.lcd.height=.*/hw.lcd.height=1920/' "$emulator_config"
+          # sed -i .bak 's/hw.lcd.width=.*/hw.lcd.width=1080/' "$emulator_config"
+          # Or, add new config
+          if ! grep -q "hw.lcd.density" "$emulator_config"; then
+            echo "hw.lcd.density=420" >> "$emulator_config"
+          fi
+          if ! grep -q "hw.lcd.height" "$emulator_config"; then
+            echo "hw.lcd.height=1920" >> "$emulator_config"
+          fi
+          if ! grep -q "hw.lcd.width" "$emulator_config"; then
+            echo "hw.lcd.width=1080" >> "$emulator_config"
+          fi
+          echo "Emulator settings ($emulator_config)"
+          cat "$emulator_config"
+          fi
 
       - name: Set Up JDK
         uses: actions/setup-java@v3
