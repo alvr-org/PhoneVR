@@ -761,7 +761,7 @@ jobs:
         with:
           name: Test results
           path: |
-            ./*.mov
+            .*.mov
       
       # # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
       # - name: Publish Test Results in Comment
