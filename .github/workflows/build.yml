@@ -273,7 +273,7 @@ jobs:
 
       - name: Change gradle wrapper permissions
         run: |
-          echo "GLESDynamicVersion = on" >> ~/.android/advancedFeatures.ini # OpenGL3 Support
+          echo "GLESDynamicVersion = on" >> ~/.android/advancedFeatures.ini # OpenGL3 Support on AVDs
 
           cd code/mobile/android/PhoneVR
           chmod +x ./gradlew
@@ -318,7 +318,7 @@ jobs:
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb shell "logcat" >> logcat.log
+            adb shell "logcat -b all" >> logcat.log
       
       - name: Run tests try#2
         uses: reactivecircus/android-emulator-runner@v2
@@ -337,7 +337,7 @@ jobs:
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb shell "logcat" >> logcat.log
+            adb shell "logcat -b all" >> logcat.log
       
       - name: Run tests try#3
         uses: reactivecircus/android-emulator-runner@v2   
@@ -356,9 +356,13 @@ jobs:
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb shell "logcat" >> logcat.log
+            adb shell "logcat -b all" >> logcat.log
       ## Redundancy End
 
+      - name: Get Bug Report & tombstones
+        run: |
+          adb bugreport bugreport.zip
+      
       - name: Shutdown PVR ADB-Telnet Server and log
         working-directory: ${{env.GRADLE_DIR}}/app/src/androidTest/java/viritualisres/phonevr/utils/
         if: always()
@@ -378,6 +382,7 @@ jobs:
             **/app/build/outputs/androidTest-results
             ${{env.GRADLE_DIR}}/logcat.log
             ./*.mov
+            bugreport.zip
       
       # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
       - name: Publish Test Results in Comment
