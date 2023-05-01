@@ -326,6 +326,7 @@ jobs:
 
           ls -alh
           ls -alh app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/
+          ls -alh "app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/Pixel_2(AVD) - 11"
 
           # for each AVD Image
           for ss_test_avd in app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*; do 
@@ -343,10 +344,10 @@ jobs:
               
               echo "#### 🔧 $ss_test_desc" >> comment.md
 
+              echo "$WK_DIR/$ss_test"
               echo '<p float="left">' >> comment.md
               cml-publish "$WK_DIR/$ss_test" | sed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
               echo '</p>' >> comment.md
-              echo "$WK_DIR/$ss_test"
 
             done
           done
