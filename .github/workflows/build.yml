@@ -227,7 +227,7 @@ jobs:
           emulator-options: ${{ env.EMU_OPTS }}
           disable-animations: false
           profile: ${{ env.EMU_PROFILE }}
-          avd-name: ${{ env.AVD_NAME }}
+          avd-name: ${{ env.EMU_AVD_NAME }}
           script: echo "Generated AVD snapshot for caching."
       
       - name: create AVD and generate snapshot for caching try#2
@@ -243,7 +243,7 @@ jobs:
           emulator-options: ${{ env.EMU_OPTS }}
           disable-animations: false
           profile: ${{ env.EMU_PROFILE }}
-          avd-name: ${{ env.AVD_NAME }}
+          avd-name: ${{ env.EMU_AVD_NAME }}
           script: echo "Generated AVD snapshot for caching."
       
       - name: create AVD and generate snapshot for caching try#3
@@ -259,7 +259,7 @@ jobs:
           emulator-options: ${{ env.EMU_OPTS }}
           disable-animations: false
           profile: ${{ env.EMU_PROFILE }}
-          avd-name: ${{ env.AVD_NAME }}
+          avd-name: ${{ env.EMU_AVD_NAME }}
           script: echo "Generated AVD snapshot for caching."
       ## Redundancy End
 
@@ -312,7 +312,7 @@ jobs:
           emulator-options: ${{ env.EMU_OPTS }}
           disable-animations: true
           profile: ${{ env.EMU_PROFILE }}
-          avd-name: ${{ env.AVD_NAME }}
+          avd-name: ${{ env.EMU_AVD_NAME }}
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
@@ -331,7 +331,7 @@ jobs:
           emulator-options: ${{ env.EMU_OPTS }}
           disable-animations: true
           profile: ${{ env.EMU_PROFILE }}
-          avd-name: ${{ env.AVD_NAME }}
+          avd-name: ${{ env.EMU_AVD_NAME }}
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
@@ -350,7 +350,7 @@ jobs:
           emulator-options: ${{ env.EMU_OPTS }}
           disable-animations: true
           profile: ${{ env.EMU_PROFILE }}
-          avd-name: ${{ env.AVD_NAME }}
+          avd-name: ${{ env.EMU_AVD_NAME }}
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
