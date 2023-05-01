@@ -505,6 +505,9 @@ jobs:
       matrix:
         api-level: [30] # 29
     steps:
+      - uses: FedericoCarboni/setup-ffmpeg@v2
+        id: setup-ffmpeg
+      - run: ffmpeg -f avfoundation -i 0 -t 840 out_API$SUFFIX.mov &
 
       - name: Create Android emulator
         shell: bash
@@ -746,19 +749,19 @@ jobs:
       #       echo "shutdown meow !" >> pvr-adb-telnet.sd
       #       cat log.txt
 
-      # # build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/GPlay_Pixel_2_API_30(AVD) - 11/ALVRActivityTest_saveDeviceScreenBitmap.png
-      # - uses: actions/upload-artifact@v3
-      #   if: always()
-      #   with:
-      #     name: Test results
-      #     path: |
-      #       **/app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*
-      #       **/app/build/reports
-      #       **/app/build/test-results
-      #       **/app/build/outputs/androidTest-results
-      #       ${{env.GRADLE_DIR}}/logcat.log
-      #       ./*.mov
-      #       bugreport.zip
+      # build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/GPlay_Pixel_2_API_30(AVD) - 11/ALVRActivityTest_saveDeviceScreenBitmap.png
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Test results
+          path: |
+            # **/app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*
+            # **/app/build/reports
+            # **/app/build/test-results
+            # **/app/build/outputs/androidTest-results
+            # ${{env.GRADLE_DIR}}/logcat.log
+            ./*.mov
+            # bugreport.zip
       
       # # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
       # - name: Publish Test Results in Comment
