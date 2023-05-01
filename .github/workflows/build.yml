@@ -360,6 +360,7 @@ jobs:
       ## Redundancy End
 
       - name: Get Bug Report & tombstones
+        if: always()
         run: |
           adb bugreport bugreport.zip
       
