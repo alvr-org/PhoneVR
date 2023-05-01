@@ -274,7 +274,8 @@ jobs:
       - name: Change gradle wrapper permissions
         run: |
           echo "GLESDynamicVersion = on" >> ~/.android/advancedFeatures.ini # OpenGL3 Support on AVDs
-
+          cat ~/.android/advancedFeatures.ini
+          
           cd code/mobile/android/PhoneVR
           chmod +x ./gradlew
           ls -alh
@@ -302,8 +303,8 @@ jobs:
           brew install glew
           brew install glxinfo
 
-          glxinfo | grep -i opengl
-          
+          # glxinfo | grep -i opengl
+
           brew install ffmpeg
           ffmpeg -f avfoundation -i 0 -t 840 out_API$SUFFIX.mov &
 
