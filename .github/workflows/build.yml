@@ -292,6 +292,13 @@ jobs:
           chmod +x pvr-adb-telnet.sh
           bash pvr-adb-telnet.sh >> log.txt 2>&1 &
 
+      - name: Install recorder and record session
+        env:
+          SUFFIX: ${{ api-level }}
+        run: |
+          brew install ffmpeg
+          ffmpeg -f avfoundation -i 0 -t 120 out_API$SUFFIX.mov &
+
       ## Create AVD with some redundancy - 3 Checks
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@v2        
@@ -368,6 +375,7 @@ jobs:
             **/app/build/test-results
             **/app/build/outputs/androidTest-results
             ${{env.GRADLE_DIR}}/logcat.log
+            ./*.mov
       
       # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
       - name: Publish Test Results in Comment
