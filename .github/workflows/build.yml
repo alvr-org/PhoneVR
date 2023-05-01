@@ -277,7 +277,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: screenshots
+          name: Test results
           path: |
             **/app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*
             **/app/build/reports
@@ -323,6 +323,9 @@ jobs:
         run: |
           echo "# 📷 Screenshots of tests:" >> comment.md
           echo "" >> comment.md
+
+          ls -alh
+          ls -alh app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/
 
           # for each AVD Image
           for ss_test_avd in app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*; do 
