@@ -454,9 +454,9 @@ jobs:
               
               echo "#### 🔧 $ss_test_desc" >> comment.md
 
-              echo "$WK_DIR/$ss_test"
+              echo "$WK_DIR + / + $ss_test"
               echo '<p float="left">' >> comment.md
-              cml-publish "$WK_DIR/$ss_test" | sed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
+              cml-publish "$ss_test" | sed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
               echo '</p>' >> comment.md
 
             done
