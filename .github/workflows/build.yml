@@ -301,7 +301,7 @@ jobs:
         run: |
           brew install glfw3
           brew install glew
-          brew install glxinfo
+          # brew install glxinfo
 
           # glxinfo | grep -i opengl
 
