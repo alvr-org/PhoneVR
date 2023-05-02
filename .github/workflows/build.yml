@@ -364,12 +364,9 @@ jobs:
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
             adb shell "logcat -b all" >> logcat.log
+            
+            adb bugreport bugreport.zip
       ## Redundancy End
-
-      - name: Get Bug Report & tombstones
-        if: always()
-        run: |
-          adb bugreport bugreport.zip
       
       - name: Shutdown PVR ADB-Telnet Server and log
         working-directory: ${{env.GRADLE_DIR}}/app/src/androidTest/java/viritualisres/phonevr/utils/
