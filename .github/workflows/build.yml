@@ -369,7 +369,7 @@ jobs:
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
             adb shell "logcat -b all" >> logcat.log
             
-            adb bugreport bugreport.zip
+            # adb bugreport bugreport.zip # hangs indef here
       ## Redundancy End
       
       - name: Shutdown PVR ADB-Telnet Server and log
@@ -434,7 +434,7 @@ jobs:
 
           ls -alh
           ls -alh app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/
-          stat 'code/mobile/android/PhoneVR/app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/Pixel_2(AVD) - 11/InitActivityTest_saveDeviceScreenBitmap.png'
+          stat 'app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/Pixel_2(AVD) - 11/InitActivityTest_saveDeviceScreenBitmap.png'
 
           # for each AVD Image
           for ss_test_avd in app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*; do 
