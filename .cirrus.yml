@@ -1,7 +1,8 @@
+windows_container:
+  image: cirrusci/windowsservercore:2019
+  
 assemble_task:
   container:
-    image: reactivecircus/android-sdk:latest
+    image: reactivecircus/android-emulator-30:latest
   assemble_script:
-    chmod +x ./code/mobile/android/PhoneVR/gradlew
-    
-    ./code/mobile/android/PhoneVR/gradlew assembleDebug
+    emulator -accel-check
