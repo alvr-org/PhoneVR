@@ -842,7 +842,7 @@ jobs:
         run: |
           Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V
           get-service | findstr vmcompute
-          $ANDROID_HOME\\emulator\\emulator -accel-check
+          $ANDROID_HOME\emulator\emulator -accel-check
 
   # Test_APK_Win:
   #   name: Test APK Win
