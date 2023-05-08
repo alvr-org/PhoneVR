@@ -4,8 +4,8 @@
 assemble_task:
   env:
     API_LEVEL: 30
-    TARGET: google_apis_playstore
-    ARCH: x86_64
+    TARGET: google_apis
+    ARCH: x86
   container:
     image: reactivecircus/android-emulator-30:latest
     kvm: true
