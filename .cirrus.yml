@@ -17,4 +17,4 @@ assemble_task:
   #   $ANDROID_HOME/emulator/emulator -avd "api-${API_LEVEL}" -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
   # wait_for_emulator_script:
   assemble_script:
-    $ANDROID_HOME/emulator/emulator -accel-check
+    emulator -accel-check
