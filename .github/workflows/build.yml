@@ -834,6 +834,15 @@ jobs:
       #         ~/.android/avd/*
       #         ~/.android/adb*
       #     key: avd-${{ matrix.api-level }}
+  Test_APK_Win:
+    runs-on: windows-latest
+    steps:
+      - name: Test HyperV
+        shell: powershell
+        run: |
+          Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V
+          get-service | findstr vmcompute
+
   # Test_APK_Win:
   #   name: Test APK Win
   #   runs-on: windows-latest
