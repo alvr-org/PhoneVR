@@ -330,7 +330,7 @@ jobs:
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb logcat -b all > logcat.log
+            # adb logcat -b all > logcat.log
             
             jobs -p | xargs kill
             # adb bugreport bugreport.zip # hangs indef here
@@ -352,7 +352,7 @@ jobs:
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb logcat -b all > logcat.log
+            # adb logcat -b all > logcat.log
 
             jobs -p | xargs kill
             # adb bugreport bugreport.zip # hangs indef here
@@ -374,7 +374,7 @@ jobs:
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb logcat -b all > logcat.log
+            # adb logcat -b all > logcat.log
             
             jobs -p | xargs kill
             # adb bugreport bugreport.zip # hangs indef here
@@ -488,7 +488,7 @@ jobs:
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
-          body-file: comment.md
+          body-file: ${{env.GRADLE_DIR}}/comment.md
           edit-mode: replace
           issue-number: ${{ github.event.number }}
       
