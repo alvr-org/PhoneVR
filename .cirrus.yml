@@ -1,5 +1,5 @@
-windows_container:
-  image: cirrusci/windowsservercore:2019
+# windows_container:
+#   image: cirrusci/windowsservercore:2019
   
 assemble_task:
   container:
