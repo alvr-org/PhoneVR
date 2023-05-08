@@ -184,6 +184,11 @@ jobs:
           distribution: 'oracle'
           java-version: 17
 
+      # https://github.com/iterative/cml/issues/1377
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '16'
+      
       # Only for Testing github-actions
       - uses: actions-rs/toolchain@v1
         if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
@@ -408,11 +413,6 @@ jobs:
           comment_title: '🛠 Test Results'
           files: |
             code/mobile/android/PhoneVR/app/build/outputs/androidTest-results/**/TEST-*.xml
-      
-      # https://github.com/iterative/cml/issues/1377
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '16'
       
       - uses: iterative/setup-cml@v1
         if: always()
