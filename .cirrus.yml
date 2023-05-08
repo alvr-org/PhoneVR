@@ -2,4 +2,4 @@ assemble_task:
   container:
     image: reactivecircus/android-sdk:latest
   assemble_script:
-    ./gradlew assembleDebug
+    ./code/mobile/android/PhoneVR/gradlew assembleDebug
