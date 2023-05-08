@@ -325,7 +325,7 @@ jobs:
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb shell "logcat -b all" >> logcat.log
+            adb logcat -b all > logcat.log
 
             # adb bugreport bugreport.zip # hangs indef here
       
@@ -346,7 +346,7 @@ jobs:
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb shell "logcat -b all" >> logcat.log
+            adb logcat -b all > logcat.log
 
             # adb bugreport bugreport.zip # hangs indef here
       
@@ -367,7 +367,7 @@ jobs:
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
-            adb shell "logcat -b all" >> logcat.log
+            adb logcat -b all > logcat.log
             
             # adb bugreport bugreport.zip # hangs indef here
       ## Redundancy End
