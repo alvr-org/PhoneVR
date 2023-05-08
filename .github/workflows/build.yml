@@ -327,7 +327,7 @@ jobs:
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
             adb shell "logcat -b all" >> logcat.log
 
-            adb bugreport bugreport.zip
+            # adb bugreport bugreport.zip # hangs indef here
       
       - name: Run tests try#2
         uses: reactivecircus/android-emulator-runner@v2
@@ -348,7 +348,7 @@ jobs:
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
             adb shell "logcat -b all" >> logcat.log
 
-            adb bugreport bugreport.zip
+            # adb bugreport bugreport.zip # hangs indef here
       
       - name: Run tests try#3
         uses: reactivecircus/android-emulator-runner@v2   
@@ -405,6 +405,11 @@ jobs:
           comment_title: '🛠 Test Results'
           files: |
             code/mobile/android/PhoneVR/app/build/outputs/androidTest-results/**/TEST-*.xml
+      
+      # https://github.com/iterative/cml/issues/1377
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '16'
       
       - uses: iterative/setup-cml@v1
         if: always()
