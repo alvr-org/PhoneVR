@@ -5,4 +5,4 @@ assemble_task:
   container:
     image: reactivecircus/android-emulator-30:latest
   assemble_script:
-    emulator -accel-check
+    $ANDROID_HOME/emulator/emulator -accel-check
