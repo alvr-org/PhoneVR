@@ -3,11 +3,11 @@
   
 assemble_task:
   env:
-    API_LEVEL: 28
-    TARGET: default
+    API_LEVEL: 30
+    TARGET: google_apis_playstore
     ARCH: x86_64
   container:
-    image: reactivecircus/android-emulator-28:latest
+    image: reactivecircus/android-emulator-30:latest
     kvm: true
     cpu: 8
     memory: 24G  
