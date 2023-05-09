@@ -443,9 +443,9 @@ jobs:
           echo "# 📷 Screenshots of tests:" >> comment.md
           echo "" >> comment.md
 
-          ls -alh
-          ls -alh app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/
-          stat 'app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/Pixel_2(AVD) - 11/InitActivityTest_saveDeviceScreenBitmap.png'
+          # ls -alh
+          # ls -alh app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/
+          # stat 'app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/Pixel_2(AVD) - 11/InitActivityTest_saveDeviceScreenBitmap.png'
 
           # for each AVD Image
           for ss_test_avd in app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*; do 
@@ -463,11 +463,13 @@ jobs:
               
               ss_test_desc=$(basename "$ss_test" .png)
               
+              echo "" >> comment.md
               echo "#### 🔧 $ss_test_desc" >> comment.md
+              echo "" >> comment.md
 
               echo "$WK_DIR + / + $ss_test"
               echo '<p float="left">' >> comment.md
-              cml-publish "$ss_test" | gsed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
+              cml-publish "$ss_test" | gsed -E 's/.+/<img width="40%" src="\0"\/>/' >> comment.md
               echo '</p>' >> comment.md
 
             done
