@@ -164,7 +164,7 @@ jobs:
     name: Test APK
     runs-on: macos-latest
     env:
-      EMU_OPTS: -no-window -gpu swiftshader_indirect -no-boot-anim -verbose -camera-back virtualscene # -noaudio 
+      EMU_OPTS: -gpu swiftshader_indirect -no-boot-anim -verbose -camera-back virtualscene # -no-window -noaudio 
       EMU_PROFILE: pixel_2
       EMU_AVD_NAME: Pixel_2
       EMU_TARGET: playstore # google_apis
@@ -314,8 +314,8 @@ jobs:
 
           # glxinfo | grep -i opengl
 
-          # brew install ffmpeg
-          # ffmpeg -f avfoundation -i 0 -t 840 out_API$SUFFIX.mov &
+          brew install ffmpeg
+          ffmpeg -f avfoundation -i 0 -t 840 out_API$SUFFIX.mov &
 
       ## Create AVD with some redundancy - 3 Checks
       - name: Run tests
