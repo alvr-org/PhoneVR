@@ -168,6 +168,7 @@ jobs:
       EMU_PROFILE: pixel_2
       EMU_AVD_NAME: Pixel_2
       EMU_TARGET: playstore # google_apis
+      EMU_TIMEOUT: 1200
 
     strategy:
       matrix:
@@ -224,6 +225,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         id: avd_create_1
         continue-on-error: true
+        emulator-boot-timeout: ${{ env.EMU_TIMEOUT }}
         with:
           working-directory: ${{env.GRADLE_DIR}}
           api-level: ${{ matrix.api-level }}
@@ -240,6 +242,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2        
         id: avd_create_2
         continue-on-error: true
+        emulator-boot-timeout: ${{ env.EMU_TIMEOUT }}
         with:
           working-directory: ${{env.GRADLE_DIR}}
           api-level: ${{ matrix.api-level }}
@@ -255,7 +258,8 @@ jobs:
         if: steps.avd-cache.outputs.cache-hit != 'true' && steps.avd_create_2.outcome == 'failure'
         uses: reactivecircus/android-emulator-runner@v2        
         id: avd_create_3
-        # continue-on-error: true # Fail if even fail the 3rd try
+        emulator-boot-timeout: ${{ env.EMU_TIMEOUT }}
+        # continue-on-error: true # Fail, if failed in the 3rd try
         with:
           working-directory: ${{env.GRADLE_DIR}}
           api-level: ${{ matrix.api-level }}
