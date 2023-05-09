@@ -434,6 +434,8 @@ jobs:
         shell: bash
         working-directory: ${{env.GRADLE_DIR}}
         run: |
+          brew install gnu-sed # There are differences between default sed on MacOS and Linux (gnuSed)
+
           echo "# 📷 Screenshots of tests:" >> comment.md
           echo "" >> comment.md
 
@@ -461,7 +463,7 @@ jobs:
 
               echo "$WK_DIR + / + $ss_test"
               echo '<p float="left">' >> comment.md
-              cml-publish "$ss_test" | sed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
+              cml-publish "$ss_test" | gsed -E 's/.+/<img width="90%" src="\0"\/>/' >> comment.md
               echo '</p>' >> comment.md
 
             done
