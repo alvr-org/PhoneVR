@@ -164,7 +164,7 @@ jobs:
     name: Test APK
     runs-on: macos-latest
     env:
-      EMU_OPTS: -gpu swiftshader_indirect -no-boot-anim -verbose -camera-back virtualscene # -no-window -noaudio 
+      EMU_OPTS: -gpu swiftshader_indirect -no-boot-anim -camera-back virtualscene # -verbose -no-window -noaudio 
       EMU_PROFILE: pixel_2
       EMU_AVD_NAME: Pixel_2
       EMU_TARGET: playstore # google_apis
