@@ -331,6 +331,7 @@ jobs:
           disable-animations: true
           profile: ${{ env.EMU_PROFILE }}
           avd-name: ${{ env.EMU_AVD_NAME }}
+          emulator-boot-timeout: ${{ env.EMU_TIMEOUT }}
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
@@ -352,6 +353,7 @@ jobs:
           disable-animations: true
           profile: ${{ env.EMU_PROFILE }}
           avd-name: ${{ env.EMU_AVD_NAME }}
+          emulator-boot-timeout: ${{ env.EMU_TIMEOUT }}
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
@@ -373,6 +375,7 @@ jobs:
           disable-animations: true
           profile: ${{ env.EMU_PROFILE }}
           avd-name: ${{ env.EMU_AVD_NAME }}
+          emulator-boot-timeout: ${{ env.EMU_TIMEOUT }}
           script: |
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
