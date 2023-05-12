@@ -50,7 +50,7 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         setContentView(R.layout.activity_vr);
         glView = findViewById(R.id.surface_view);
-        glView.setEGLContextClientVersion(2);
+        glView.setEGLContextClientVersion(3);
         Renderer renderer = new Renderer();
         glView.setRenderer(renderer);
         glView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
