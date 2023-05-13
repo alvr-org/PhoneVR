@@ -472,7 +472,7 @@ jobs:
 
               echo "$WK_DIR + / + $ss_test"
               echo '<p float="left">' >> comment.md
-              cml-publish "$ss_test" | gsed -E 's/.+/<img width="40%" src="\0"\/>/' >> comment.md
+              cml-publish "$ss_test" | gsed -E 's/.+/<img width="70%" src="\0"\/>/' >> comment.md
               echo '</p>' >> comment.md
 
             done
