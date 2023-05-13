@@ -492,7 +492,7 @@ jobs:
           echo "###### For commit $sha" >> comment.md
       
       - name: Publish Screehnshots - Update or Create Comment
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && always()
+        if: github.event_name == 'pull_request' && always()
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
