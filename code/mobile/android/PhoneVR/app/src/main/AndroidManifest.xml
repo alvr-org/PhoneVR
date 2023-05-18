@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <uses-feature
-        android:glEsVersion="0x00030000"
+        android:glEsVersion="0x00030001"
         android:required="true" />
     <uses-feature
         android:name="android.software.vr.mode"
@@ -30,6 +30,9 @@
     <uses-feature
         android:name="android.hardware.sensor.compass"
         android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
 
     <application
         android:name=".ErrorReporting"

@@ -1,7 +1,6 @@
 package viritualisres.phonevr
 
 import android.annotation.SuppressLint
-import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.util.Log
 import androidx.test.core.app.takeScreenshot
 import androidx.test.core.graphics.writeToTestStorage
@@ -13,11 +12,17 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.rule.GrantPermissionRule
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObjectNotFoundException
+import androidx.test.uiautomator.UiSelector
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
+import viritualisres.phonevr.utils.PVRInstrumentationBase
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -33,8 +38,8 @@ import java.lang.Thread.sleep
  * or
  * build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/Pixel_2_API_30(AVD) - 11
  */
-@RunWith(AndroidJUnit4::class)
-class ALVRActivityTest {
+// @RunWith(AndroidJUnit4::class)
+class ALVRActivityTest: PVRInstrumentationBase() {
 
     private val TAG: String? = javaClass.simpleName
 
@@ -46,26 +51,6 @@ class ALVRActivityTest {
 
     @get:Rule
     var perms7: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.CAMERA);
-    /*@get:Rule
-    var perms3: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.VIBRATE);
-
-    @get:Rule
-    var perms1:GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.READ_EXTERNAL_STORAGE);
-
-    @get:Rule
-    var perms4: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.NFC);
-
-    @get:Rule
-    var perms5: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.INTERNET);
-
-    @get:Rule
-    var perms6: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.READ_LOGS);
-
-    @get:Rule
-    var perms9: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.WAKE_LOCK);
-
-    @get:Rule
-    var perms10: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.ACCESS_WIFI_STATE);*/
 
     @get:Rule
     var nameRule = TestName()
@@ -166,21 +151,19 @@ class ALVRActivityTest {
         // set gravity acceleration g in Y Direction - real Mock
         sendADBCommand("sensor set acceleration 9.77622:0:0");
     }
-    /**
-     * Captures and saves an image of the entire device screen to storage.
-     */
+
     @SuppressLint("CheckResult")
-    @Test
+    @Test 
     @Throws(IOException::class)
     fun saveDeviceScreenBitmap() {
         // SKIP Cardboard API Asking to Scan QR
         try {
+            // Cardboard initial load asks to scan for QR
             onView(withText("SKIP")).perform(click())
         } catch (e: NoMatchingViewException) {
             // View is not in hierarchy - which is okay
         }
 
-        Log.d(TAG, "saveDeviceScreenBitmap: Test")
         rotateAVDLandscape()
         waitForADBTelnetServer() // Wait for ADBTelnetServer to execute rotation
 
@@ -189,6 +172,13 @@ class ALVRActivityTest {
         // Wait for Rendering to settle
         sleep(1000)
 
+        Log.d(TAG, "saveDeviceScreenBitmap: Executed AVD Commands, Taking screenshot...")
+        try {
+            // First time going into VR mode android shows an annoying "You are in fullscreen dialog"
+            onView(withText("Got it")).perform(click())
+        } catch (e: NoMatchingViewException) {
+            // View is not in hierarchy - which is okay
+        }
         takeScreenshot()
             .writeToTestStorage("${javaClass.simpleName}_${nameRule.methodName}")
 

@@ -9,10 +9,15 @@ import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
+import viritualisres.phonevr.utils.PVRInstrumentationBase
 import java.io.IOException
 import java.lang.Thread.sleep
 
@@ -26,7 +31,7 @@ import java.lang.Thread.sleep
  * build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/Pixel_2_API_30(AVD) - 11
  */
 @RunWith(AndroidJUnit4::class)
-class InitActivityTest {
+class InitActivityTest: PVRInstrumentationBase() {
     // a handy JUnit rule that stores the method name, so it can be used to generate unique
     // screenshot files per test method
     @get:Rule
