@@ -10,6 +10,10 @@ env:
   GRADLE_DIR: code/mobile/android/PhoneVR
   ORG_FULL: PhoneVR-Developers/PhoneVR
 
+permissions:
+  checks: write
+  pull-requests: write
+
 on:
   push:
     branches: [ master ]
