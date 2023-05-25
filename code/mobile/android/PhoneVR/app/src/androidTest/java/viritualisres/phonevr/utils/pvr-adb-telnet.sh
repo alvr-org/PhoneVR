@@ -19,19 +19,26 @@ do
     then
 
         echo -e "Got CMD $GREEN$cmd$NC ($len)"
-        token=$(cat ~/.emulator_console_auth_token)
-        adb shell "echo meow >> $lockFile"
+        
+        if [[ $cmd == adb* ]] # is it a adb command ?
+        then
+            $cmd
+        else # else it must be a telnet emulator command
+            token=$(cat ~/.emulator_console_auth_token)
+            
+            adb shell "echo meow >> $lockFile"
 
-        {
-          echo "auth $token";
-          sleep 3;
-          echo "$cmd";
-          sleep 3;
-          echo "exit";
-          sleep 3;
-        } | telnet localhost 5554
+            {
+                echo "auth $token";
+                sleep 3;
+                echo "$cmd";
+                sleep 3;
+                echo "exit";
+                sleep 3;
+            } | telnet localhost 5554
 
-        sleep 0.1
+            sleep 0.1
+        fi
 
         adb shell "run-as viritualisres.phonevr rm -f $cmdFile"
         adb shell "rm -f $lockFile"
