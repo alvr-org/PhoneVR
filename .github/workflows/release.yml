@@ -9,6 +9,8 @@ env:
 
   GRADLE_DIR: code/mobile/android/PhoneVR
   ORG_FULL: PhoneVR-Developers/PhoneVR
+  
+  CARGO_TERM_COLOR: always
 
 permissions:
   checks: write
@@ -213,6 +215,7 @@ jobs:
           draft: true
           prerelease: false
           generateReleaseNotes: true
+          commit: master
           # commitish: ${{ steps.output_ref.outputs.release_ref }}
 
   build_windows_streamer:
