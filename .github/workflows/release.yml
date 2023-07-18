@@ -201,16 +201,17 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ncipollo/release-action@v1
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           # tag_name: ${{ steps.bump_version.outputs.version_tag }}
-          tag_name: ${{ github.event.inputs.version }}
+          # tag_name: ${{ github.event.inputs.version }}
           # release_name: PhoneVR ${{ steps.bump_version.outputs.version_tag }}
-          release_name: PhoneVR ${{ github.event.inputs.version }}
+          name: PhoneVR ${{ github.event.inputs.version }}
           draft: true
           prerelease: false
+          generateReleaseNotes: true
           # commitish: ${{ steps.output_ref.outputs.release_ref }}
 
   build_windows_streamer:
