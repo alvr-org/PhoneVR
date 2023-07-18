@@ -13,6 +13,7 @@ env:
 permissions:
   checks: write
   pull-requests: write
+  contents: write
 
 on:
   workflow_dispatch:
