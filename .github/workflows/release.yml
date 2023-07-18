@@ -205,8 +205,8 @@ jobs:
         # env:
         #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag: ${{ steps.bump_version.outputs.version_tag }}
-          # tag_name: ${{ github.event.inputs.version }}
+          # tag_name: ${{ steps.bump_version.outputs.version_tag }}
+          tag: ${{ github.event.inputs.version }}
           # release_name: PhoneVR ${{ steps.bump_version.outputs.version_tag }}
           name: PhoneVR ${{ github.event.inputs.version }}
           draft: true
