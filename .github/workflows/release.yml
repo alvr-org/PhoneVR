@@ -29,12 +29,11 @@ jobs:
   prepare_release:
     runs-on: windows-2019
     outputs:
-      release_ref: ${{ steps.output_ref.outputs.release_ref }}
       upload_url: ${{ steps.create_release.outputs.upload_url }}
       release_id: ${{ steps.create_release.outputs.id }}
     steps:
-      - name: Configure git
-        run: git config --global core.autocrlf false
+      # - name: Configure git
+      #   run: git config --global core.autocrlf false
 
       # - uses: actions/checkout@v2
 
@@ -82,6 +81,7 @@ jobs:
   
   Build_PVR_Server:
     name: Build PhoneVR Server
+    needs: [prepare_release]
     strategy:
       fail-fast: false
       matrix:
@@ -135,6 +135,7 @@ jobs:
 
   Build_APK:
     name: Build Android APK
+    needs: [prepare_release]
     runs-on: ubuntu-latest
 
     steps:
