@@ -131,7 +131,7 @@ jobs:
         upload_url: ${{ needs.prepare_release.outputs.upload_url }}
         asset_path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
         asset_name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
-        asset_content_type: application/octet-stream
+        asset_content_type: application/gzip
 
   Build_APK:
     name: Build Android APK
@@ -237,4 +237,4 @@ jobs:
           upload_url: ${{ needs.prepare_release.outputs.upload_url }}
           asset_path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/release/
           asset_name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
-          asset_content_type: application/octet-stream
+          asset_content_type: application/gzip
