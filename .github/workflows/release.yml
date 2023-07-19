@@ -26,6 +26,60 @@ on:
         default: ""
 
 jobs:
+  prepare_release:
+    runs-on: windows-2019
+    outputs:
+      release_ref: ${{ steps.output_ref.outputs.release_ref }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      release_id: ${{ steps.create_release.outputs.id }}
+    steps:
+      - name: Configure git
+        run: git config --global core.autocrlf false
+
+      # - uses: actions/checkout@v2
+
+      # - uses: actions-rs/toolchain@v1
+      #   with:
+      #     toolchain: stable
+
+      ### TODO: #74 Stream Line Versioning VisualStudio Desktop Project + Android Studio + ALVR Linking, then can automate bumping
+      # - name: Bump version
+      #   id: bump_version
+      #   env:
+      #     RUST_BACKTRACE: 1
+      #   run: |
+      #     $versionarg = "${{ github.event.inputs.version }}"
+      #     $versionarg = If ($versionarg.Length -gt 0) { "--version $versionarg" } else { "" }
+      #     $out = cargo xtask bump $versionarg.split()
+      #     echo $out
+      #     cargo update -p alvr_common
+      #     echo "::set-output name=version_tag::$(echo $out | sls -CaseSensitive -Pattern '^v.*$')"
+
+      # - name: Push changes
+      #   uses: stefanzweifel/git-auto-commit-action@v4
+      #   with:
+      #     commit_message: "[Auto] Bump version"
+
+      # - name: Output ref for later checkouts
+      #   id: output_ref
+      #   run: echo "::set-output name=release_ref::$(git rev-parse HEAD)"
+
+      - name: Create Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # tag_name: ${{ steps.bump_version.outputs.version_tag }}
+          tag: ${{ github.event.inputs.version }}
+          # release_name: PhoneVR ${{ steps.bump_version.outputs.version_tag }}
+          name: PhoneVR ${{ github.event.inputs.version }}
+          draft: true
+          prerelease: false
+          generateReleaseNotes: true
+          commit: master
+          # commitish: ${{ steps.output_ref.outputs.release_ref }}
+  
   Build_PVR_Server:
     name: Build PhoneVR Server
     strategy:
@@ -69,6 +123,16 @@ jobs:
         name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
         path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
   
+    - name: Upload PVR Server
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.prepare_release.outputs.upload_url }}
+        asset_path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
+        asset_name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
+        asset_content_type: application/octet-stream
+
   Build_APK:
     name: Build Android APK
     runs-on: ubuntu-latest
@@ -164,279 +228,12 @@ jobs:
           name: build-files
           path: ${{ env.GRADLE_DIR }}/app/.cxx/
   
-  prepare_release:
-    runs-on: windows-2019
-    outputs:
-      release_ref: ${{ steps.output_ref.outputs.release_ref }}
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-      release_id: ${{ steps.create_release.outputs.id }}
-    steps:
-      - name: Configure git
-        run: git config --global core.autocrlf false
-
-      # - uses: actions/checkout@v2
-
-      # - uses: actions-rs/toolchain@v1
-      #   with:
-      #     toolchain: stable
-
-      ### TODO: #74 Stream Line Versioning VisualStudio Desktop Project + Android Studio + ALVR Linking, then can automate bumping
-      # - name: Bump version
-      #   id: bump_version
-      #   env:
-      #     RUST_BACKTRACE: 1
-      #   run: |
-      #     $versionarg = "${{ github.event.inputs.version }}"
-      #     $versionarg = If ($versionarg.Length -gt 0) { "--version $versionarg" } else { "" }
-      #     $out = cargo xtask bump $versionarg.split()
-      #     echo $out
-      #     cargo update -p alvr_common
-      #     echo "::set-output name=version_tag::$(echo $out | sls -CaseSensitive -Pattern '^v.*$')"
-
-      # - name: Push changes
-      #   uses: stefanzweifel/git-auto-commit-action@v4
-      #   with:
-      #     commit_message: "[Auto] Bump version"
-
-      # - name: Output ref for later checkouts
-      #   id: output_ref
-      #   run: echo "::set-output name=release_ref::$(git rev-parse HEAD)"
-
-      - name: Create Release
-        id: create_release
-        uses: ncipollo/release-action@v1
-        # env:
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          # tag_name: ${{ steps.bump_version.outputs.version_tag }}
-          tag: ${{ github.event.inputs.version }}
-          # release_name: PhoneVR ${{ steps.bump_version.outputs.version_tag }}
-          name: PhoneVR ${{ github.event.inputs.version }}
-          draft: true
-          prerelease: false
-          generateReleaseNotes: true
-          commit: master
-          # commitish: ${{ steps.output_ref.outputs.release_ref }}
-
-  build_windows_streamer:
-    runs-on: windows-2019
-    needs: [prepare_release]
-    env:
-      # For bindgen to find libclang.dll, we need to give it the path to the Visual Studio package.
-      # This is specific to the GitHub windows-2019 runner.
-      LIBCLANG_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\Llvm\x64\bin'
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-        #   ref: ${{ needs.prepare_release.outputs.release_ref }}
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - uses: crazy-max/ghaction-chocolatey@v1
-        with:
-          args: install zip unzip vulkan-sdk pkgconfiglite wixtoolset
-
-      - name: Build and package ALVR
-        id: build
-        env:
-          RUST_BACKTRACE: 1
-        run: |
-          cd code/mobile/android/PhoneVR/ALVR
-          cargo xtask prepare-deps --platform windows --ci
-          cargo xtask package-streamer --gpl
-          $file = Get-ChildItem -Name .\build\*.exe | Select-Object -f 1
-          echo "::set-output name=exe_filename::$file"
-
-      - name: Upload Windows installer (exe)
+      - name: Upload PVR APK
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.prepare_release.outputs.upload_url }}
-          asset_path: ./code/mobile/android/PhoneVR/ALVR/build/${{ steps.build.outputs.exe_filename }}
-          asset_name: ${{ steps.build.outputs.exe_filename }}
+          asset_path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/release/
+          asset_name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
           asset_content_type: application/octet-stream
-      - name: Upload Windows installer (msi)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.prepare_release.outputs.upload_url }}
-          asset_path: ./code/mobile/android/PhoneVR/ALVR/build/alvr_streamer_windows.msi
-          asset_name: alvr_streamer_windows.msi
-          asset_content_type: application/octet-stream
-      - name: Upload portable streamer for Windows
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.prepare_release.outputs.upload_url }}
-          asset_path: ./code/mobile/android/PhoneVR/ALVR/build/alvr_streamer_windows.zip
-          asset_name: alvr_streamer_windows.zip
-          asset_content_type: application/zip
-
-  build_windows_launcher:
-    runs-on: windows-2019
-    needs: [prepare_release]
-    env:
-      # For bindgen to find libclang.dll, we need to give it the path to the Visual Studio package.
-      # This is specific to the GitHub windows-2019 runner.
-      LIBCLANG_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\Llvm\x64\bin'
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-        #   ref: ${{ needs.prepare_release.outputs.release_ref }}
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - uses: crazy-max/ghaction-chocolatey@v1
-        with:
-          args: install zip wixtoolset
-
-      - name: Build and package ALVR
-        id: build
-        env:
-          RUST_BACKTRACE: 1
-        run: |
-          cd code/mobile/android/PhoneVR/ALVR
-          cargo xtask package-launcher
-
-      - name: Upload portable launcher for Windows
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.prepare_release.outputs.upload_url }}
-          asset_path: ./code/mobile/android/PhoneVR/ALVR/build/alvr_launcher_windows.zip
-          asset_name: alvr_launcher_windows.zip
-          asset_content_type: application/zip
-
-  build_linux_streamer:
-    runs-on: ubuntu-latest
-    needs: [prepare_release]
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-        #   ref: ${{ needs.prepare_release.outputs.release_ref }}
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - name: Build and install dependencies
-        env:
-          RUST_BACKTRACE: 1
-        run: |
-          cd code/mobile/android/PhoneVR/ALVR
-          sudo apt-get update
-          sudo apt-get install libfuse2 build-essential pkg-config nasm libva-dev libdrm-dev libvulkan-dev libx264-dev libx265-dev cmake libasound2-dev libjack-jackd2-dev libxrandr-dev libunwind-dev libffmpeg-nvenc-dev nvidia-cuda-toolkit libgtk-3-dev flatpak flatpak-builder
-          cp alvr/xtask/deb/cuda.pc /usr/share/pkgconfig
-          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          cargo xtask prepare-deps --platform linux
-          
-      - name: Build and package ALVR (.tar.gz)
-        id: build
-        env:
-          RUST_BACKTRACE: 1
-        run: |
-          cd code/mobile/android/PhoneVR/ALVR
-          cargo xtask package-streamer
-
-      - name: Upload streamer for Linux
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.prepare_release.outputs.upload_url }}
-          asset_path: ./code/mobile/android/PhoneVR/ALVR/build/alvr_streamer_linux.tar.gz
-          asset_name: alvr_streamer_linux.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Build and package ALVR portable (.AppImage)
-        id: build_portable
-        env:
-          RUST_BACKTRACE: 1
-        run: |
-          cd code/mobile/android/PhoneVR/ALVR
-          cargo xtask package-streamer --appimage --zsync
-
-      - name: Upload portable streamer for Linux
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.prepare_release.outputs.upload_url }}
-          asset_path: ./code/mobile/android/PhoneVR/ALVR/build/ALVR-x86_64.AppImage
-          asset_name: ALVR-x86_64.AppImage
-          asset_content_type: application/x-executable
-      - name: Upload portable streamer for Linux (zsync)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.prepare_release.outputs.upload_url }}
-          asset_path: ./code/mobile/android/PhoneVR/ALVR/build/ALVR-x86_64.AppImage.zsync
-          asset_name: ALVR-x86_64.AppImage.zsync
-          asset_content_type: application/octet-stream
-
-      - name: Build and package ALVR flatpak (.flatpak)
-        id: build_flatpak
-        run: |
-          cd code/mobile/android/PhoneVR/ALVR
-          sudo flatpak-builder --repo=.flatpak-repo --install-deps-from=flathub --force-clean --default-branch=stable --arch=x86_64 .flatpak-build-dir alvr/xtask/flatpak/com.valvesoftware.Steam.Utility.alvr.json
-          flatpak build-bundle .flatpak-repo ./build/com.valvesoftware.Steam.Utility.alvr.flatpak com.valvesoftware.Steam.Utility.alvr stable --runtime
-
-      - name: Upload flatpak streamer for Linux
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.prepare_release.outputs.upload_url }}
-          asset_path: ./code/mobile/android/PhoneVR/ALVR/build/com.valvesoftware.Steam.Utility.alvr.flatpak
-          asset_name: com.valvesoftware.Steam.Utility.alvr.flatpak
-          asset_content_type: application/octet-stream
-
-  build_linux_launcher:
-    runs-on: ubuntu-latest
-    needs: [prepare_release]
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-          # ref: ${{ needs.prepare_release.outputs.release_ref }}
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - name: Build and install dependencies
-        env:
-          RUST_BACKTRACE: 1
-        run: |
-          sudo apt-get update
-          sudo apt-get install build-essential libgtk-3-dev
-          
-      - name: Build .tar.gz
-        id: build
-        env:
-          RUST_BACKTRACE: 1
-        run: |
-          cd code/mobile/android/PhoneVR/ALVR
-          cargo xtask package-launcher
-
-      - name: Upload launcher for Linux
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.prepare_release.outputs.upload_url }}
-          asset_path: ./code/mobile/android/PhoneVR/ALVR/build/alvr_launcher_linux.tar.gz
-          asset_name: alvr_launcher_linux.tar.gz
-          asset_content_type: application/gzip
