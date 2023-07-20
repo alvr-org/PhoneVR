@@ -247,21 +247,22 @@ jobs:
           asset_name: PhoneVR.apk
           asset_content_type: application/vnd.android.package-archive
   
-  Build_APK:
+  Upload_release_assets:
     name: Upload Assets
     needs: [Build_PVR_Server, prepare_release]
     runs-on: ubuntu-latest
 
-    - uses: actions/download-artifact@v3
-      with:
-        name: ${{ env.PROJECT_NAME }}-Server-Release # depends on line 118 Above (Upload Build Output job's with.name)
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.PROJECT_NAME }}-Server-Release # depends on line 118 Above (Upload Build Output job's with.name)
 
-    - name: Upload PVR Server Assets
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.prepare_release.outputs.upload_url }}
-        asset_path: ${{ env.PROJECT_NAME }}-Server-Release.zip
-        asset_name: ${{ env.PROJECT_NAME }}-Server-Release
-        asset_content_type: application/gzip
+      - name: Upload PVR Server Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.prepare_release.outputs.upload_url }}
+          asset_path: ${{ env.PROJECT_NAME }}-Server-Release.zip
+          asset_name: ${{ env.PROJECT_NAME }}-Server-Release
+          asset_content_type: application/gzip
