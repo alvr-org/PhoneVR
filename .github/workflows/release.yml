@@ -235,7 +235,7 @@ jobs:
           MODULE: ${{ env.MAIN_PROJECT_MODULE }}
         run: |
           cd "$GRADLE_DIR/$MAIN_PROJECT_MODULE/build/outputs/apk/release/"
-          mv -f /app/.cxx/PhoneVR*.apk PhoneVR.apk
+          mv -f PhoneVR*.apk PhoneVR.apk
 
       - name: Upload PVR APK
         uses: actions/upload-release-asset@v1
