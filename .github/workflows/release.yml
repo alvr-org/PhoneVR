@@ -123,15 +123,15 @@ jobs:
         name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
         path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
   
-    - name: Upload PVR Server
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.prepare_release.outputs.upload_url }}
-        asset_path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
-        asset_name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
-        asset_content_type: application/gzip
+    # - name: Upload PVR Server
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ needs.prepare_release.outputs.upload_url }}
+    #     asset_path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
+    #     asset_name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
+    #     asset_content_type: application/gzip
 
   Build_APK:
     name: Build Android APK
@@ -229,6 +229,14 @@ jobs:
           name: build-files
           path: ${{ env.GRADLE_DIR }}/app/.cxx/
   
+      - name: Rename release-APK for release
+        env:
+          GRADLE_PVR_DIR: ${{ env.GRADLE_DIR }}
+          MODULE: ${{ env.MAIN_PROJECT_MODULE }}
+        run: |
+          cd "$GRADLE_DIR/$MAIN_PROJECT_MODULE/build/outputs/apk/release/"
+          mv -f /app/.cxx/PhoneVR*.apk PhoneVR.apk
+
       - name: Upload PVR APK
         uses: actions/upload-release-asset@v1
         env:
@@ -236,5 +244,24 @@ jobs:
         with:
           upload_url: ${{ needs.prepare_release.outputs.upload_url }}
           asset_path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/release/
-          asset_name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
-          asset_content_type: application/gzip
+          asset_name: PhoneVR.apk
+          asset_content_type: application/vnd.android.package-archive
+  
+  Build_APK:
+    name: Upload Assets
+    needs: [Build_PVR_Server, prepare_release]
+    runs-on: ubuntu-latest
+
+    - uses: actions/download-artifact@v3
+      with:
+        name: ${{ env.PROJECT_NAME }}-Server-Release # depends on line 118 Above (Upload Build Output job's with.name)
+
+    - name: Upload PVR Server Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.prepare_release.outputs.upload_url }}
+        asset_path: ${{ env.PROJECT_NAME }}-Server-Release.zip
+        asset_name: ${{ env.PROJECT_NAME }}-Server-Release
+        asset_content_type: application/gzip
