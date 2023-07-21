@@ -247,23 +247,29 @@ jobs:
           asset_name: PhoneVR.apk
           asset_content_type: application/vnd.android.package-archive
   
-  # Step is needed because the PVRServer runs as a matrix and adds files to the same artifact
+  # Step is needed because the PVRServerBuild runs as a matrix and adds files to the same artifact
   Upload_release_assets:
     name: Upload Assets
     needs: [Build_PVR_Server, prepare_release]
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v3
+
       - uses: actions/download-artifact@v3
         with:
           name: ${{ env.PROJECT_NAME }}-Server-Release # depends on line 118 Above (Upload Build Output job's with.name)
+          path: ./build_artifacts/
 
       - name: Zip Artifact
         env: 
           PROJECT_NAME: ${{ env.PROJECT_NAME }}
         run: |
           ls -R
-          zip -r "$PROJECT_NAME-Server-Release.zip" "$PROJECT_NAME-Server-Release"
+          cp -rf ./build_artifacts/x64/.* ./driver/PVRServer/bin/win64/
+          cp -rf ./build_artifacts/Win32/.* ./driver/PVRServer/bin/win32/
+
+          zip -r "$PROJECT_NAME-Server-Release.zip" "./driver"
           ls -R
         
       - name: Upload PVR Server Assets
@@ -273,5 +279,5 @@ jobs:
         with:
           upload_url: ${{ needs.prepare_release.outputs.upload_url }}
           asset_path: ${{ env.PROJECT_NAME }}-Server-Release.zip
-          asset_name: ${{ env.PROJECT_NAME }}-Server-Release.zip
+          asset_name: ${{ env.PROJECT_NAME }}-Server-${{ github.event.inputs.version }}.zip
           asset_content_type: application/gzip
