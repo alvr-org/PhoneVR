@@ -266,8 +266,8 @@ jobs:
           PROJECT_NAME: ${{ env.PROJECT_NAME }}
         run: |
           ls -R
-          cp -rf ./build_artifacts/x64/.* ./driver/PVRServer/bin/win64/
-          cp -rf ./build_artifacts/Win32/.* ./driver/PVRServer/bin/win32/
+          cp -a ./build_artifacts/x64/. ./driver/PVRServer/bin/win64/
+          cp -a ./build_artifacts/Win32/. ./driver/PVRServer/bin/win32/
 
           zip -r "$PROJECT_NAME-Server-Release.zip" "./driver"
           ls -R
