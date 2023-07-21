@@ -262,7 +262,7 @@ jobs:
         env: 
           PROJECT_NAME: ${{ env.PROJECT_NAME }}
         run: |
-          sudo apt-get install zip
+          ls -R
           zip -r "$PROJECT_NAME-Server-Release.zip" "$PROJECT_NAME-Server-Release"
           ls -R
         
