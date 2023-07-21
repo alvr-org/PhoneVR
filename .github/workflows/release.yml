@@ -32,6 +32,7 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
       release_id: ${{ steps.create_release.outputs.id }}
     steps:
+      ### TODO: #74 Stream Line Versioning VisualStudio Desktop Project + Android Studio + ALVR Linking, then can automate bumping
       # - name: Configure git
       #   run: git config --global core.autocrlf false
 
@@ -41,7 +42,6 @@ jobs:
       #   with:
       #     toolchain: stable
 
-      ### TODO: #74 Stream Line Versioning VisualStudio Desktop Project + Android Studio + ALVR Linking, then can automate bumping
       # - name: Bump version
       #   id: bump_version
       #   env:
@@ -85,7 +85,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config: [Release] #, Debug]
+        config: [Release]
         platform: [x64, x86]
     runs-on: windows-latest
 
@@ -123,16 +123,6 @@ jobs:
         name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
         path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
   
-    # - name: Upload PVR Server
-    #   uses: actions/upload-release-asset@v1
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     upload_url: ${{ needs.prepare_release.outputs.upload_url }}
-    #     asset_path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
-    #     asset_name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
-    #     asset_content_type: application/gzip
-
   Build_APK:
     name: Build Android APK
     needs: [prepare_release]
