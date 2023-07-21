@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version"
+        description: "Version string (eg. v0.3-beta)"
         required: false
         default: ""
 
