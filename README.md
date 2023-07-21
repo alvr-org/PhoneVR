@@ -1,6 +1,7 @@
 <br/><br/>
 [![PhonveVR](./.github/LogoPVR.png)](https://github.com/PhoneVR-Developers/PhoneVR/releases)<br/><br/><br/>
-[![PhonveVR](./.github/LogoPVRCotent.png)](https://github.com/PhoneVR-Developers/PhoneVR/releases)<br/>
+![LogoPVRv0 3](https://github.com/PhoneVR-Developers/PhoneVR/assets/4137788/b32a23f6-4264-45f9-99cc-bbdd593a8e94)
+
 <br/><br/><br/>
 
 <img src="./.github/rep1.png" width="50%"><img src="./.github/rep2.jpg" width="50%">
@@ -10,7 +11,7 @@
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/PhoneVR-Developers/PhoneVR?color=orange&include_prereleases)
 [![Discord](https://img.shields.io/discord/745688786410930296?label=Discuss&logo=Discord&logoColor=white)](https://discord.gg/pNYtBNk)
 
-Use Steam VR-enabled applications with your phone as HMD (*Head-mounted display*). The only Open-Source solution to similar commercial packages like VRidge, Riftcat, Trinus etc etc. *Common-network* can be anytype of network between desktop and android app, even *USB Tethering* and *Mobile Hotspots* are supported.
+Use Steam VR-enabled applications with your phone as VR HMD (*Head-mounted display*). The only Open-Source solution to similar commercial packages like VRidge, Riftcat, Trinus etc etc. *Common-network* can be any type of network between desktop and android app, even **USB Tethering** and **Mobile Hotspots** are supported.
 <br/>
 
 | Tabs | Links |
@@ -31,20 +32,50 @@ Use Steam VR-enabled applications with your phone as HMD (*Head-mounted display*
 
 ## Requirements
 
-A PC with *Windows 7 or above*, A smartphone with *Android 5.0(Lollipop) or above* with *OpenGL-ES 3.0 or above*, Steam and some SteamVR applications installed.
+A PC with *Windows 7 or above*, A smartphone with *Android 5.0 (Lollipop) or above* with *OpenGL-ES 3.0 or above*, Steam and some SteamVR applications installed.
 
 ## Installation
+PhoneVR(PVR) can be used with two servers ALVR and PVRServer. ALVR Server is recommended over PVRServer, both use different APIs.
 
+| Differences                                                                    | ALVR Server                                  | PhoneVR Server             |
+| ------------------------------------------------------------------------------ | -------------------------------------------- | -------------------------- |
+| Server/Desktop Side                                                            | OpenVR API                                   | OpenVR API                 |
+| Mobile Side                                                                    | Google Cardboard API                         | Google VR API (deprecated) |
+| GUI                                                                            | ✅                                           | ❌                         |
+| User friendly Installer                                                        | ✅                                           | ❌                         |
+| Serverside hardware(GPU) Encoding                                              | ✅                                           | ❌                         |
+| Serverside software Encoding                                                   | ✅                                           | ✅                         |
+| Automatic Firewall setting                                                     | ✅                                           | ❌                         |
+| Linux Support (\*Partial\*)                                                    | ✅                                           | ❌                         |
+| Developers                                                                     | [Alvr-org](https://github.com/alvr-org/ALVR) | PhoneVR                    |
+| Supports other HMDs ? Quest etc.                                               | ✅                                           | ❌                         |
+| OpenSoruce                                                                     | ✅                                           | ✅                         |
+| Network throttling                                                             | ✅                                           | ❌                         |
+| Average Latency                                                                | 150ms                                        | 1500ms                     |
+| VRApplication Graphics manipulation<br>(Brightness, resolution, contrast etc.) | ✅                                           | (Partial)                  |
+| Code backend                                                                   | Rust + C++                                   | C++                        |
+
+### A. Installation using ALVR Server
+* Currently only **[ALVR v20.1.0](https://github.com/alvr-org/ALVR/releases/tag/v20.1.0)** (latest stable) is supported by PhoneVR.
+* Use the install guide of ALVR Server from [here](https://github.com/alvr-org/ALVR#install).
+
+### B. Installation using Legacy PhoneVR Server
 * Make sure you have Steam and SteamVR installed (To find SteamVR on steam, `Library -> Tools -> SteamVR`).
-* Download latest release [`PhoneVR.zip`](https://github.com/PhoneVR-Developers/PhoneVR/releases/latest) of this repository.
+* Download latest release [`PhoneVR-Server-vX.X.X-xxxxx.zip`](https://github.com/PhoneVR-Developers/PhoneVR/releases/latest) of this repository.
 * Copy the whole folder `PVRServer` in `driver` folder of zip file into your `SteamVR/drivers` folder. (Default Path: `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers`.
+* (Only for PhoneVR Server) To **play**, **first open the Phone App**(SteamVR should also be closed), then run the game of your choice on PC. (Obviously, both PC and Mobile should be on same Network, preferably Wifi 5.0)
+
+### Common Instructions for both Servers
 * Install the Android Apk on your mobile from [`Releases`](https://github.com/PhoneVR-Developers/PhoneVR/releases/latest) page.
-* Make sure that "Run in Background", "Auto Start"(Restart on Crash) permissions, if exists on your device(espicially Xiaomi users), are given. Also make sure that any kind of 3rd party battery saver app dosen't kill PhoneVR when in background.
+* Make sure that "Run in Background", "Auto Start"(Restart on Crash) permissions, if exists on your device(especially Xiaomi users), are given. Also make sure that any kind of 3rd party battery saver app dosen't kill PhoneVR when in background.
+* After opening the installed app, Choose ALVR(recommended) or PhoneVR Server, according to the server you installed.
 
-To **play**, **first open the Phone App**(SteamVR should also be closed), then run the game of your choice on PC. (Obviously, both PC and Mobile should be on same Network, preferably Wifi 5.0)
+## Advanced Configuration 
 
-## Advanced Configuration
+### for ALVR Server
+* This can be found [here](https://github.com/alvr-org/ALVR/wiki/Settings-guide) and [here](https://github.com/alvr-org/ALVR/wiki/Settings-tutorial).
 
+### for Phone VR Server
 * **Windows Driver Settings**
 
   Windows SteamVR Driver, auto loads with SteamVR, and gets `FrameTextures` from VRApplication(like SteamVR Home, VRChat, etc.) via SteamVR. These Textures are then Encoded and Streamed, at specified `game_fps`, to Mobile device using x264 Encoder. Some configurations of this encoder can be adjusted via, `pvrsettings.json` in default installation location `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\PVRServer\`.<br/>
@@ -95,7 +126,7 @@ To **play**, **first open the Phone App**(SteamVR should also be closed), then r
 ## Development
 This Project is presently under testing. But, pull requests are welcome. 
 
-* Windows Driver: `<root>/code/windows/PhoneVR.sln`
+* Windows PhoneVR Driver: `<root>/code/windows/PhoneVR.sln`
   * Compiled/Tested on `Microsoft Visual Studio 2017`
   * After building copy the `driver_PhoveVR.dll` and other files from `<solution root>/build/[win32 or x64]/` to local driver folder.
   * For Runtime debugging, You need to Attach `MSVS JIT debugger` to `vrserver.exe` (which actually loads the driver_PhonveVR.dll)
@@ -104,6 +135,9 @@ This Project is presently under testing. But, pull requests are welcome.
 * Android App: App folder: `<root>/code/mobile/android/PhoneVR`
   * Compiled/Tested on `Android Studio 4.0.1`
   * For testing, this project has 2 Build Configs, Debug and Release. Debug has lots of debugging callouts to logcat from both JAVA and JNI.
+  * PhoneVR is Android AVD compatible, though PhoneVR Server networking is also AVD compatible, but ALVR Server networking need some more work for simulation.
+    * PhoneVR APK when run on AVD automatically assigns 10.0.2.2 (default emu addr) to pcIP
+    * After starting the AVD Emulator, need to run "adb forward tcp:33333 tcp:33333", in terminal/cmd, this will enable PVRServer -> Android Emulator based PVRAndroidApp communication.
   
 * External Vendor Libraries used (all Headers included in respective Projects):
   * Json v3.8.0 (https://github.com/nlohmann/json) (code\windows\libs\json)
@@ -112,6 +146,7 @@ This Project is presently under testing. But, pull requests are welcome.
   * x264 0.161.r3015 MSVS15(2017) (https://github.com/ShiftMediaProject/x264)
   * GoogleVR 1.200 (https://github.com/googlevr/gvr-android-sdk) (code\mobile\android\libraries\jni)
   * ACRA v5.7 (https://github.com/ACRA/acra)
+  * ALVR (https://github.com/alvr-org/ALVR) (code\mobile\android\PhoneVR\ALVR)
 
 ## Troubleshooting  
 * Android App doesn’t connect to Windows Steam VR even after opening Phone App first and then SteamVR on windows
@@ -127,37 +162,42 @@ This Project is presently under testing. But, pull requests are welcome.
   
 * Incase above mentioned things have not been helpful to you, then you might want to **Install Debug variant of APK** from `[PhoneVR.zip]/android/arm7/debug` which can help you/us to get more detailed logs.
   
-* **Diagnostics Stats Nomenclature** (in order from VRAppFrameCreation to MobileFrameDisplay):<br/>
+* **Diagnostics Stats Nomenclature (ONLY PhoneVR Server)** (in order from VRAppFrameCreation to MobileFrameDisplay):<br/>
   These stats can be enabled by checking `Settings`->`Stats` option. All the values must be stable and more or less equal to `game_fps`± 10 value in `pvrsettings.json`.
+  <details><summary>Nomenclature</summary>
+
+  ```css
+  --- @M - Mobile; @C - CPU/Desktop ---
+  ```
+  ```css
+  @FPS(s) :
+  SR - StreamReceiver @M
+  D - Media Decoder @M
+  R - Frame Renderer @M
   
-  * ```css
-    --- @M - Mobile; @C - CPU/Desktop ---
-    ```
-    ```css
-    @FPS(s) :
-    SR - StreamReceiver @M
-    D - Media Decoder @M
-    R - Frame Renderer @M
+  cR - Frame Renderer @C
+  SS - Stream Sender @C
+  SW - Stream Writer @C
+  E - Media Encoder @C
+  VRa - VR Application FPS @C
+  
+  @Latency(s) :
+  tSS - Time Delay between RendererGotFrame and RendererRendered @C
+  tE - Time Delay between EncoderGotFrame and EncoderEncoded @C
+  tND - NetworkDelay - Time Delay between DataPacketSent from @C to DataPacketReceived @M
+  tSR - StreamReceiver - Time Delay between DataPacketSent from @C to DataSentToMediaDecoder @M
+  ```
 
-    cR - Frame Renderer @C
-    SS - Stream Sender @C
-    SW - Stream Writer @C
-    E - Media Encoder @C
-    VRa - VR Application FPS @C
-
-    @Latency(s) :
-    tSS - Time Delay between RendererGotFrame and RendererRendered @C
-    tE - Time Delay between EncoderGotFrame and EncoderEncoded @C
-    tND - NetworkDelay - Time Delay between DataPacketSent from @C to DataPacketReceived @M
-    tSR - StreamReceiver - Time Delay between DataPacketSent from @C to DataSentToMediaDecoder @M
-    ```
-  ![PhonveVR FPS](./.github/fps.jpg)
+  ![PhonveVR FPS](./.github/fps.jpg)  
+  </details>
 
 ## Issue / Bug Reporting
 
-Prior to reporting your Issue/Bug, please check out the ongoing issues ([here](https://github.com/PhoneVR-Developers/PhoneVR/issues)), If you have the same issue, you can join and watch that discussion(s).
+Prior to reporting your Issue/Bug, please check out the ongoing issues ([here](https://github.com/PhoneVR-Developers/PhoneVR/issues) and [here](https://github.com/alvr-org/ALVR/issues)), If you have the same issue, you can join and watch that discussion(s).
 
-You can use the [`Github Issues`](https://github.com/PhoneVR-Developers/PhoneVR/issues) or [`Discord`](https://discord.gg/pNYtBNk) to submit any issues/bugs related to working of this Project or for any query.
+You can use the [`Github Issues`](https://github.com/PhoneVR-Developers/PhoneVR/issues) to submit PhoneVR related issues/bugs related to working of this Project or for any query.
+For reporting ALVRServer related issues please use [`ALVR Github Issues`](https://github.com/alvr-org/ALVR/issues).
+
 For quick resolution you may want to add the following data along with your issue/bug report,
 
 <ins>For Installation-time or SteamVR-and-PhoneVR-linking issues,</ins>
@@ -179,4 +219,5 @@ For quick resolution you may want to add the following data along with your issu
 <ins>**Common files required for all kinds issues,**</ins>
 * `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default **windows** location `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\PVRServer\logs`
 * `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default **android** location `.../Android/data/virtualis.phonevr/files/PVR/`. *Optionally* you can also attach `Log` from your `Settings page` on the app.
+* Screenshots / Videos are much more helpful for developers to understand the issues faster.
 * And ofcourse, how to reproduce the issue :)
