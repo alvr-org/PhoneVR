@@ -85,8 +85,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config: [Release, Debug]
-        platform: [x64, x86]
+        config: [Release] #, Debug]
+        platform: [x64] #, x86]
     runs-on: windows-latest
 
     steps:
