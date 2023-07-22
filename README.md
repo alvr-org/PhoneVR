@@ -32,7 +32,7 @@ Use Steam VR-enabled applications with your phone as VR HMD (*Head-mounted displ
 
 ## Requirements
 
-A PC with *Windows 7 or above*, A smartphone with *Android 5.0 (Lollipop) or above* with *OpenGL-ES 3.0 or above*, Steam and some SteamVR applications installed.
+A PC with *Windows 7 or above*, A smartphone with *Android 5.0 (Lollipop) or above* (_ALVR requires Android 8.0 or above_) with *OpenGL-ES 3.0 or above*, Steam and some SteamVR applications installed.
 
 ## Installation
 PhoneVR(PVR) can be used with two servers ALVR and PVRServer. ALVR Server is recommended over PVRServer, both use different APIs.
