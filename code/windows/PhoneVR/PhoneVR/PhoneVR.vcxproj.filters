@@ -62,5 +62,18 @@
     <ClInclude Include="..\..\..\common\src\Utils\ThreadUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\common\src\version.info">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

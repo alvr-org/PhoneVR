@@ -92,9 +92,12 @@ void PVRStartConnectionListener(function<void(string, PVR_MSG)> callback) {
 						auto msgType = (PVR_MSG)buf[3];
 						if (msgType == PVR_MSG::PAIR_HMD || msgType == PVR_MSG::PAIR_PHONE_CTRL) {
 							if (vec2uint(&buf[4]) >= PVR_CLIENT_VERSION)
+							{
+								PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Server v" + versunint2str(PVR_SERVER_VERSION) + " connected to Client v" + versunint2str(vec2uint(&buf[4])) );
 								callback(ip, msgType);
+							}
 							else
-								PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Device " + ip + " needs to be updated");
+								PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Device " + ip + " needs to be updated, " + "Server v" + versunint2str(PVR_SERVER_VERSION) + " connected to Client v" + versunint2str(vec2uint(&buf[4])));
 						}
 						else
 							PVR_DB_I("[PVRSockets::PVRStartConnectionListener] Invalid message from device: " + ip);

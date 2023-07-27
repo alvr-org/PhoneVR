@@ -93,8 +93,14 @@ inline uint32_t vers2uint(uint8_t rel, uint8_t sub, uint16_t patch) {
 	return rel << 24 | sub << 16 | patch;
 }
 
-#define PVR_SERVER_VERSION vers2uint(0, 6, 0)
-#define PVR_CLIENT_VERSION vers2uint(0, 6, 0)
+inline std::string versunint2str(uint32_t ver) {
+	return ( std::to_string(ver >> 24) + "." + std::to_string((ver >> 16) % 0x100) + "." + std::to_string((ver & 0xffff)) );
+}
+
+#include "version.info"
+
+#define PVR_SERVER_VERSION vers2uint(PVR_BINVERSION)
+#define PVR_CLIENT_VERSION vers2uint(PVR_BINVERSION)
 
 std::wstring _GetExePath(void);
 
