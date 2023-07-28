@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
+apply from: '../versioning.gradle'
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
@@ -37,8 +38,8 @@ android {
         applicationId "viritualisres.phonevr"
         minSdkVersion 24
         targetSdkVersion 33
-        versionCode Integer.valueOf(System.env.APPVEYOR_BUILD_NUMBER ?: 1)
-        versionName System.getenv("APPVEYOR_PVR_TAG")
+        versionCode buildVersionCode()
+        versionName buildVersionName()
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments useTestStorageService: 'true'
@@ -54,7 +55,7 @@ android {
 
         defaultPublishConfig 'release'
         publishNonDefault true
-        archivesBaseName = "PhoneVR-v$versionCode($versionName)"
+        archivesBaseName = "PhoneVR-v$versionName"
     }
     buildTypes {
         release {
@@ -178,4 +179,3 @@ preBuild.dependsOn(buildClientLib)
 build.dependsOn(extractNdk)
 build.dependsOn(buildClientLib)
 clean.dependsOn(deleteNdk)
-

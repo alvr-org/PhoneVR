@@ -1,0 +1,18 @@
+ext {
+    versionProps = {
+        def props = new Properties()
+        file("../version.properties").withInputStream { props.load(it) }
+        return props
+    }
+    buildVersionCode = {
+        def props = versionProps()
+        def version = props.getProperty("VERSION")
+        def (major, minor, patch) = version.toLowerCase().tokenize('.')
+        (major, minor, patch) = [major, minor, patch].collect { it.toInteger() }
+        (major * 10000) + (minor * 100) + patch
+    }
+    buildVersionName = {
+        def props = versionProps()
+        return props.getProperty("VERSION_NAME")
+    }
+}

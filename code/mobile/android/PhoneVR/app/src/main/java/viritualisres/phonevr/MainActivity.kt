@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val VersionTV : TextView = findViewById<TextView>(R.id.tViewVersion);
-        VersionTV.text = "PhoneVR v" + BuildConfig.VERSION_NAME + "_" + BuildConfig.VERSION_CODE;
+        VersionTV.text = "PhoneVR v" + BuildConfig.VERSION_NAME;
 
         //        MediaCodecInfo[] dmsadas = (new MediaCodecList(MediaCodecList.REGULAR_CODECS)).getCodecInfos();
         //        for (MediaCodecInfo mci : dmsadas){
