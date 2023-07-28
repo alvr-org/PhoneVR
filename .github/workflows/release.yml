@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version string (eg. v0.3-beta)"
+        description: "Version string (eg. 0.3.1-beta)"
         required: false
         default: ""
 
@@ -31,53 +31,46 @@ jobs:
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
       release_id: ${{ steps.create_release.outputs.id }}
+      release_ref: ${{ steps.output_ref.outputs.release_ref }}
     steps:
-      ### TODO: #74 Stream Line Versioning VisualStudio Desktop Project + Android Studio + ALVR Linking, then can automate bumping
-      # - name: Configure git
-      #   run: git config --global core.autocrlf false
+      - name: Configure git
+        if: github.event.inputs.version != ''
+        run: git config --global core.autocrlf false
 
-      # - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        if: github.event.inputs.version != ''
 
-      # - uses: actions-rs/toolchain@v1
-      #   with:
-      #     toolchain: stable
+      - name: Bump version
+        if: github.event.inputs.version != ''
+        run: |
+          $version = "${{ github.event.inputs.version }}"
+          $versionInt,$suffix = $version.Split('-')
+          $versioncomma = $versionInt.replace('.',',')
 
-      # - name: Bump version
-      #   id: bump_version
-      #   env:
-      #     RUST_BACKTRACE: 1
-      #   run: |
-      #     $versionarg = "${{ github.event.inputs.version }}"
-      #     $versionarg = If ($versionarg.Length -gt 0) { "--version $versionarg" } else { "" }
-      #     $out = cargo xtask bump $versionarg.split()
-      #     echo $out
-      #     cargo update -p alvr_common
-      #     echo "::set-output name=version_tag::$(echo $out | sls -CaseSensitive -Pattern '^v.*$')"
+          echo "#define PVR_BINVERSION $versioncomma" "#define PVR_STRVERSION `"$version`"" > code/common/src/version.info
+          echo "VERSION=$versionInt" "VERSION_NAME=$version" > code/mobile/android/PhoneVR/version.properties
 
-      # - name: Push changes
-      #   uses: stefanzweifel/git-auto-commit-action@v4
-      #   with:
-      #     commit_message: "[Auto] Bump version"
+      - name: Push changes
+        if: github.event.inputs.version != ''
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "[Auto] Bump version"
+          tagging_message: v${{ github.event.inputs.version }}
 
-      # - name: Output ref for later checkouts
-      #   id: output_ref
-      #   run: echo "::set-output name=release_ref::$(git rev-parse HEAD)"
+      - name: Output ref for later checkouts
+        id: output_ref
+        run: echo "::set-output name=release_ref::$(git rev-parse HEAD)"
 
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1
-        # env:
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          # tag_name: ${{ steps.bump_version.outputs.version_tag }}
-          tag: ${{ github.event.inputs.version }}
-          # release_name: PhoneVR ${{ steps.bump_version.outputs.version_tag }}
-          name: PhoneVR ${{ github.event.inputs.version }}
+          tag: v${{ github.event.inputs.version }}
+          name: PhoneVR v${{ github.event.inputs.version }}
           draft: true
           prerelease: false
           generateReleaseNotes: true
-          commit: master
-          # commitish: ${{ steps.output_ref.outputs.release_ref }}
+          commit: ${{ steps.output_ref.outputs.release_ref }}
   
   Build_PVR_Server:
     name: Build PhoneVR Server
@@ -91,6 +84,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        ref: ${{ needs.prepare_release.outputs.release_ref }}
 
     # https://github.com/actions/runner-images/issues/842#issuecomment-1495115166
     - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
@@ -131,6 +126,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          ref: ${{ needs.prepare_release.outputs.release_ref }}
           submodules: 'true'
 
       # Set Current Date As Env Variable
@@ -234,7 +230,7 @@ jobs:
         with:
           upload_url: ${{ needs.prepare_release.outputs.upload_url }}
           asset_path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/release/PhoneVR.apk
-          asset_name: PhoneVR-${{ github.event.inputs.version }}.apk
+          asset_name: PhoneVR-v${{ github.event.inputs.version }}.apk
           asset_content_type: application/vnd.android.package-archive
   
   # Step is needed because the PVRServerBuild runs as a matrix and adds files to the same artifact
@@ -245,6 +241,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.prepare_release.outputs.release_ref }}
 
       - uses: actions/download-artifact@v3
         with:
@@ -269,5 +267,5 @@ jobs:
         with:
           upload_url: ${{ needs.prepare_release.outputs.upload_url }}
           asset_path: ${{ env.PROJECT_NAME }}-Server-Release.zip
-          asset_name: ${{ env.PROJECT_NAME }}-Server-${{ github.event.inputs.version }}.zip
+          asset_name: ${{ env.PROJECT_NAME }}-Server-v${{ github.event.inputs.version }}.zip
           asset_content_type: application/gzip
