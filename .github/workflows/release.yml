@@ -34,11 +34,9 @@ jobs:
       release_ref: ${{ steps.output_ref.outputs.release_ref }}
     steps:
       - name: Configure git
-        if: github.event.inputs.version != ''
         run: git config --global core.autocrlf false
 
       - uses: actions/checkout@v2
-        if: github.event.inputs.version != ''
 
       - name: Bump version
         if: github.event.inputs.version != ''
