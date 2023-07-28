@@ -165,7 +165,7 @@ public:
 		VRProperties()->SetBoolProperty(propCont, Prop_DeviceCanPowerOff_Bool, true);
 		//VRProperties()->SetInt32Property(propCont, Prop_DeviceClass_Int32, TrackedDeviceClass_HMD);
 		VRProperties()->SetBoolProperty(propCont, Prop_HasCamera_Bool, false);
-		VRProperties()->SetStringProperty(propCont, Prop_DriverVersion_String, (to_string(PVR_SERVER_VERSION >> 24) + "." + to_string((PVR_SERVER_VERSION >> 16) % 0x100)).c_str());
+		VRProperties()->SetStringProperty(propCont, Prop_DriverVersion_String, versunint2str(PVR_SERVER_VERSION).c_str());
 		VRProperties()->SetBoolProperty(propCont, Prop_Firmware_ForceUpdateRequired_Bool, false); //TODO implement
 		//VRProperties()->SetBoolProperty(propCont, Prop_ViveSystemButtonFixRequired_Bool, false); // ??
 		VRProperties()->SetBoolProperty(propCont, Prop_ReportsTimeSinceVSync_Bool, false);

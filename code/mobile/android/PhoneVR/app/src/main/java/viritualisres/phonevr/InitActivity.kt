@@ -19,7 +19,7 @@ class InitActivity : AppCompatActivity() {
         setContentView(R.layout.activity_init)
 
         val tvVersion : TextView = findViewById<TextView>(R.id.head);
-        tvVersion.text = "PhoneVR v" + BuildConfig.VERSION_NAME + "_" + BuildConfig.VERSION_CODE;
+        tvVersion.text = "PhoneVR v" + BuildConfig.VERSION_NAME;
 
         val result = HtmlCompat.fromHtml("<a href=\"https://github.com/PhoneVR-Developers/PhoneVR#readme\">Readme.md</a>", HtmlCompat.FROM_HTML_MODE_LEGACY);
         val tvBody = findViewById<TextView>(R.id.body);
