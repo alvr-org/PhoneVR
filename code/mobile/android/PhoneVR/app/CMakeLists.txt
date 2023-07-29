@@ -27,7 +27,7 @@ set(libs_dir ${CMAKE_CURRENT_SOURCE_DIR}/libraries)
 set(alvr_build_dir ${CMAKE_CURRENT_SOURCE_DIR}/../ALVR/build/alvr_client_core)
 
 target_include_directories(native-lib
-    PUBLIC ../../libraries/headers
+    PUBLIC ./libraries/headers
     PUBLIC ../../../../common/libs/asio/asio/include
     PUBLIC ../../../../common/libs/eigen/Eigen
     PUBLIC ../../../../common/libs/ifaddrs
