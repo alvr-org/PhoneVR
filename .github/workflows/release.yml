@@ -36,7 +36,7 @@ jobs:
       - name: Configure git
         run: git config --global core.autocrlf false
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Bump version
         if: github.event.inputs.version != ''
