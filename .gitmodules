@@ -1,3 +1,12 @@
 [submodule "code/mobile/android/PhoneVR/ALVR"]
 	path = code/mobile/android/PhoneVR/ALVR
 	url = https://github.com/PhoneVR-Developers/ALVR-phonevr
+[submodule "code/windows/libs/json"]
+	path = code/windows/libs/json
+	url = https://github.com/nlohmann/json
+[submodule "code/common/libs/eigen"]
+	path = code/common/libs/eigen
+	url = https://gitlab.com/libeigen/eigen
+[submodule "code/common/libs/asio"]
+	path = code/common/libs/asio
+	url = https://github.com/chriskohlhoff/asio

@@ -37,6 +37,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: 'true'
 
     # https://github.com/actions/runner-images/issues/842#issuecomment-1495115166
     - name: Install MSVC 2015 (v140) and Windows 8.1 SDK

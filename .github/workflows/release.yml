@@ -37,6 +37,8 @@ jobs:
         run: git config --global core.autocrlf false
 
       - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
 
       - name: Bump version
         if: github.event.inputs.version != ''
@@ -83,6 +85,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
+        submodules: 'true'
         ref: ${{ needs.prepare_release.outputs.release_ref }}
 
     # https://github.com/actions/runner-images/issues/842#issuecomment-1495115166
