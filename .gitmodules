@@ -4,3 +4,6 @@
 [submodule "code/windows/libs/json"]
 	path = code/windows/libs/json
 	url = https://github.com/nlohmann/json
+[submodule "code/common/libs/eigen"]
+	path = code/common/libs/eigen
+	url = https://gitlab.com/libeigen/eigen

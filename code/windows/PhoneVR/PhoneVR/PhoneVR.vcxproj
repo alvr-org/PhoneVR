@@ -94,7 +94,7 @@
       <WarningLevel>Level1</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0601;WIN32;_DEBUG;_WINDOWS;_USRDLL;PHONEVR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName);$(SolutionDir)\..\..\common\src;$(SolutionDir)\..\libs\json\include\;$(SolutionDir)\..\libs\x264\include;$(SolutionDir)\..\..\common\libs\asio;$(SolutionDir)\..\..\common\libs\eigen;$(SolutionDir)\..\..\common\src\Utils;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName);$(SolutionDir)\..\..\common\src;$(SolutionDir)\..\libs\json\include\;$(SolutionDir)\..\libs\x264\include;$(SolutionDir)\..\..\common\libs\asio;$(SolutionDir)\..\..\common\libs\eigen\Eigen;$(SolutionDir)\..\..\common\src\Utils;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
@@ -112,7 +112,7 @@
       </PrecompiledHeader>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0601;_DEBUG;_WINDOWS;_USRDLL;PHONEVR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName);$(SolutionDir)\..\..\common\src;$(SolutionDir)\..\libs\json\include\;$(SolutionDir)\..\libs\x264\include;$(SolutionDir)\..\..\common\libs\asio;$(SolutionDir)\..\..\common\libs\eigen;$(SolutionDir)\..\..\common\src\Utils;$(SolutionDir)\..\..\common\src\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName);$(SolutionDir)\..\..\common\src;$(SolutionDir)\..\libs\json\include\;$(SolutionDir)\..\libs\x264\include;$(SolutionDir)\..\..\common\libs\asio;$(SolutionDir)\..\..\common\libs\eigen\Eigen;$(SolutionDir)\..\..\common\src\Utils;$(SolutionDir)\..\..\common\src\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
@@ -135,7 +135,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0601;WIN32;NDEBUG;_WINDOWS;_USRDLL;PHONEVR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName);$(SolutionDir)\..\..\common\src;$(SolutionDir)\..\libs\json\include\;$(SolutionDir)\..\libs\x264\include;$(SolutionDir)\..\..\common\libs\asio;$(SolutionDir)\..\..\common\libs\eigen;$(SolutionDir)\..\..\common\src\Utils;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName);$(SolutionDir)\..\..\common\src;$(SolutionDir)\..\libs\json\include\;$(SolutionDir)\..\libs\x264\include;$(SolutionDir)\..\..\common\libs\asio;$(SolutionDir)\..\..\common\libs\eigen\Eigen;$(SolutionDir)\..\..\common\src\Utils;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
@@ -157,7 +157,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0601;NDEBUG;_WINDOWS;_USRDLL;PHONEVR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName);$(SolutionDir)\..\..\common\src;$(SolutionDir)\..\libs\json\include\;$(SolutionDir)\..\libs\x264\include;$(SolutionDir)\..\..\common\libs\asio;$(SolutionDir)\..\..\common\libs\eigen;$(SolutionDir)\..\..\common\src\Utils;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName);$(SolutionDir)\..\..\common\src;$(SolutionDir)\..\libs\json\include\;$(SolutionDir)\..\libs\x264\include;$(SolutionDir)\..\..\common\libs\asio;$(SolutionDir)\..\..\common\libs\eigen\Eigen;$(SolutionDir)\..\..\common\src\Utils;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
