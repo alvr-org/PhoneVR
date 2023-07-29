@@ -7,3 +7,6 @@
 [submodule "code/common/libs/eigen"]
 	path = code/common/libs/eigen
 	url = https://gitlab.com/libeigen/eigen
+[submodule "code/common/libs/asio"]
+	path = code/common/libs/asio
+	url = https://github.com/chriskohlhoff/asio
