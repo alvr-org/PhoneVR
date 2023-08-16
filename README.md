@@ -217,7 +217,10 @@ For quick resolution you may want to add the following data along with your issu
 3. Attach the `bugreport-xxx.zip` file in Discord or GitHub or mail to *"phonevr.crash@gmail.com"*
 
 <ins>**Common files required for all kinds issues,**</ins>
-* `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default **windows** location `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\PVRServer\logs`
-* `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default **android** location `.../Android/data/virtualis.phonevr/files/PVR/`. *Optionally* you can also attach `Log` from your `Settings page` on the app.
+- If using PhoneVR Legacy server
+  * `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default **windows** location `C:\Program Files (x86)\Steam\steamapps\common\SteamVR\drivers\PVRServer\logs`
+  * `pvrLog.txt` and/or `pvrDebugLog.txt` file(s) in default **android** location `.../Android/data/virtualis.phonevr/files/PVR/`. *Optionally* you can also attach `Log` from your `Settings page` on the app.
+- If using ALVR
+  * ALVR logs from its server, are available in the GUI (you may which to enable Setting -> Logging -> [Log to disk](https://github.com/alvr-org/ALVR/wiki/Settings-guide#log-to-disk) if you want to keep saving the logs to file, even after alvr is closed 
 * Screenshots / Videos are much more helpful for developers to understand the issues faster.
 * And ofcourse, how to reproduce the issue :)
