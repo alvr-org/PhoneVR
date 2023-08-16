@@ -69,6 +69,8 @@ body:
        - Desktop OS: [e.g. Windows 10 1680 etc..]
        - Android OS: [e.g. 7.1, 9, 11 etc..]
        - Mobile Device Model [e.g. Xiaomi Mi Note10] 
+       - ALVR Version (if applicable)
+       - PhoneVR Version
   validations:
     required: true
 
