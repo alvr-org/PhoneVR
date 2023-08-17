@@ -236,6 +236,12 @@ Java_viritualisres_phonevr_ALVRActivity_setScreenResolutionNative(JNIEnv *, jobj
 }
 
 extern "C" JNIEXPORT void JNICALL
+Java_viritualisres_phonevr_ALVRActivity_sendBatteryLevel(JNIEnv *, jobject, jfloat level,
+                                                               jboolean plugged) {
+    alvr_send_battery(HEAD_ID, level, plugged);
+}
+
+extern "C" JNIEXPORT void JNICALL
 Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *, jobject) {
     if (CTX.renderingParamsChanged) {
         info("renderingParamsChanged, processing new params");
