@@ -42,17 +42,16 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     private GLSurfaceView glView;
 
+    private BatteryMonitor bMonitor = new BatteryMonitor(this);
+
     public class BatteryMonitor extends BroadcastReceiver {
         private BatteryLevelListener listener;
 
-        public BatteryMonitor(BatteryLevelListener listener)
-        {
+        public BatteryMonitor(BatteryLevelListener listener) {
             this.listener = listener;
         }
 
-        public void startMonitoring(Context context, BatteryLevelListener listener) {
-            this.listener = listener;
-
+        public void startMonitoring(Context context) {
             // Register BroadcastReceiver to monitor battery level changes
             IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
             context.registerReceiver(this, filter);
@@ -126,13 +125,15 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     @Override
     public void onBatteryLevelChanged(float batteryPercentage, boolean isPlugged) {
         sendBatteryLevel(batteryPercentage, isPlugged);
+        Log.d(TAG, "Battery level changed: " + batteryPercentage + ", isPlugged in? :" + isPlugged);
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
         pauseNative();
         glView.onPause();
+        bMonitor.stopMonitoring(this);
     }
 
     @Override
@@ -140,7 +141,7 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         super.onResume();
 
         if (VERSION.SDK_INT < VERSION_CODES.Q && !isReadExternalStorageEnabled()) {
-            final String[] permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
+            final String[] permissions = new String[] { Manifest.permission.READ_EXTERNAL_STORAGE };
             ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_REQUEST_CODE);
 
             return;
@@ -148,6 +149,7 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         glView.onResume();
         resumeNative();
+        bMonitor.startMonitoring(this);
     }
 
     @Override
