@@ -1,10 +1,14 @@
 package viritualisres.phonevr;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
+import android.os.BatteryManager;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -25,17 +29,62 @@ import androidx.core.app.ActivityCompat;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
+public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener, BatteryLevelListener {
 
     static {
         System.loadLibrary("native-lib");
     }
+
     private static final String TAG = ALVRActivity.class.getSimpleName();
 
     // Permission request codes
     private static final int PERMISSIONS_REQUEST_CODE = 2;
 
     private GLSurfaceView glView;
+
+    private BatteryMonitor bMonitor = new BatteryMonitor(this);
+
+    public class BatteryMonitor extends BroadcastReceiver {
+        private BatteryLevelListener listener;
+
+        public BatteryMonitor(BatteryLevelListener listener) {
+            this.listener = listener;
+        }
+
+        public void startMonitoring(Context context) {
+            // Register BroadcastReceiver to monitor battery level changes
+            IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            context.registerReceiver(this, filter);
+        }
+
+        public void stopMonitoring(Context context) {
+            // Unregister the BroadcastReceiver
+            context.unregisterReceiver(this);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)) {
+                // Get the current battery level and scale
+                int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+                int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100);
+
+                // Calculate the battery percentage as a float value between 0 and 1
+                float batteryPercentage = (float) level / scale;
+
+                // Get the charging state
+                int chargingState = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                boolean isCharging = chargingState == BatteryManager.BATTERY_PLUGGED_AC
+                        || chargingState == BatteryManager.BATTERY_PLUGGED_USB
+                        || chargingState == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+
+                // Notify the listener with the current battery percentage and charging state
+                if (listener != null) {
+                    listener.onBatteryLevelChanged(batteryPercentage, isCharging);
+                }
+            }
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -74,10 +123,17 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     @Override
+    public void onBatteryLevelChanged(float batteryPercentage, boolean isPlugged) {
+        sendBatteryLevel(batteryPercentage, isPlugged);
+        Log.d(TAG, "Battery level changed: " + batteryPercentage + ", isPlugged in? :" + isPlugged);
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         pauseNative();
         glView.onPause();
+        bMonitor.stopMonitoring(this);
     }
 
     @Override
@@ -85,7 +141,7 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         super.onResume();
 
         if (VERSION.SDK_INT < VERSION_CODES.Q && !isReadExternalStorageEnabled()) {
-            final String[] permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
+            final String[] permissions = new String[] { Manifest.permission.READ_EXTERNAL_STORAGE };
             ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_REQUEST_CODE);
 
             return;
@@ -93,6 +149,7 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         glView.onResume();
         resumeNative();
+        bMonitor.startMonitoring(this);
     }
 
     @Override
@@ -151,8 +208,8 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     private boolean isReadExternalStorageEnabled() {
-        return ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED;
+        return ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -163,8 +220,8 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             Toast.makeText(this, R.string.read_storage_permission, Toast.LENGTH_LONG).show();
             if (!ActivityCompat.shouldShowRequestPermissionRationale(
                     this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                // Permission denied with checking "Do not ask again". Note that in Android R "Do not ask
-                // again" is not available anymore.
+                // Permission denied with checking "Do not ask again". Note that in Android R
+                // "Do not ask again" is not available anymore.
                 Intent intent = new Intent();
                 intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                 intent.setData(Uri.fromParts("package", getPackageName(), null));
@@ -201,4 +258,6 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private native void renderNative();
 
     private native void switchViewerNative();
+
+    private native void sendBatteryLevel(float level, boolean plugged);
 }
