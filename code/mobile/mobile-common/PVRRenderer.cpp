@@ -1,10 +1,10 @@
 #include "PVRRenderer.h"
 
-#include <unistd.h>
 #include "Geometry"
+#include <unistd.h>
 
-#include "Utils/RenderUtils.h"
 #include "PVRSockets.h"
+#include "Utils/RenderUtils.h"
 
 using namespace std;
 using namespace gvr;
@@ -24,13 +24,12 @@ namespace {
     bool debugMode = false;
     float offFov;
 
-    gvr_context *gvrCtx; // only for ios
+    gvr_context *gvrCtx;   // only for ios
     unique_ptr<SwapChain> swapChain;
     unique_ptr<BufferViewportList> vps;
 
     Matrix4f rotInv = Matrix4f::Identity();
     unique_ptr<Renderer> videoRdr[2];
-
 
     Matrix4f gvrToEigenMat(Mat4f gvrMat) {
         Matrix4f eMat;
@@ -40,14 +39,13 @@ namespace {
                     eMat(i, j) = gvrMat.m[i][j];
                 }
             }
-        }
-        catch(exception e) {
+        } catch (exception e) {
             PVR_DB_I("PVRRenderer_gvrToEigenMat:: Caught Exception: " + string(e.what()));
         }
         return eMat;
     }
 
-    const float deg2rad = (float)M_PI / 180;
+    const float deg2rad = (float) M_PI / 180;
     const float nearP = 0.1;
     const float farP = 10;
 
@@ -67,8 +65,7 @@ namespace {
             res(2, 2) = (nearP + farP) / (nearP - farP);
             res(2, 3) = (2 * nearP * farP) / (nearP - farP);
             res(3, 2) = -1;
-        }
-        catch(exception e) {
+        } catch (exception e) {
             PVR_DB_I("PVRRenderer_Perspectivet:: Caught Exception: " + string(e.what()));
         }
 
@@ -111,8 +108,8 @@ namespace {
 
                     Rectf quad;
                     quad.left = -tan((fov.left + offFov) * deg2rad);
-                    quad.top = tan(
-                            (fov.top + offFov * 2 / 3) * deg2rad); //augment less vertical fov
+                    quad.top =
+                        tan((fov.top + offFov * 2 / 3) * deg2rad);   // augment less vertical fov
                     quad.right = tan((fov.right + offFov) * deg2rad);
                     quad.bottom = -tan((fov.bottom + offFov * 2 / 3) * deg2rad);
                     if (i == GVR_LEFT_EYE) {
@@ -120,22 +117,24 @@ namespace {
                     }
                     e.quadModel = Affine3f(Translation3f((quad.right + quad.left) / 2.f,
                                                          (quad.top + quad.bottom) / 2.f,
-                                                         -1.f)).matrix() *
+                                                         -1.f))
+                                      .matrix() *
                                   Affine3f(Scaling((quad.right - quad.left) / 2.f,
-                                                   (quad.top - quad.bottom) / 2.f, 1.f)).matrix();
+                                                   (quad.top - quad.bottom) / 2.f,
+                                                   1.f))
+                                      .matrix();
 
                     eyes[i] = e;
                 }
             }
-        }
-        catch(exception e) {
+        } catch (exception e) {
             PVR_DB_I("PVRRenderer_InitGVRRendering:: Caught Exception: " + string(e.what()));
         }
     }
 
     // Matrix4f eyeMat = gvrToEigenMat(gvrApi->GetEyeFromHeadMatrix(eye)) * headMat;
-    //lastRotMatInv = headMat.inverse();
-}
+    // lastRotMatInv = headMat.inverse();
+}   // namespace
 
 unsigned int PVRInitSystem(int maxW, int maxH, float offFov, bool reproj, bool debug) {
 
@@ -143,7 +142,7 @@ unsigned int PVRInitSystem(int maxW, int maxH, float offFov, bool reproj, bool d
     try {
         pvrState = PVR_STATE_INITIALIZATION;
         gvrApi->InitializeGl();
-        //auto fjdkl = gvrApi->IsFeatureSupported(GVR_FEATURE_MULTIVIEW);
+        // auto fjdkl = gvrApi->IsFeatureSupported(GVR_FEATURE_MULTIVIEW);
 
         ::offFov = offFov;
         ::reproj = reproj;
@@ -151,18 +150,18 @@ unsigned int PVRInitSystem(int maxW, int maxH, float offFov, bool reproj, bool d
 
         InitGVRRendering();
 
-        //block until receive nal headers. todo: optimize timing
-        SendAdditionalData({(uint16_t) maxW, (uint16_t) maxH}, leftQuad,
+        // block until receive nal headers. todo: optimize timing
+        SendAdditionalData({(uint16_t) maxW, (uint16_t) maxH},
+                           leftQuad,
                            gvrApi->GetEyeFromHeadMatrix(GVR_LEFT_EYE).m[0][3] *
-                           2); // extracting IPD
+                               2);   // extracting IPD
 
         videoTex = genTexture(true);
         videoRdr[0].reset(new Renderer({{videoTex, true}}, FS_PT, 0.0f, 0.5f));
         videoRdr[1].reset(new Renderer({{videoTex, true}}, FS_PT, 0.5f, 1.0f));
 
         gvrApi->ResumeTracking();
-    }
-    catch(exception e) {
+    } catch (exception e) {
         PVR_DB_I("PVRRenderer_InitGVRRendering:: Caught Exception: " + string(e.what()));
     }
 
@@ -178,24 +177,24 @@ void PVRRender(int64_t pts) {
             if (pts > 0) {
                 vector<float> v = DequeueQuatAtPts(pts);
                 if (v.size() == 4)
-                    rotInv.block(0, 0, 3, 3) = Matrix3f(
-                            Quaternionf(v[0], v[1], v[2], v[3])); //todo: simplify
-                //rotInv = rotMat;//.inverse(); ?
+                    rotInv.block(0, 0, 3, 3) =
+                        Matrix3f(Quaternionf(v[0], v[1], v[2], v[3]));   // todo: simplify
+                // rotInv = rotMat;//.inverse(); ?
             }
 
-            //vps->SetToRecommendedBufferViewports();
+            // vps->SetToRecommendedBufferViewports();
             Frame frame = swapChain->AcquireFrame();
 
             frame.BindBuffer(0);
             if (!debugMode)
-                glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // black background
+                glClearColor(0.0f, 0.0f, 0.0f, 1.0f);   // black background
             else
-                glClearColor(1.0f, 0.0f, 0.0f, 1.0f); // red background
+                glClearColor(1.0f, 0.0f, 0.0f, 1.0f);   // red background
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_SCISSOR_TEST);
 
             ClockTimePoint tgt_time = GvrApi::GetTimePointNow();
-            tgt_time.monotonic_system_time_nanos += 20000000; // 0.020 s
+            tgt_time.monotonic_system_time_nanos += 20000000;   // 0.020 s
             Mat4f gvrHeadMat = gvrApi->GetHeadSpaceFromStartSpaceRotation(tgt_time);
             Matrix4f deltaRot = gvrToEigenMat(gvrHeadMat) * rotInv;
 
@@ -207,7 +206,7 @@ void PVRRender(int64_t pts) {
 
                 Matrix4f mvp;
                 if (reproj)
-                    mvp = e.proj * deltaRot * e.quadModel; //order sensitive!!
+                    mvp = e.proj * deltaRot * e.quadModel;   // order sensitive!!
                 else
                     mvp = e.proj * e.quadModel;
 
@@ -220,13 +219,12 @@ void PVRRender(int64_t pts) {
             fpsRenderer = (1000000000.0 / (Clk::now() - oldtime).count());
             oldtime = Clk::now();
         }
-    }
-    catch(exception e) {
+    } catch (exception e) {
         PVR_DB_I("PVRRenderer_PVRRender:: Caught Exception: " + string(e.what()));
     }
 }
 
-void PVRTrigger() { } //TODO: register press
+void PVRTrigger() {}   // TODO: register press
 
 void PVRPause() {
     try {
@@ -234,8 +232,7 @@ void PVRPause() {
             gvrApi->PauseTracking();
             pvrState = PVR_STATE_PAUSED;
         }
-    }
-    catch(exception e) {
+    } catch (exception e) {
         PVR_DB_I("PVRRenderer_PVRPause:: Caught Exception: " + string(e.what()));
     }
 }
@@ -247,8 +244,7 @@ void PVRResume() {
             gvrApi->ResumeTracking();
             pvrState = PVR_STATE_RUNNING;
         }
-    }
-    catch(exception e) {
+    } catch (exception e) {
         PVR_DB_I("PVRRenderer_PVRResume:: Caught Exception: " + string(e.what()));
     }
 }
@@ -256,8 +252,7 @@ void PVRResume() {
 void PVRCreateGVR(gvr_context *ctx) {
     try {
         gvrApi = GvrApi::WrapNonOwned(ctx);
-    }
-    catch(exception e) {
+    } catch (exception e) {
         PVR_DB_I("PVRRenderer_PVRCreateGVR:: Caught Exception: " + string(e.what()));
     }
 }
@@ -265,12 +260,10 @@ void PVRCreateGVR(gvr_context *ctx) {
 void PVRDestroyGVR() {
     try {
         gvr_destroy(&gvrCtx);
-    }
-    catch(exception e) {
+    } catch (exception e) {
         PVR_DB_I("PVRRenderer_PVRDestroyGVR:: Caught Exception: " + string(e.what()));
     }
 }
-
 
 #ifdef __APPLE__
 

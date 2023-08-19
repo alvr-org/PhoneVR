@@ -5,7 +5,7 @@
 #ifdef __cplusplus
 
 namespace PVR {
-    extern std::unique_ptr <gvr::GvrApi> gvrApi;
+    extern std::unique_ptr<gvr::GvrApi> gvrApi;
 }
 
 extern "C" {
@@ -13,7 +13,11 @@ extern "C" {
 
 extern float fpsRenderer;
 
-unsigned int PVRInitSystem(int maxWidth, int maxHeight, float offFov, bool reproj, bool debug); // return render texture id
+unsigned int PVRInitSystem(int maxWidth,
+                           int maxHeight,
+                           float offFov,
+                           bool reproj,
+                           bool debug);   // return render texture id
 void PVRRender(int64_t pts);
 void PVRTrigger();
 void PVRPause();
@@ -29,4 +33,3 @@ void PVRCreateGVRAndContext();
 #ifdef __cplusplus
 }
 #endif
-

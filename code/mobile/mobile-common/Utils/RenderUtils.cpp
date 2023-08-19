@@ -1,17 +1,17 @@
-#include "Utils/StrUtils.h"
 #include "RenderUtils.h"
 #include "PVRGlobals.h"
+#include "Utils/StrUtils.h"
 
 using namespace std;
 
-void glCheckError( string glFuncName );
+void glCheckError(string glFuncName);
 
 namespace {
     char errorLog[256];
 
-    //fbo and screen vertex shaders must have different axis convention, why??
+    // fbo and screen vertex shaders must have different axis convention, why??
     string VS_PT =
-    R"glsl( #version 300 es
+        R"glsl( #version 300 es
             const vec2 verts[4] = vec2[4](vec2(-1, -1), vec2(-1, 1), vec2(1, 1), vec2(1, -1));
             const vec2 coords[4] = vec2[4](vec2(0, 0), vec2(0, 1), vec2(1, 1), vec2(1, 0));
             out vec2 coord;
@@ -22,7 +22,7 @@ namespace {
     )glsl";
 
     string VS_REPR =
-    R"glsl( #version 300 es
+        R"glsl( #version 300 es
             uniform mat4 mvp;
             #define XSTART %f
             #define XEND %f
@@ -39,8 +39,9 @@ namespace {
         GLuint shader;
         try {
             shader = glCreateShader(type);
-            if( shader == GL_INVALID_ENUM || shader == GL_NO_ERROR) {
-                PVR_DB_I("RenderUtils::loadShader:: Error Creating Shader Object, Returned: " + string(((shader)?"GL_INVALID_ENUM":"GL_NO_ERROR")));
+            if (shader == GL_INVALID_ENUM || shader == GL_NO_ERROR) {
+                PVR_DB_I("RenderUtils::loadShader:: Error Creating Shader Object, Returned: " +
+                         string(((shader) ? "GL_INVALID_ENUM" : "GL_NO_ERROR")));
                 return shader;
             } else {
                 const char *str = text.c_str();
@@ -54,12 +55,13 @@ namespace {
                 if (!compiled) {
                     glGetShaderInfoLog(shader, sizeof(errorLog), nullptr, errorLog);
                     glCheckError("loadShader::glGetShaderInfoLog");
-                    PVR_DB_I("RenderUtils::loadShader:: Error has Occurred while compiling Shader Object: ErrorLog: " + string(errorLog) + "\nProg: '" + text + "'");
+                    PVR_DB_I("RenderUtils::loadShader:: Error has Occurred while compiling Shader "
+                             "Object: ErrorLog: " +
+                             string(errorLog) + "\nProg: '" + text + "'");
                     exit(1);
                 }
             }
-        }
-        catch( exception e){
+        } catch (exception e) {
             PVR_DB_I("RenderUtils::loadShader:: Caught Exception: " + string(e.what()));
         }
         return shader;
@@ -69,8 +71,9 @@ namespace {
         GLuint prog;
         try {
             prog = glCreateProgram();
-            if( prog == 0 ) {
-                PVR_DB_I("RenderUtils::genProg:: Error Creating Program Object, Returned: " + to_string(prog));
+            if (prog == 0) {
+                PVR_DB_I("RenderUtils::genProg:: Error Creating Program Object, Returned: " +
+                         to_string(prog));
                 return prog;
             }
             glAttachShader(prog, loadShader(GL_VERTEX_SHADER, vs));
@@ -86,18 +89,19 @@ namespace {
             if (!linked) {
                 glGetProgramInfoLog(prog, sizeof(errorLog), nullptr, errorLog);
                 glCheckError("genProg::glGetProgramInfoLog");
-                PVR_DB_I("RenderUtils::genProg:: Error has Occurred while Linking to Program Object: ErrorLog: " + string(errorLog));
+                PVR_DB_I("RenderUtils::genProg:: Error has Occurred while Linking to Program "
+                         "Object: ErrorLog: " +
+                         string(errorLog));
                 exit(1);
             }
-        }
-        catch( exception e){
+        } catch (exception e) {
             PVR_DB_I("RenderUtils::genProg:: Caught Exception: " + string(e.what()));
         }
         return prog;
     }
-}
+}   // namespace
 
-GLuint genTexture(bool oes, int w, int h, GLenum fmt, GLint mag, int max){
+GLuint genTexture(bool oes, int w, int h, GLenum fmt, GLint mag, int max) {
     GLuint tex;
     try {
         glGenTextures(1, &tex);
@@ -112,11 +116,10 @@ GLuint genTexture(bool oes, int w, int h, GLenum fmt, GLint mag, int max){
         glTexParameteri(tgt, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(tgt, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(tgt, GL_TEXTURE_MAG_FILTER, mag);
-        glTexParameteri(tgt, GL_TEXTURE_MIN_FILTER,
-                        max == 0 ? GL_LINEAR : GL_LINEAR_MIPMAP_NEAREST);
+        glTexParameteri(
+            tgt, GL_TEXTURE_MIN_FILTER, max == 0 ? GL_LINEAR : GL_LINEAR_MIPMAP_NEAREST);
         glCheckError("genTexture::glTexParameteri");
-    }
-    catch( exception e){
+    } catch (exception e) {
         PVR_DB_I("RenderUtils::genTexture:: Caught Exception: " + string(e.what()));
     }
     return tex;
@@ -128,15 +131,14 @@ void setupRTS(int w, int h) {
         glCheckError("setupRTS::glBindFramebuffer");
         glViewport(0, 0, w, h);
         glCheckError("setupRTS::glViewport");
-    }
-    catch( exception e){
+    } catch (exception e) {
         PVR_DB_I("RenderUtils::setupRTS:: Caught Exception: " + string(e.what()));
     }
 }
 
 void Renderer::initProg(vector<pair<GLuint, bool>> texs, std::string vs, string frag) {
     string fs =
-    R"glsl( #version 300 es
+        R"glsl( #version 300 es
             #extension GL_OES_EGL_image_external_essl3 : require
             precision highp float;
             in vec2 coord;
@@ -152,52 +154,50 @@ void Renderer::initProg(vector<pair<GLuint, bool>> texs, std::string vs, string 
         for (int i = 0; i < texs.size(); i++) {
             auto jdjaskl = glGetUniformLocation(prog, ("tex" + to_string(i)).c_str());
             glCheckError("Renderer::initProg::glGetUniformLocation");
-            tuple<GLuint, GLint, GLenum> t(
-                    get<0>(texs[i]), jdjaskl,
-                    get<1>(texs[i]) ? GL_TEXTURE_EXTERNAL_OES : GL_TEXTURE_2D);
-            inTexs.push_back(t);// todo: try emplace_back
+            tuple<GLuint, GLint, GLenum> t(get<0>(texs[i]),
+                                           jdjaskl,
+                                           get<1>(texs[i]) ? GL_TEXTURE_EXTERNAL_OES
+                                                           : GL_TEXTURE_2D);
+            inTexs.push_back(t);   // todo: try emplace_back
         }
-    }
-    catch( exception e){
+    } catch (exception e) {
         PVR_DB_I("RenderUtils::Renderer::initProg:: Caught Exception: " + string(e.what()));
     }
 }
 
-std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+std::string ReplaceAll(std::string str, const std::string &from, const std::string &to) {
     size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
         str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+        start_pos += to.length();   // Handles case where 'to' is a substring of 'from'
     }
     return str;
 }
 
-void Renderer::PVRPrintGLDesc()
-{
+void Renderer::PVRPrintGLDesc() {
     const GLubyte *sVendor, *sRenderer, *sVersion, *sExts;
 
-    if((sVendor = glGetString(GL_VENDOR)) == nullptr)
+    if ((sVendor = glGetString(GL_VENDOR)) == nullptr)
         glCheckError("Renderer::PVRPrintGLDesc::glGetString(GL_VENDOR)");
-    if((sRenderer = glGetString(GL_RENDERER)) == nullptr)
+    if ((sRenderer = glGetString(GL_RENDERER)) == nullptr)
         glCheckError("Renderer::PVRPrintGLDesc::glGetString(GL_RENDERER)");
-    if((sVersion = glGetString(GL_VERSION)) == nullptr)
+    if ((sVersion = glGetString(GL_VERSION)) == nullptr)
         glCheckError("Renderer::PVRPrintGLDesc::glGetString(GL_VERSION)");
-    if((sExts = glGetString(GL_EXTENSIONS)) == nullptr)
+    if ((sExts = glGetString(GL_EXTENSIONS)) == nullptr)
         glCheckError("Renderer::PVRPrintGLDesc::glGetString(GL_EXTENSIONS)");
 
-    string strExts = string((const char*)sExts);
+    string strExts = string((const char *) sExts);
     strExts = ReplaceAll(strExts, " ", ", ");
 
-    PVR_DB_I("Renderer::PVRPrintGLDesc: glVendor : " + string((const char*)sVendor) +
-                ", glRenderer : " + string((const char*)sRenderer) +
-                ", glVersion : " + string((const char*)sVersion) );
-    PVR_DB_I( "Renderer::PVRPrintGLDesc: glExts : " + strExts );
+    PVR_DB_I("Renderer::PVRPrintGLDesc: glVendor : " + string((const char *) sVendor) +
+             ", glRenderer : " + string((const char *) sRenderer) +
+             ", glVersion : " + string((const char *) sVersion));
+    PVR_DB_I("Renderer::PVRPrintGLDesc: glExts : " + strExts);
 }
-
 
 // This is the actuall Constructor
 Renderer::Renderer(vector<pair<GLuint, bool>> texs, string frag, float xStart, float xEnd)
-        : frmBuf(0), rtt(false), maxLod(0){
+    : frmBuf(0), rtt(false), maxLod(0) {
     try {
         PVRPrintGLDesc();
 
@@ -206,15 +206,20 @@ Renderer::Renderer(vector<pair<GLuint, bool>> texs, string frag, float xStart, f
         initProg(texs, vs, frag);
         matUnif = glGetUniformLocation(prog, "mvp");
         glCheckError("Renderer::Renderer::glGetUniformLocation");
-    }
-    catch( exception e){
+    } catch (exception e) {
         PVR_DB_I("RenderUtils::Renderer::Renderer:: Caught Exception: " + string(e.what()));
     }
 }
 
-Renderer::Renderer(int width, int height, vector<pair<GLuint, bool>> texs, string frag, GLenum fmt,
-                   GLint mag, GLuint rdrBuf, int max) : width(width), height(height),
-                                                        size(width * height * 4), maxLod(max), rtt(true) {
+Renderer::Renderer(int width,
+                   int height,
+                   vector<pair<GLuint, bool>> texs,
+                   string frag,
+                   GLenum fmt,
+                   GLint mag,
+                   GLuint rdrBuf,
+                   int max)
+    : width(width), height(height), size(width * height * 4), maxLod(max), rtt(true) {
     try {
         PVRPrintGLDesc();
 
@@ -226,11 +231,9 @@ Renderer::Renderer(int width, int height, vector<pair<GLuint, bool>> texs, strin
         glCheckError("Renderer::Renderer::glBindFramebuffer");
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, outTex, 0);
         glCheckError("Renderer::Renderer::glFramebufferTexture2D");
-    }
-    catch( exception e){
+    } catch (exception e) {
         PVR_DB_I("RenderUtils::Renderer::Renderer:: Caught Exception: " + string(e.what()));
     }
-
 }
 
 void Renderer::render(Eigen::Matrix4f mat) {
@@ -245,7 +248,7 @@ void Renderer::render(Eigen::Matrix4f mat) {
         } else {
             glUniformMatrix4fv(matUnif, 1, GL_FALSE, mat.data());
             glCheckError("Renderer::render::glUniformMatrix4fv");
-            //glViewport(0, 0, 1024, 768);
+            // glViewport(0, 0, 1024, 768);
         }
 
         for (int i = 0; i < inTexs.size(); i++) {
@@ -265,14 +268,13 @@ void Renderer::render(Eigen::Matrix4f mat) {
             glGenerateMipmap(GL_TEXTURE_2D);
             glCheckError("Renderer::render::glGenerateMipmap");
         }
-    }
-    catch( exception e){
+    } catch (exception e) {
         PVR_DB_I("RenderUtils::Renderer::Renderer:: Caught Exception: " + string(e.what()));
     }
 }
 
 PBO::PBO(void *cpuBuf, int w, int h, int sz, GLenum fmt, GLenum type)
-        : cpuBuf(cpuBuf), w(w), h(h), sz(sz), fmt(fmt), type(type) {
+    : cpuBuf(cpuBuf), w(w), h(h), sz(sz), fmt(fmt), type(type) {
     try {
         glGenBuffers(1, &pbo);
         glCheckError("PBO::PBO::glGenBuffers");
@@ -280,8 +282,7 @@ PBO::PBO(void *cpuBuf, int w, int h, int sz, GLenum fmt, GLenum type)
         glCheckError("PBO::PBO::glBindBuffer");
         glBufferData(GL_PIXEL_PACK_BUFFER, sz, nullptr, GL_DYNAMIC_READ);
         glCheckError("PBO::PBO::glBufferData");
-    }
-    catch( exception e){
+    } catch (exception e) {
         PVR_DB_I("RenderUtils::PBO::PBO:: Caught Exception: " + string(e.what()));
     }
 }
@@ -301,20 +302,19 @@ void PBO::download() {
         glCheckError("PBO::download::glUnmapBuffer");
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
         glCheckError("PBO::download::glBindBuffer");
-    }
-    catch( exception e){
+    } catch (exception e) {
         PVR_DB_I("RenderUtils::PBO::download:: Caught Exception: " + string(e.what()));
     }
 }
 
-void glCheckError( string glFuncName ) {
+void glCheckError(string glFuncName) {
     try {
         static GLenum error = 0;
         while ((error = glGetError()) != GL_NO_ERROR) {
-            PVR_DB_I("RenderUtils::glCheckError Caught Error:" + to_string(error) + string(" at Function:") + glFuncName);
+            PVR_DB_I("RenderUtils::glCheckError Caught Error:" + to_string(error) +
+                     string(" at Function:") + glFuncName);
         }
-    }
-    catch( exception &e){
+    } catch (exception &e) {
         PVR_DB_I("RenderUtils::glCheckError:: Caught Exception: " + string(e.what()));
     }
 }

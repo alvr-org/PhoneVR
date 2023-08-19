@@ -7,6 +7,7 @@ format:
 		! -path "*gvr*" 		\
 		! -path "*cardboard*" 	\
 		! -path "*.cxx*" 		\
+		! -path "*/build/*"		\
 		-exec clang-format -i {} + -print
 
 format-check:
@@ -15,4 +16,5 @@ format-check:
 		! -path "*gvr*" 		\
 		! -path "*cardboard*" 	\
 		! -path "*.cxx*" 		\
+		! -path "*/build/*"		\
 		-exec clang-format --dry-run --Werror {} + -print

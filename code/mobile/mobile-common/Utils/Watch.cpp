@@ -35,7 +35,6 @@ void stopWatch(const char *const name) {
         float time = (float) duration_cast<milliseconds>(Clk::now() - i->second).count();
         PRINT("%s: %6.3f\n", name, watchMode ? 1 / time : time / 1000);
     }
-
 }
 
 void watchTick(const char *const name) {

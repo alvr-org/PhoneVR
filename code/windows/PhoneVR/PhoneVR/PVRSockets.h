@@ -9,7 +9,11 @@
 void PVRStartConnectionListener(std::function<void(std::string ip, PVR_MSG devType)> callback);
 void PVRStopConnectionListener();
 
-void PVRStartStreamer(std::string ip, uint16_t width, uint16_t height, std::function<void(std::vector<uint8_t>)> headerCb, std::function<void()> onErrCb);
+void PVRStartStreamer(std::string ip,
+                      uint16_t width,
+                      uint16_t height,
+                      std::function<void(std::vector<uint8_t>)> headerCb,
+                      std::function<void()> onErrCb);
 void PVRProcessFrame(uint64_t hdl, Eigen::Quaternionf quat);
 void PVRStopStreamer();
 
