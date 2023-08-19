@@ -1,3 +1,4 @@
+/* (C)2023 */
 package viritualisres.phonevr
 
 import android.annotation.SuppressLint
@@ -7,19 +8,14 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
-import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.UiSelector
-import org.junit.BeforeClass
+import java.io.IOException
+import java.lang.Thread.sleep
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
 import viritualisres.phonevr.utils.PVRInstrumentationBase
-import java.io.IOException
-import java.lang.Thread.sleep
-
 
 /*
  * SS Test All Activities Startup
@@ -31,23 +27,21 @@ import java.lang.Thread.sleep
  * build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/Pixel_2_API_30(AVD) - 11
  */
 @RunWith(AndroidJUnit4::class)
-class MainActivityTest: PVRInstrumentationBase() {
+class MainActivityTest : PVRInstrumentationBase() {
 
     @get:Rule
-    var perms1:GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.READ_EXTERNAL_STORAGE);
+    var perms1: GrantPermissionRule =
+        GrantPermissionRule.grant(android.Manifest.permission.READ_EXTERNAL_STORAGE)
 
     @get:Rule
-    var perms2:GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    var perms2: GrantPermissionRule =
+        GrantPermissionRule.grant(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
-    @get:Rule
-    var nameRule = TestName()
+    @get:Rule var nameRule = TestName()
 
-    @get:Rule
-    val activityScenarioRule = activityScenarioRule<MainActivity>()
+    @get:Rule val activityScenarioRule = activityScenarioRule<MainActivity>()
 
-    /**
-     * Captures and saves an image of the entire device screen to storage.
-     */
+    /** Captures and saves an image of the entire device screen to storage. */
     @SuppressLint("CheckResult")
     @Test
     @Throws(IOException::class)
@@ -55,7 +49,6 @@ class MainActivityTest: PVRInstrumentationBase() {
         onView(isRoot())
         sleep(1000)
 
-        takeScreenshot()
-            .writeToTestStorage("${javaClass.simpleName}_${nameRule.methodName}")
+        takeScreenshot().writeToTestStorage("${javaClass.simpleName}_${nameRule.methodName}")
     }
 }

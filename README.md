@@ -148,6 +148,11 @@ This Project is presently under testing. But, pull requests are welcome.
   * ACRA v5.7 (https://github.com/ACRA/acra)
   * ALVR (https://github.com/alvr-org/ALVR) (code\mobile\android\PhoneVR\ALVR)
 
+* Code styling
+  * Repo enforces clang-format v16.0.0 (.clang-format) for C/C++ and spotless (.editorconfig, google-java-format, ktfmt) for Java/Kotlin files
+  * To autofix clang-format'ing issues devs can use `make format`
+  * To autofix spotless format issues devs can goto PhoneVR android project folder and use `./gradlew spotlessApply` or use [spotless-gradle](https://plugins.jetbrains.com/plugin/18321-spotless-gradle) plugin for AndroidStudio/IDEs
+
 ## Troubleshooting  
 * Android App doesn’t connect to Windows Steam VR even after opening Phone App first and then SteamVR on windows
   1. Make sure that both the Windows and Android devices are in the same Local Network. (connected to the same router/wifi device)

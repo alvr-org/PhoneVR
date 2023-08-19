@@ -1,7 +1,7 @@
+/* (C)2023 */
 package viritualisres.phonevr;
 
 import android.content.Context;
-
 import org.acra.config.CoreConfiguration;
 import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderFactory;

@@ -1,0 +1,24 @@
+---
+NamespaceIndentation: All
+
+ColumnLimit: 100
+# does (int) x instead of (int)x
+SpaceAfterCStyleCast: true
+# spaces, not tabs!
+UseTab: Never
+# if (x) doStuff()  is not allowed, bad style
+AllowShortIfStatementsOnASingleLine: false
+#
+AlignTrailingComments: true
+SpacesBeforeTrailingComments: 3
+# change the next line to All for Alistair's textbook style
+AlwaysBreakAfterReturnType: TopLevelDefinitions
+#  #define SHORT_NAME       42
+#  #define LONGER_NAME      0x007f   # does nice spacing for macros
+AlignConsecutiveMacros: Consecutive
+# use \n instead of \r\n
+UseCRLF: false
+IndentWidth: 4
+BinPackArguments: false
+BinPackParameters: false
+AlwaysBreakAfterReturnType: None

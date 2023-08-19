@@ -1,27 +1,28 @@
+/* (C)2023 */
 package viritualisres.phonevr.utils
 
 import android.util.Log
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.base.DefaultFailureHandler
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
+import java.util.Locale
 import org.junit.Before
 import org.junit.BeforeClass
-import org.junit.Rule
-import java.util.Locale
 
 open class PVRInstrumentationBase {
-    //Running count of the number of Android Not Responding dialogues to prevent endless dismissal.
+    // Running count of the number of Android Not Responding dialogues to prevent endless dismissal.
     private var anrCount = 0
-    //`RootViewWithoutFocusException` class is private, need to match the message (instead of using type matching).
-    private val rootViewWithoutFocusExceptionMsg = java.lang.String.format(
-        Locale.ROOT,
-        "Waited for the root of the view hierarchy to have "
-                + "window focus and not request layout for 10 seconds. If you specified a non "
-                + "default root matcher, it may be picking a root that never takes focus. "
-                + "Root:")
+    // `RootViewWithoutFocusException` class is private, need to match the message (instead of using
+    // type matching).
+    private val rootViewWithoutFocusExceptionMsg =
+        java.lang.String.format(
+            Locale.ROOT,
+            "Waited for the root of the view hierarchy to have " +
+                "window focus and not request layout for 10 seconds. If you specified a non " +
+                "default root matcher, it may be picking a root that never takes focus. " +
+                "Root:")
 
     /*@get:Rule
     var perms2: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -55,12 +56,12 @@ open class PVRInstrumentationBase {
     @Before
     fun setUpHandler() {
         Espresso.setFailureHandler { error, viewMatcher ->
-
             if (error.message!!.contains(rootViewWithoutFocusExceptionMsg) && anrCount < 3) {
                 anrCount++
                 dismissANRSystemDialog()
             } else { // chain all failures down to the default espresso handler
-                DefaultFailureHandler(InstrumentationRegistry.getInstrumentation().targetContext).handle(error, viewMatcher)
+                DefaultFailureHandler(InstrumentationRegistry.getInstrumentation().targetContext)
+                    .handle(error, viewMatcher)
             }
         }
     }

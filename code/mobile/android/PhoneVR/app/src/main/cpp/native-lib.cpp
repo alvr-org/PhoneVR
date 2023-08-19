@@ -1,6 +1,6 @@
+#include <android/native_window_jni.h>
 #include <jni.h>
 #include <media/NdkMediaCodec.h>
-#include <android/native_window_jni.h>
 #include <unistd.h>
 
 #include "Eigen"
@@ -10,9 +10,9 @@
 #include "media/NdkMediaExtractor.h"
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
+#include <android/log.h>
 #include <queue>
 #include <sys/stat.h>
-#include <android/log.h>
 
 #include "common.h"
 
@@ -21,7 +21,7 @@ using namespace Eigen;
 using namespace gvr;
 using namespace PVR;
 
-#define JNI_VERS JNI_VERSION_1_6
+#define JNI_VERS  JNI_VERSION_1_6
 #define SUB(func) FUNC(void, func)
 
 JavaVM *jVM;
@@ -31,7 +31,6 @@ namespace {
 
     float newAcc[3];
     uint16_t vPort = 0;
-
 
     int maxWidth, maxHeight;
     vector<uint8_t> vHeader;
@@ -48,15 +47,14 @@ namespace {
     AMediaCodec *codec;
     std::thread *mediaThr;
     int64_t vOutPts = -1;
-}
+}   // namespace
 
-extern char* ExtDirectory = nullptr;
+extern char *ExtDirectory = nullptr;
 extern float fpsStreamDecoder;
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
-    //PVR_DB_I("JNI initiating...");
-    try
-    {
+    // PVR_DB_I("JNI initiating...");
+    try {
         jVM = vm;
         JNIEnv *env;
         jint result = jVM->GetEnv((void **) &env, JNI_VERS);
@@ -74,14 +72,15 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
         jthrowable exc;
         jclass jWrapClass = env->FindClass("viritualisres/phonevr/Wrap");
         if (env->ExceptionCheck()) {
-            //jclass jClassFormErr = env->FindClass("java/lang/ClassFormatError");
+            // jclass jClassFormErr = env->FindClass("java/lang/ClassFormatError");
             exc = env->ExceptionOccurred();
             env->ExceptionClear();
 
             jboolean isCopy = false;
-            jmethodID toString = env->GetMethodID(env->FindClass("java/lang/Object"), "toString", "()Ljava/lang/String;");
-            jstring s = (jstring)(*env).CallObjectMethod(exc, toString);
-            const char* utf = (*env).GetStringUTFChars(s, &isCopy);
+            jmethodID toString = env->GetMethodID(
+                env->FindClass("java/lang/Object"), "toString", "()Ljava/lang/String;");
+            jstring s = (jstring) (*env).CallObjectMethod(exc, toString);
+            const char *utf = (*env).GetStringUTFChars(s, &isCopy);
 
             PVR_DB_I("JNI_OnLoad:: Exception Caught: " + string(utf));
         }
@@ -93,12 +92,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
         javaWrap = (jclass) env->NewGlobalRef(jWrapClass);
         if (javaWrap == NULL) {
             PVR_DB_I("JNI_OnLoad::GlobalRef:: System ran out of memory");
-        }
-        else {
+        } else {
             PVR_DB_I("JNI_OnLoad:: Found.");
         }
-    }
-    catch( exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_OnLoad::FindClass:: Caught Exception: " + string(e.what()));
     }
     return JNI_VERS;
@@ -133,14 +130,15 @@ void callJavaMethod(const char *name) {
         jthrowable exc;
         jmethodID resultOfMethodID = (env->GetStaticMethodID(javaWrap, name, "()V"));
         if (env->ExceptionCheck()) {
-            //jclass jClassFormErr = env->FindClass("java/lang/ClassFormatError");
+            // jclass jClassFormErr = env->FindClass("java/lang/ClassFormatError");
             exc = env->ExceptionOccurred();
             env->ExceptionClear();
 
             jboolean isCopy = false;
-            jmethodID toString = env->GetMethodID(env->FindClass("java/lang/Object"), "toString", "()Ljava/lang/String;");
-            jstring s = (jstring)(*env).CallObjectMethod(exc, toString);
-            const char* utf = (*env).GetStringUTFChars(s, &isCopy);
+            jmethodID toString = env->GetMethodID(
+                env->FindClass("java/lang/Object"), "toString", "()Ljava/lang/String;");
+            jstring s = (jstring) (*env).CallObjectMethod(exc, toString);
+            const char *utf = (*env).GetStringUTFChars(s, &isCopy);
 
             PVR_DB_I("JNI_callJavaMethod:: Exception Caught: " + string(utf));
         }
@@ -154,22 +152,31 @@ void callJavaMethod(const char *name) {
 
         if (!isMainThread) {
             jint resultOfDetachCurrentThread = jVM->DetachCurrentThread();
-            if( resultOfDetachCurrentThread != JNI_OK ) {
-                PVR_DB_I("JNI_callJavaMethod:: Fail DetachCurrentThread with error code " + to_string(resultOfDetachCurrentThread));
+            if (resultOfDetachCurrentThread != JNI_OK) {
+                PVR_DB_I("JNI_callJavaMethod:: Fail DetachCurrentThread with error code " +
+                         to_string(resultOfDetachCurrentThread));
             }
         }
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_callJavaMethod::GetStaticMethodID:: Caught Exception: " + string(e.what()));
     }
 }
 
-extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3,
-        float cf1, float cf2, float cf3, float cf4, float cf5,
-        float ctd1, float ctd2,
-        int td1, int td2)
-{
-    PVR_DB("JNI Calling updataJavaTextViewFPS: " + to_string(f1) + " " + to_string(f2) + " " + to_string(f3)+ " " + to_string(cf1) + " " + to_string(cf2)+ " " + to_string(cf3) +" " + to_string(cf4));
+extern "C" void updateJavaTextViewFPS(float f1,
+                                      float f2,
+                                      float f3,
+                                      float cf1,
+                                      float cf2,
+                                      float cf3,
+                                      float cf4,
+                                      float cf5,
+                                      float ctd1,
+                                      float ctd2,
+                                      int td1,
+                                      int td2) {
+    PVR_DB("JNI Calling updataJavaTextViewFPS: " + to_string(f1) + " " + to_string(f2) + " " +
+           to_string(f3) + " " + to_string(cf1) + " " + to_string(cf2) + " " + to_string(cf3) +
+           " " + to_string(cf4));
     try {
         bool isMainThread = true;
         JNIEnv *env;
@@ -188,7 +195,7 @@ extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3,
 
             if (thread_result != JNI_OK) {
                 PVR_DB("JNI_updataJavaTextViewFPS:: Fail to AttachCurrentThread " +
-                         to_string(thread_result));
+                       to_string(thread_result));
             }
         }
 
@@ -209,8 +216,8 @@ extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3,
         jint jtd2 = td2;
 
         jthrowable exc;
-        jmethodID resultOfMethodID = (env->GetStaticMethodID(javaWrap, "updateTextViewFPS",
-                                                             "(FFFFFFFFFFII)V"));
+        jmethodID resultOfMethodID =
+            (env->GetStaticMethodID(javaWrap, "updateTextViewFPS", "(FFFFFFFFFFII)V"));
         /*if (env->ExceptionCheck()) {
             //jclass jClassFormErr = env->FindClass("java/lang/ClassFormatError");
             exc = env->ExceptionOccurred();
@@ -229,20 +236,30 @@ extern "C" void updateJavaTextViewFPS(float f1, float f2, float f3,
             PVR_DB("JNI_updataJavaTextViewFPS:: Fail to GetStaticMethodID of updateTextViewFPS");
         }
 
-        env->CallStaticVoidMethod(javaWrap, resultOfMethodID, jf1, jf2, jf3,
-                                  jcf1, jcf2, jcf3, jcf4, jcf5,
-                                  jctd1, jctd2,
-                                  jtd1, jtd2);
+        env->CallStaticVoidMethod(javaWrap,
+                                  resultOfMethodID,
+                                  jf1,
+                                  jf2,
+                                  jf3,
+                                  jcf1,
+                                  jcf2,
+                                  jcf3,
+                                  jcf4,
+                                  jcf5,
+                                  jctd1,
+                                  jctd2,
+                                  jtd1,
+                                  jtd2);
         if (!isMainThread) {
             jint resultOfDetachCurrentThread = jVM->DetachCurrentThread();
             if (resultOfDetachCurrentThread != JNI_OK) {
                 PVR_DB("JNI_updataJavaTextViewFPS:: Fail DetachCurrentThread with error code " +
-                         to_string(resultOfDetachCurrentThread));
+                       to_string(resultOfDetachCurrentThread));
             }
         }
-    }
-    catch(exception e){
-        PVR_DB_I("JNI_updataJavaTextViewFPS::GetStaticMethodID:: Caught Exception: " + string(e.what()));
+    } catch (exception e) {
+        PVR_DB_I("JNI_updataJavaTextViewFPS::GetStaticMethodID:: Caught Exception: " +
+                 string(e.what()));
     }
 }
 
@@ -251,7 +268,8 @@ SUB(setExtDirectory)(JNIEnv *env, jclass, jstring jExtDir, jint len) {
     try {
         const char *resultOfGetStringUTFChars = env->GetStringUTFChars(jExtDir, nullptr);
         if (resultOfGetStringUTFChars == NULL) {
-            PVR_DB_I("JNI_setExtDirectory::GetStringUTFChars:: resultOfGetStringUTFChars is " + to_string(resultOfGetStringUTFChars));
+            PVR_DB_I("JNI_setExtDirectory::GetStringUTFChars:: resultOfGetStringUTFChars is " +
+                     to_string(resultOfGetStringUTFChars));
         }
 
         auto dir = resultOfGetStringUTFChars;
@@ -262,7 +280,9 @@ SUB(setExtDirectory)(JNIEnv *env, jclass, jstring jExtDir, jint len) {
         env->ReleaseStringUTFChars(jExtDir, dir);
 
         if (mkdir(string(string(ExtDirectory) + string("/PVR/")).c_str(), 0777)) {
-            __android_log_print(ANDROID_LOG_DEBUG, "PVR-JNI-D", "Directory Error %d (%s): %s - %s",
+            __android_log_print(ANDROID_LOG_DEBUG,
+                                "PVR-JNI-D",
+                                "Directory Error %d (%s): %s - %s",
                                 errno,
                                 string(ExtDirectory).c_str(),
                                 string(string(ExtDirectory) + string("/PVR/")).c_str(),
@@ -270,10 +290,9 @@ SUB(setExtDirectory)(JNIEnv *env, jclass, jstring jExtDir, jint len) {
         }
 
         PVR_DB_I(
-                "--------------------------------------------------------------------------------");
+            "--------------------------------------------------------------------------------");
         PVR_DB_I("JNI setExtDirectory: len: " + to_string(len) + ", copdstr: " + ExtDirectory);
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_setExtDirectory:: Caught Exception: " + string(e.what()));
     }
 }
@@ -283,21 +302,21 @@ SUB(startAnnouncer)(JNIEnv *env, jclass, jstring jIP, jint port) {
     try {
         auto ip = env->GetStringUTFChars(jIP, nullptr);
         if (ip == NULL) {
-            PVR_DB_I("JNI_startAnnouncer::GetStringUTFChars:: resultOfGetStringUTFChars is " + to_string(
-                    ip));
+            PVR_DB_I("JNI_startAnnouncer::GetStringUTFChars:: resultOfGetStringUTFChars is " +
+                     to_string(ip));
         }
 
         PVR_DB_I("JNI startAnnouncer: " + to_string(ip) + ":" + to_string(port));
-        PVRStartAnnouncer(ip, port, [] {
-            callJavaMethod("segueToGame");
-        }, [](uint8_t *headerBuf, size_t len) {
-            vHeader = vector<uint8_t>(headerBuf, headerBuf + len);
-        }, [] {
-            callJavaMethod("unwindToMain");
-        });
+        PVRStartAnnouncer(
+            ip,
+            port,
+            [] { callJavaMethod("segueToGame"); },
+            [](uint8_t *headerBuf, size_t len) {
+                vHeader = vector<uint8_t>(headerBuf, headerBuf + len);
+            },
+            [] { callJavaMethod("unwindToMain"); });
         env->ReleaseStringUTFChars(jIP, ip);
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_startAnnouncer:: Caught Exception: " + string(e.what()));
     }
 }
@@ -306,8 +325,7 @@ SUB(stopAnnouncer)() {
     PVR_DB_I("JNI stopAnnouncer");
     try {
         PVRStopAnnouncer();
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_stopAnnouncer:: Caught Exception: " + string(e.what()));
     }
 }
@@ -331,23 +349,21 @@ SUB(startSendSensorData)(JNIEnv *env, jclass, jint port) {
             }
             return false;
         });
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_startSendSensorData:: Caught Exception: " + string(e.what()));
     }
 }
 
 SUB(setAccData)(JNIEnv *env, jclass, jfloatArray jarr) {
-    //PVR_DB("JNI setAccData");
+    // PVR_DB("JNI setAccData");
     try {
         auto *accArr = env->GetFloatArrayElements(jarr, nullptr);
-        if( accArr == NULL ) {
+        if (accArr == NULL) {
             PVR_DB("JNI_setAccData:: GetFloatArrayElements returned NULL value ");
         }
         memcpy(newAcc, accArr, 3 * 4);
         env->ReleaseFloatArrayElements(jarr, accArr, JNI_ABORT);
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_setAccData:: Caught Exception: " + string(e.what()));
     }
 }
@@ -357,8 +373,7 @@ SUB(createRenderer)(JNIEnv *, jclass, jlong jGvrApi) {
     PVR_DB_I("JNI createRenderer");
     try {
         PVRCreateGVR(reinterpret_cast<gvr_context *>(jGvrApi));
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_createRenderer:: Caught Exception: " + string(e.what()));
     }
 }
@@ -367,8 +382,7 @@ SUB(onPause)() {
     PVR_DB_I("JNI onPause");
     try {
         PVRPause();
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_onPause:: Caught Exception: " + string(e.what()));
     }
 }
@@ -377,8 +391,7 @@ SUB(onTriggerEvent)() {
     PVR_DB_I("JNI onTriggerEvent");
     try {
         PVRTrigger();
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_onTriggerEvent:: Caught Exception: " + string(e.what()));
     }
 }
@@ -387,29 +400,26 @@ SUB(onResume)() {
     PVR_DB_I("JNI onResume");
     try {
         PVRResume();
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_onResume:: Caught Exception: " + string(e.what()));
     }
 }
 
 ///////////////////////////////////// video stream & coding //////////////////////////////////////
 SUB(setVStreamPort)(JNIEnv *, jclass, jint port) {
-    PVR_DB_I("JNI setVStreamPort - "+ to_string(port));
+    PVR_DB_I("JNI setVStreamPort - " + to_string(port));
     try {
         vPort = (uint16_t) port;
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_setVStreamPort:: Caught Exception: " + string(e.what()));
     }
 }
 
-SUB(startStream)() {// cannot pass parameter here or else sigabrit on getting frame (why???)
+SUB(startStream)() {   // cannot pass parameter here or else sigabrit on getting frame (why???)
     PVR_DB_I("JNI startStream");
     try {
         PVRStartReceiveStreams((uint16_t) vPort);
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_startStream:: Caught Exception: " + string(e.what()));
     }
 }
@@ -419,15 +429,14 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
     try {
         window = ANativeWindow_fromSurface(env, surface);
 
-
         auto *fmt = AMediaFormat_new();
         AMediaFormat_setString(fmt, AMEDIAFORMAT_KEY_MIME, "video/avc");
         AMediaFormat_setInt32(fmt, AMEDIAFORMAT_KEY_WIDTH, maxWidth);
         AMediaFormat_setInt32(fmt, AMEDIAFORMAT_KEY_HEIGHT, maxHeight);
         AMediaFormat_setInt32(fmt, AMEDIAFORMAT_KEY_MAX_WIDTH, maxWidth);
         AMediaFormat_setInt32(fmt, AMEDIAFORMAT_KEY_MAX_HEIGHT, maxHeight);
-        //AMediaFormat_setInt32(fmt, AMEDIAFORMAT_KEY_FRAME_RATE, 62);
-        //AMediaFormat_setInt32(fmt, AMEDIAFORMAT_KEY_MAX_INPUT_SIZE, 1000000);
+        // AMediaFormat_setInt32(fmt, AMEDIAFORMAT_KEY_FRAME_RATE, 62);
+        // AMediaFormat_setInt32(fmt, AMEDIAFORMAT_KEY_MAX_INPUT_SIZE, 1000000);
         AMediaFormat_setBuffer(fmt, "csd-0", &vHeader[0], vHeader.size());
 
         codec = AMediaCodec_createDecoderByType("video/avc");
@@ -441,80 +450,81 @@ SUB(startMediaCodec)(JNIEnv *env, jclass, jobject surface) {
         mediaThr = new std::thread([] {
             try {
                 while (pvrState != PVR_STATE_SHUTDOWN) {
-                    if (PVRIsVidBufNeeded()) //emptyVBufs.size() < 3
+                    if (PVRIsVidBufNeeded())   // emptyVBufs.size() < 3
                     {
-                        auto idx = AMediaCodec_dequeueInputBuffer(codec, 1000); // 1ms timeout
+                        auto idx = AMediaCodec_dequeueInputBuffer(codec, 1000);   // 1ms timeout
                         if (idx >= 0) {
                             size_t bufSz = 0;
                             uint8_t *buf = AMediaCodec_getInputBuffer(codec, (size_t) idx, &bufSz);
                             PVREnqueueVideoBuf(
-                                    {buf, static_cast<int>(idx), bufSz}); // into emptyVbuf
+                                {buf, static_cast<int>(idx), bufSz});   // into emptyVbuf
                             PVR_DB("[MediaCodec th] Getting MCInputMedia Buf[ " + to_string(bufSz) +
                                    "] @ idx:" + to_string(idx) + ". into emptyVbuf");
                         }
                     }
 
-                    auto fBuf = PVRPopVideoBuf(); //filledVBuf
+                    auto fBuf = PVRPopVideoBuf();   // filledVBuf
                     static Clk::time_point oldtime = Clk::now();
                     if (fBuf.idx != -1) {
-                        AMediaCodec_queueInputBuffer(codec, (size_t) fBuf.idx, 0, fBuf.pktSz,
+                        AMediaCodec_queueInputBuffer(codec,
+                                                     (size_t) fBuf.idx,
+                                                     0,
+                                                     fBuf.pktSz,
                                                      fBuf.pts,
-                                                     0); //AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM
+                                                     0);   // AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM
                         PVR_DB("[MediaCodec th] Getting filledVBuf Buf[ " + to_string(fBuf.pktSz) +
                                "] @ idx:" + to_string(fBuf.idx) + ", pts:" + to_string(fBuf.pts) +
                                ". into MCqInputBuf");
                     }
 
                     AMediaCodecBufferInfo info;
-                    auto outIdx = AMediaCodec_dequeueOutputBuffer(codec, &info,
-                                                                  1000); // 1ms timeout
+                    auto outIdx = AMediaCodec_dequeueOutputBuffer(codec,
+                                                                  &info,
+                                                                  1000);   // 1ms timeout
                     if (outIdx >= 0) {
-                        PVR_DB("[MediaCodec th] Output: " +
-                               to_string(
-                                       AMediaFormat_toString(AMediaCodec_getOutputFormat(codec))));
+                        PVR_DB(
+                            "[MediaCodec th] Output: " +
+                            to_string(AMediaFormat_toString(AMediaCodec_getOutputFormat(codec))));
 
                         /*int result_code = mkdir("/data/data/viritualisres.phonevr/files/", 0777);
-                        PVR_DB("[MediaCodec th] Dir path /data/data/viritualisres.phonevr/files/ " + to_string(result_code));
+                        PVR_DB("[MediaCodec th] Dir path /data/data/viritualisres.phonevr/files/ " +
+                        to_string(result_code));
 
-                        auto *file = fopen("/data/data/viritualisres.phonevr/files/mystream.h264","wb");
+                        auto *file =
+                        fopen("/data/data/viritualisres.phonevr/files/mystream.h264","wb");
 
                         if(file) {
                             auto buf = AMediaCodec_getOutputBuffer(codec, outIdx,
-                                                                   reinterpret_cast<size_t *>(&info.size));
-                            fwrite(buf, sizeof(uint8_t), ((info.size)/sizeof(uint8_t)), file);
-                            fclose(file);
-                            PVR_DB("[MediaCodec th] Wrote stream to file /storage/emulated/0/etc/mystream.h264");
-                        } else {
-                            PVR_DB("[MediaCodec th] File open failed /storage/emulated/0/etc/mystream.h264");
+                                                                   reinterpret_cast<size_t
+                        *>(&info.size)); fwrite(buf, sizeof(uint8_t), ((info.size)/sizeof(uint8_t)),
+                        file); fclose(file); PVR_DB("[MediaCodec th] Wrote stream to file
+                        /storage/emulated/0/etc/mystream.h264"); } else { PVR_DB("[MediaCodec th]
+                        File open failed /storage/emulated/0/etc/mystream.h264");
                         }*/
 
                         bool render = info.size != 0;
-                        auto status = AMediaCodec_releaseOutputBuffer(codec, (size_t) outIdx,
-                                                                      render);
+                        auto status =
+                            AMediaCodec_releaseOutputBuffer(codec, (size_t) outIdx, render);
                         if (render)
                             vOutPts = info.presentationTimeUs;
 
                         fpsStreamDecoder = (1000000000.0 / (Clk::now() - oldtime).count());
                         oldtime = Clk::now();
-                        PVR_DB("[MediaCodec th] MCreleaseOutputBuffer Buf @ idx:" +
-                               to_string(outIdx) +
-                               ", pts:" +
-                               (render ? ("Rendered " + to_string(vOutPts)) : "NotRendered") +
-                               ", Status: " + to_string(status) + ", Outsize:" +
-                               to_string(info.size));
+                        PVR_DB(
+                            "[MediaCodec th] MCreleaseOutputBuffer Buf @ idx:" + to_string(outIdx) +
+                            ", pts:" +
+                            (render ? ("Rendered " + to_string(vOutPts)) : "NotRendered") +
+                            ", Status: " + to_string(status) + ", Outsize:" + to_string(info.size));
                     }
                 }
-            }
-            catch(exception e){
+            } catch (exception e) {
                 PVR_DB_I("JNI_startMediaCodec:: Thread:: Caught Exception: " + string(e.what()));
             }
         });
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_startMediaCodec:: Caught Exception: " + string(e.what()));
     }
     pvrState = PVR_STATE_RUNNING;
-
 }
 
 FUNC(jlong, vFrameAvailable)(JNIEnv *) {
@@ -537,22 +547,21 @@ SUB(stopAll)(JNIEnv *) {
         AMediaCodec_delete(codec);
         ANativeWindow_release(window);
         pvrState = PVR_STATE_IDLE;
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_stopAll:: Caught Exception: " + string(e.what()));
     }
 }
 
 //////////////////////////////////////////// drawing //////////////////////////////////////////////
-FUNC(jint, initSystem)(JNIEnv *, jclass, jint x, jint y, jint resMul, jfloat offFov, jboolean reproj, jboolean debug) {
+FUNC(jint, initSystem)
+(JNIEnv *, jclass, jint x, jint y, jint resMul, jfloat offFov, jboolean reproj, jboolean debug) {
     try {
         int w = (x > y ? x : y), h = (x > y ? y : x);
         maxWidth = min(w / 8, resMul * w / h) *
-                   8; // keep pixel aspect ratio (does not influence image aspect ratio)
+                   8;   // keep pixel aspect ratio (does not influence image aspect ratio)
         maxHeight = min(h / 8, resMul) * 8;
         return PVRInitSystem(maxWidth, maxHeight, offFov, reproj, debug);
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_initSystem:: Caught Exception: " + string(e.what()));
     }
 }
@@ -560,9 +569,7 @@ FUNC(jint, initSystem)(JNIEnv *, jclass, jint x, jint y, jint resMul, jfloat off
 SUB(drawFrame)(JNIEnv *env, jclass, jlong pts) {
     try {
         PVRRender(pts);
-    }
-    catch(exception e){
+    } catch (exception e) {
         PVR_DB_I("JNI_drawFrame:: Caught Exception: " + string(e.what()));
     }
 }
-

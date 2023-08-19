@@ -6,4 +6,4 @@ extern JavaVM *jVM;
 
 #define FUNC(type, func) extern "C" JNIEXPORT type JNICALL Java_viritualisres_phonevr_Wrap_##func
 
-#endif //PHONEVR_COMMON_H
+#endif   // PHONEVR_COMMON_H

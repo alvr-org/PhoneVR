@@ -27,44 +27,37 @@ using namespace std;
 
 char watchMode = 0;
 
-
-class Watch
-{
+class Watch {
     typedef std::chrono::high_resolution_clock WClk;
 
     const char *name;
     WClk::time_point tp = WClk::now();
     bool mode;
 
-    Watch(const char *const name, bool mode) : name(name), mode(mode) {} // hidden ctor
+    Watch(const char *const name, bool mode) : name(name), mode(mode) {}   // hidden ctor
 
-public:
+  public:
     static Watch get(const char *const name, bool mode = false);
 
-    void start()
-    {
-        tp = WClk::now();
-    }
+    void start() { tp = WClk::now(); }
 
-    void stop()
-    {
-        float time = (float) std::chrono::duration_cast<std::chrono::milliseconds>(WClk::now() - tp).count();
+    void stop() {
+        float time =
+            (float) std::chrono::duration_cast<std::chrono::milliseconds>(WClk::now() - tp).count();
         WPRINT("%s: %6.3f\n", name, watchMode ? 1 / time : time / 1000);
     }
 
-    void tick()
-    {
+    void tick() {
         stop();
         start();
     };
-
 };
 
 namespace {
     unordered_map<const char *, Watch> watch_dict;
 }
 
-Watch Watch::get(const char *const name, bool mode) //factory
+Watch Watch::get(const char *const name, bool mode)   // factory
 {
     auto i = watch_dict.find(name);
     if (i != watch_dict.end())
@@ -76,16 +69,10 @@ Watch Watch::get(const char *const name, bool mode) //factory
     }
 }
 
-void startWatch(const char *const name, bool mode = false) {
-    Watch::get(name, mode).start();
-}
+void startWatch(const char *const name, bool mode = false) { Watch::get(name, mode).start(); }
 
-void stopWatch(const char *const name, bool mode = false) {
-    Watch::get(name, mode).stop();
-}
+void stopWatch(const char *const name, bool mode = false) { Watch::get(name, mode).stop(); }
 
-void watchTick(const char *const name, bool mode = false) {
-    Watch::get(name, mode).tick();
-}
+void watchTick(const char *const name, bool mode = false) { Watch::get(name, mode).tick(); }
 
-#endif // __cplusplus
+#endif   // __cplusplus

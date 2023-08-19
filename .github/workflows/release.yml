@@ -106,6 +106,15 @@ jobs:
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+    
+    - name: Install LLVM and Clang
+      uses: KyleMayes/install-llvm-action@v1
+      with:
+        version: "16.0"
+    
+    - name: Clang-format check
+      shell: bash
+      run: make format-check
 
     - name: Building ${{matrix.platform}}-${{matrix.config}}
       working-directory: ${{env.GITHUB_WORKSPACE}}

@@ -1,3 +1,4 @@
+/* (C)2023 */
 package viritualisres.phonevr
 
 import android.Manifest
@@ -16,27 +17,27 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import kotlinx.android.synthetic.main.activity_settings.*
 
-import viritualisres.phonevr.BuildConfig;
-
 class MainActivity : AppCompatActivity() {
 
-    private val REQUEST_CODE: Int = 52142;
+    private val REQUEST_CODE: Int = 52142
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
 
         // TODO: Add log to file, by making some util
-        Log.d("PhoneVR", "Running PVR on FINGERPRINT:${Build.FINGERPRINT}\n" +
-            "MODEL:${Build.MODEL}\n" +
-            "MANUFACTURER:${Build.MANUFACTURER}\n" +
-            "BRAND:${Build.BRAND}\n" +
-            "DEVICE:${Build.DEVICE}\n" +
-            "BOARD:${Build.BOARD}\n" +
-            "HOST:${Build.HOST}\n" +
-            "PRODUCT:${Build.PRODUCT}\n");
+        Log.d(
+            "PhoneVR",
+            "Running PVR on FINGERPRINT:${Build.FINGERPRINT}\n" +
+                "MODEL:${Build.MODEL}\n" +
+                "MANUFACTURER:${Build.MANUFACTURER}\n" +
+                "BRAND:${Build.BRAND}\n" +
+                "DEVICE:${Build.DEVICE}\n" +
+                "BOARD:${Build.BOARD}\n" +
+                "HOST:${Build.HOST}\n" +
+                "PRODUCT:${Build.PRODUCT}\n")
 
-        setExtDirinJNI();
+        setExtDirinJNI()
 
         setContentView(R.layout.activity_main)
         Wrap.setMainView(this)
@@ -48,15 +49,20 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             when (PackageManager.PERMISSION_DENIED) {
                 checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
-                    requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE), REQUEST_CODE)
+                    requestPermissions(
+                        arrayOf(
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE),
+                        REQUEST_CODE)
                 }
             }
         }
 
-        val VersionTV : TextView = findViewById<TextView>(R.id.tViewVersion);
-        VersionTV.text = "PhoneVR v" + BuildConfig.VERSION_NAME;
+        val VersionTV: TextView = findViewById<TextView>(R.id.tViewVersion)
+        VersionTV.text = "PhoneVR v" + BuildConfig.VERSION_NAME
 
-        //        MediaCodecInfo[] dmsadas = (new MediaCodecList(MediaCodecList.REGULAR_CODECS)).getCodecInfos();
+        //        MediaCodecInfo[] dmsadas = (new
+        // MediaCodecList(MediaCodecList.REGULAR_CODECS)).getCodecInfos();
         //        for (MediaCodecInfo mci : dmsadas){
         //            if (mci.toString() == "OMX.qcom.video.encoder.avc"){
         //                mci.getSupportedTypes();
@@ -64,13 +70,20 @@ class MainActivity : AppCompatActivity() {
         //        }
 
         // MediaCodecList.getCodecInfos();
-        //Range<Integer> dsfs =  MediaCodecInfo;
-        //Log.d("PhoneVR", "OnCreate called");
+        // Range<Integer> dsfs =  MediaCodecInfo;
+        // Log.d("PhoneVR", "OnCreate called");
     }
 
     private fun setExtDirinJNI() {
         val dir = getExternalFilesDir(null).toString()
-        Log.d("PhoneVR", "ExtDir: " + dir + ", ExtRead Only? :"+ isExternalStorageReadOnly() + ", ExtAvalb ?:"+ isExternalStorageAvailable())
+        Log.d(
+            "PhoneVR",
+            "ExtDir: " +
+                dir +
+                ", ExtRead Only? :" +
+                isExternalStorageReadOnly() +
+                ", ExtAvalb ?:" +
+                isExternalStorageAvailable())
         Wrap.setExtDirectory(dir, dir.length)
     }
 
@@ -84,19 +97,24 @@ class MainActivity : AppCompatActivity() {
         return MEDIA_MOUNTED == extStorageState
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             REQUEST_CODE -> {
                 if ((grantResults.isEmpty() ||
-                        grantResults[0] != PackageManager.PERMISSION_GRANTED) ||
-                        grantResults[1] != PackageManager.PERMISSION_GRANTED) {
+                    grantResults[0] != PackageManager.PERMISSION_GRANTED) ||
+                    grantResults[1] != PackageManager.PERMISSION_GRANTED) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE), REQUEST_CODE)
+                        requestPermissions(
+                            arrayOf(
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.READ_EXTERNAL_STORAGE),
+                            REQUEST_CODE)
                     }
-                }
-                else
-                    setExtDirinJNI()
+                } else setExtDirinJNI()
                 return
             }
             else -> {
@@ -109,10 +127,15 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         setExtDirinJNI()
         val prefs = getSharedPreferences(pvrPrefsKey, Context.MODE_PRIVATE)
-        //Wrap.startAnnouncer(prefs.getString(pcIpKey, pcIpDef), prefs.getInt(connPortKey, connPortDef))
+        // Wrap.startAnnouncer(prefs.getString(pcIpKey, pcIpDef), prefs.getInt(connPortKey,
+        // connPortDef))
 
-        //Log.d("PhoneVR", "OnResume called... Starting Announcer @ port :" + prefs.getInt(connPortKey, connPortDef).toString());
-        prefs.getString(pcIpKey, pcIpDef)?.let { Wrap.startAnnouncer(it, prefs.getInt(connPortKey, connPortDef)) }
+        // Log.d("PhoneVR", "OnResume called... Starting Announcer @ port :" +
+        // prefs.getInt(connPortKey,
+        // connPortDef).toString());
+        prefs.getString(pcIpKey, pcIpDef)?.let {
+            Wrap.startAnnouncer(it, prefs.getInt(connPortKey, connPortDef))
+        }
     }
 
     override fun onPause() {

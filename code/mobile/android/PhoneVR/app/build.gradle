@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply from: '../versioning.gradle'
+apply plugin: "com.diffplug.spotless"
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
@@ -175,7 +176,32 @@ task buildClientLib {
 // TODO: Automate with gradle tasks
 //connectedAndroidTest.dependsOn(runPVRADBTelnetServer)
 
+spotless {
+    java {
+        // don't need to set target, it is inferred from java
+        // fix formatting of type annotations
+        target '**/*.java'
+        formatAnnotations()
+        removeUnusedImports()
+        // apply a specific flavor of google-java-format
+        googleJavaFormat().aosp().reflowLongStrings()
+        // make sure every file has the following copyright header.
+        // optionally, Spotless can set copyright years by digging
+        // through git history (see "license" section below)
+        licenseHeader '/* (C)$YEAR */'
+    }
+    kotlin {
+        // by default the target is every '.kt' and '.kts` file in the java sourcesets
+        target '**/*.kt'
+        ktfmt().dropboxStyle()    // has its own section below
+        licenseHeader '/* (C)$YEAR */' // or licenseHeaderFile
+    }
+}
+
 preBuild.dependsOn(buildClientLib)
+preBuild.dependsOn("spotlessCheck")
+
 build.dependsOn(extractNdk)
 build.dependsOn(buildClientLib)
+
 clean.dependsOn(deleteNdk)

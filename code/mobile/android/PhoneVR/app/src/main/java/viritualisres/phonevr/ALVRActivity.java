@@ -1,3 +1,4 @@
+/* (C)2023 */
 package viritualisres.phonevr;
 
 import android.Manifest;
@@ -21,15 +22,14 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.PopupMenu;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener, BatteryLevelListener {
+public class ALVRActivity extends AppCompatActivity
+        implements PopupMenu.OnMenuItemClickListener, BatteryLevelListener {
 
     static {
         System.loadLibrary("native-lib");
@@ -74,9 +74,10 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                 // Get the charging state
                 int chargingState = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-                boolean isCharging = chargingState == BatteryManager.BATTERY_PLUGGED_AC
-                        || chargingState == BatteryManager.BATTERY_PLUGGED_USB
-                        || chargingState == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+                boolean isCharging =
+                        chargingState == BatteryManager.BATTERY_PLUGGED_AC
+                                || chargingState == BatteryManager.BATTERY_PLUGGED_USB
+                                || chargingState == BatteryManager.BATTERY_PLUGGED_WIRELESS;
 
                 // Notify the listener with the current battery percentage and charging state
                 if (listener != null) {
@@ -141,7 +142,7 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         super.onResume();
 
         if (VERSION.SDK_INT < VERSION_CODES.Q && !isReadExternalStorageEnabled()) {
-            final String[] permissions = new String[] { Manifest.permission.READ_EXTERNAL_STORAGE };
+            final String[] permissions = new String[] {Manifest.permission.READ_EXTERNAL_STORAGE};
             ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_REQUEST_CODE);
 
             return;
@@ -208,8 +209,8 @@ public class ALVRActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     private boolean isReadExternalStorageEnabled() {
-        return ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override

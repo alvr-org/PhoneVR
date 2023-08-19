@@ -1,3 +1,4 @@
+/* (C)2023 */
 package viritualisres.phonevr
 
 import android.content.Intent
@@ -18,11 +19,15 @@ internal object Wrap {
         gameRef = WeakReference(view)
     }
 
-    //callbacks
+    // callbacks
     @JvmStatic
     fun segueToGame() {
         val rotation = mainRef?.get()?.windowManager?.defaultDisplay?.rotation
-        Log.d("PVR-Java", "wrap/segueToGame: Wrapper Class Layout Orientation : " /*+ mainLayout.rotation.toString()*/ + ", GVR: " + rotation);
+        Log.d(
+            "PVR-Java",
+            "wrap/segueToGame: Wrapper Class Layout Orientation : " /*+ mainLayout.rotation.toString()*/ +
+                ", GVR: " +
+                rotation)
         val intent = Intent(mainRef?.get(), GameActivity::class.java)
         intent.putExtra("MAINLAYOUT_ROT", rotation)
         mainRef?.get()?.startActivity(intent)
@@ -34,15 +39,37 @@ internal object Wrap {
     }
 
     @JvmStatic
-    fun updateTextViewFPS(fpsStreamRecv : Float, fpsDecoder : Float, fpsRenderer: Float,
-                          cfpsSteamVRApp : Float, cfpsEncoder : Float, cfpsStreamWriter: Float, cfpsStreamer : Float, cfpsRenderer : Float,
-                          ctDelayRend : Float, ctDelayEnc: Float,
-                          tNetworkDelat: Int, tDelayTillUpdateCallms: Int) {
-        //Log.d("--PVR-Java--", "updateTextViewFPS Wrapper : $fpsStreamRecv $fpsDecoder $fpsRenderer")
-        gameRef?.get()?.updateFPS(  fpsStreamRecv, fpsDecoder, fpsRenderer,
-                                    cfpsSteamVRApp, cfpsEncoder, cfpsStreamWriter, cfpsStreamer, cfpsRenderer,
-                                    ctDelayRend, ctDelayEnc,
-                                    tNetworkDelat, tDelayTillUpdateCallms)
+    fun updateTextViewFPS(
+        fpsStreamRecv: Float,
+        fpsDecoder: Float,
+        fpsRenderer: Float,
+        cfpsSteamVRApp: Float,
+        cfpsEncoder: Float,
+        cfpsStreamWriter: Float,
+        cfpsStreamer: Float,
+        cfpsRenderer: Float,
+        ctDelayRend: Float,
+        ctDelayEnc: Float,
+        tNetworkDelat: Int,
+        tDelayTillUpdateCallms: Int
+    ) {
+        // Log.d("--PVR-Java--", "updateTextViewFPS Wrapper : $fpsStreamRecv $fpsDecoder
+        // $fpsRenderer")
+        gameRef
+            ?.get()
+            ?.updateFPS(
+                fpsStreamRecv,
+                fpsDecoder,
+                fpsRenderer,
+                cfpsSteamVRApp,
+                cfpsEncoder,
+                cfpsStreamWriter,
+                cfpsStreamer,
+                cfpsRenderer,
+                ctDelayRend,
+                ctDelayEnc,
+                tNetworkDelat,
+                tDelayTillUpdateCallms)
     }
 
     external fun createRenderer(gvrCtx: Long)
@@ -51,8 +78,14 @@ internal object Wrap {
 
     external fun startStream()
 
-    external fun initSystem(screenWidth: Int, screenHeight: Int, resMul: Int, offScreenFov: Float,
-                            enableWarp: Boolean, enableDebug: Boolean): Int
+    external fun initSystem(
+        screenWidth: Int,
+        screenHeight: Int,
+        resMul: Int,
+        offScreenFov: Float,
+        enableWarp: Boolean,
+        enableDebug: Boolean
+    ): Int
 
     external fun drawFrame(pts: Long)
 

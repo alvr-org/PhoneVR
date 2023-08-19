@@ -1,9 +1,9 @@
 #include "alvr_client_core.h"
 #include "cardboard.h"
-#include <jni.h>
 #include <GLES3/gl3.h>
 #include <algorithm>
 #include <deque>
+#include <jni.h>
 #include <map>
 #include <thread>
 #include <unistd.h>
@@ -28,7 +28,7 @@ void log(AlvrLogLevel level, const char *format, ...) {
 }
 
 #define error(...) log(ALVR_LOG_LEVEL_ERROR, __VA_ARGS__)
-#define info(...) log(ALVR_LOG_LEVEL_INFO, __VA_ARGS__)
+#define info(...)  log(ALVR_LOG_LEVEL_INFO, __VA_ARGS__)
 #define debug(...) log(ALVR_LOG_LEVEL_DEBUG, __VA_ARGS__)
 
 uint64_t HEAD_ID = alvr_path_string_to_id("/user/head");
@@ -77,9 +77,7 @@ int64_t GetBootTimeNano() {
 }
 
 // Inverse unit quaternion
-AlvrQuat inverseQuat(AlvrQuat q) {
-    return {-q.x, -q.y, -q.z, q.w};
-}
+AlvrQuat inverseQuat(AlvrQuat q) { return {-q.x, -q.y, -q.z, q.w}; }
 
 void cross(float a[3], float b[3], float out[3]) {
     out[0] = a[1] * b[2] - a[2] * b[1];
@@ -120,16 +118,23 @@ Pose getPose(uint64_t timestampNs) {
     auto inverseOrientation = AlvrQuat{q[0], q[1], q[2], q[3]};
     pose.orientation = inverseQuat(inverseOrientation);
 
-    // FIXME: The position is calculated wrong. It behaves correctly when leaning side to side but the overall position is wrong when facing left, right or back.
-    // float positionBig[3] = {pos[0] * 5, pos[1] * 5, pos[2] * 5};
-    // float headPos[3];
-    // quatVecMultiply(pose.orientation, positionBig, headPos);
+    // FIXME: The position is calculated wrong. It behaves correctly when leaning side to side but
+    // the overall position is wrong when facing left, right or back. float positionBig[3] = {pos[0]
+    // * 5, pos[1] * 5, pos[2] * 5}; float headPos[3]; quatVecMultiply(pose.orientation,
+    // positionBig, headPos);
 
-    pose.position[0] = 0; //-headPos[0];
+    pose.position[0] = 0;   //-headPos[0];
     pose.position[1] = /*-headPos[1]*/ +FLOOR_HEIGHT;
-    pose.position[2] = 0; //-headPos[2];
+    pose.position[2] = 0;   //-headPos[2];
 
-    debug("returning pos (%f,%f,%f) orient (%f, %f, %f, %f)", pos[0], pos[1], pos[2], q[0], q[1], q[2], q[3]);
+    debug("returning pos (%f,%f,%f) orient (%f, %f, %f, %f)",
+          pos[0],
+          pos[1],
+          pos[2],
+          q[0],
+          q[1],
+          q[2],
+          q[3]);
     return pose;
 }
 
@@ -150,21 +155,20 @@ void inputThread() {
         headMotion.position[2] = headPose.position[2];
         headMotion.orientation = headPose.orientation;
 
-        alvr_send_tracking(targetTimestampNs, &headMotion, 1/* , nullptr, nullptr */);
+        alvr_send_tracking(targetTimestampNs, &headMotion, 1 /* , nullptr, nullptr */);
 
         deadline += std::chrono::nanoseconds((uint64_t) (1e9 / 60.f / 3));
         std::this_thread::sleep_until(deadline);
     }
 }
 
-//extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *) {
-//    CTX.javaVm = vm;
-//    return JNI_VERSION_1_6;
-//}
+// extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *) {
+//     CTX.javaVm = vm;
+//     return JNI_VERSION_1_6;
+// }
 
-extern "C" JNIEXPORT void JNICALL
-Java_viritualisres_phonevr_ALVRActivity_initializeNative(JNIEnv *env, jobject obj,
-                                                      jint screenWidth, jint screenHeight) {
+extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initializeNative(
+    JNIEnv *env, jobject obj, jint screenWidth, jint screenHeight) {
     CTX.javaVm = jVM;
     CTX.javaContext = env->NewGlobalRef(obj);
 
@@ -173,15 +177,20 @@ Java_viritualisres_phonevr_ALVRActivity_initializeNative(JNIEnv *env, jobject ob
 
     float refreshRatesBuffer[1] = {60.f};
 
-    alvr_initialize((void *) CTX.javaVm, (void *) CTX.javaContext, viewWidth, viewHeight,
-                    refreshRatesBuffer, 1, false);
+    alvr_initialize((void *) CTX.javaVm,
+                    (void *) CTX.javaContext,
+                    viewWidth,
+                    viewHeight,
+                    refreshRatesBuffer,
+                    1,
+                    false);
 
     Cardboard_initializeAndroid(CTX.javaVm, CTX.javaContext);
     CTX.headTracker = CardboardHeadTracker_create();
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_viritualisres_phonevr_ALVRActivity_destroyNative(JNIEnv *, jobject) {
+extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_destroyNative(JNIEnv *,
+                                                                                        jobject) {
     alvr_destroy();
 
     CardboardHeadTracker_destroy(CTX.headTracker);
@@ -189,8 +198,8 @@ Java_viritualisres_phonevr_ALVRActivity_destroyNative(JNIEnv *, jobject) {
     CardboardDistortionRenderer_destroy(CTX.distortionRenderer);
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_viritualisres_phonevr_ALVRActivity_resumeNative(JNIEnv *, jobject) {
+extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_resumeNative(JNIEnv *,
+                                                                                       jobject) {
     CardboardHeadTracker_resume(CTX.headTracker);
 
     CTX.renderingParamsChanged = true;
@@ -208,8 +217,8 @@ Java_viritualisres_phonevr_ALVRActivity_resumeNative(JNIEnv *, jobject) {
     alvr_resume();
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_viritualisres_phonevr_ALVRActivity_pauseNative(JNIEnv *, jobject) {
+extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_pauseNative(JNIEnv *,
+                                                                                      jobject) {
     alvr_pause();
 
     if (CTX.running) {
@@ -226,23 +235,21 @@ Java_viritualisres_phonevr_ALVRActivity_surfaceCreatedNative(JNIEnv *, jobject) 
     CTX.glContextRecreated = true;
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_viritualisres_phonevr_ALVRActivity_setScreenResolutionNative(JNIEnv *, jobject, jint width,
-                                                               jint height) {
+extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_setScreenResolutionNative(
+    JNIEnv *, jobject, jint width, jint height) {
     CTX.screenWidth = width;
     CTX.screenHeight = height;
 
     CTX.renderingParamsChanged = true;
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_viritualisres_phonevr_ALVRActivity_sendBatteryLevel(JNIEnv *, jobject, jfloat level,
-                                                               jboolean plugged) {
+extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_sendBatteryLevel(
+    JNIEnv *, jobject, jfloat level, jboolean plugged) {
     alvr_send_battery(HEAD_ID, level, plugged);
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *, jobject) {
+extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *,
+                                                                                       jobject) {
     if (CTX.renderingParamsChanged) {
         info("renderingParamsChanged, processing new params");
         uint8_t *buffer;
@@ -255,8 +262,8 @@ Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *, jobject) {
 
         info("renderingParamsChanged, sending new params to alvr");
         CardboardLensDistortion_destroy(CTX.lensDistortion);
-        CTX.lensDistortion = CardboardLensDistortion_create(buffer, size, CTX.screenWidth,
-                                                            CTX.screenHeight);
+        CTX.lensDistortion =
+            CardboardLensDistortion_create(buffer, size, CTX.screenWidth, CTX.screenHeight);
 
         CardboardQrCode_destroy(buffer);
 
@@ -265,13 +272,13 @@ Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *, jobject) {
 
         for (int eye = 0; eye < 2; eye++) {
             CardboardMesh mesh;
-            CardboardLensDistortion_getDistortionMesh(CTX.lensDistortion, (CardboardEye) eye,
-                                                      &mesh);
+            CardboardLensDistortion_getDistortionMesh(
+                CTX.lensDistortion, (CardboardEye) eye, &mesh);
             CardboardDistortionRenderer_setMesh(CTX.distortionRenderer, &mesh, (CardboardEye) eye);
 
             float matrix[16] = {};
-            CardboardLensDistortion_getEyeFromHeadMatrix(CTX.lensDistortion, (CardboardEye) eye,
-                                                         matrix);
+            CardboardLensDistortion_getEyeFromHeadMatrix(
+                CTX.lensDistortion, (CardboardEye) eye, matrix);
             CTX.eyeOffsets[eye] = matrix[12];
         }
 
@@ -288,15 +295,25 @@ Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *, jobject) {
     }
 
     if (CTX.renderingParamsChanged || CTX.glContextRecreated) {
-        info("Rebuilding, binding textures, Resuming ALVR since glContextRecreated %b, renderingParamsChanged %b", CTX.renderingParamsChanged, CTX.glContextRecreated);
+        info("Rebuilding, binding textures, Resuming ALVR since glContextRecreated %b, "
+             "renderingParamsChanged %b",
+             CTX.renderingParamsChanged,
+             CTX.glContextRecreated);
         glGenTextures(2, CTX.lobbyTextures);
 
-        for (auto &lobbyTexture: CTX.lobbyTextures) {
+        for (auto &lobbyTexture : CTX.lobbyTextures) {
             glBindTexture(GL_TEXTURE_2D, lobbyTexture);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, CTX.screenWidth / 2, CTX.screenHeight, 0, GL_RGB,
-                         GL_UNSIGNED_BYTE, nullptr);
+            glTexImage2D(GL_TEXTURE_2D,
+                         0,
+                         GL_RGB,
+                         CTX.screenWidth / 2,
+                         CTX.screenHeight,
+                         0,
+                         GL_RGB,
+                         GL_UNSIGNED_BYTE,
+                         nullptr);
         }
 
         const uint32_t *targetViews[2] = {(uint32_t *) &CTX.lobbyTextures[0],
@@ -319,17 +336,25 @@ Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *, jobject) {
             alvr_update_hud_message_opengl(&message_buffer[0]);
         }
         if (event.tag == ALVR_EVENT_STREAMING_STARTED) {
-            info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, generating and binding textures...");
+            info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, generating and binding "
+                 "textures...");
             auto config = event.STREAMING_STARTED;
 
             glGenTextures(2, CTX.streamTextures);
 
-            for (auto &streamTexture: CTX.streamTextures) {
+            for (auto &streamTexture : CTX.streamTextures) {
                 glBindTexture(GL_TEXTURE_2D, streamTexture);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, config.view_width, config.view_height, 0,
-                             GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+                glTexImage2D(GL_TEXTURE_2D,
+                             0,
+                             GL_RGB,
+                             config.view_width,
+                             config.view_height,
+                             0,
+                             GL_RGB,
+                             GL_UNSIGNED_BYTE,
+                             nullptr);
             }
 
             AlvrFov fovArr[2] = {getFov((CardboardEye) 0), getFov((CardboardEye) 1)};
@@ -357,12 +382,14 @@ Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *, jobject) {
 
             alvr_start_stream_opengl(render_config);
 
-            info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, opengl stream started and input Thread started...");
+            info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, opengl stream started and input "
+                 "Thread started...");
             CTX.streaming = true;
             CTX.inputThread = std::thread(inputThread);
 
         } else if (event.tag == ALVR_EVENT_STREAMING_STOPPED) {
-            info("ALVR Poll Event: ALVR_EVENT_STREAMING_STOPPED, Waiting for inputThread to join...");
+            info("ALVR Poll Event: ALVR_EVENT_STREAMING_STOPPED, Waiting for inputThread to "
+                 "join...");
             CTX.streaming = false;
             CTX.inputThread.join();
 
@@ -372,7 +399,7 @@ Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *, jobject) {
     }
 
     CardboardEyeTextureDescription viewsDescs[2] = {};
-    for (auto &viewsDesc: viewsDescs) {
+    for (auto &viewsDesc : viewsDescs) {
         viewsDesc.left_u = 0.0;
         viewsDesc.right_u = 1.0;
         viewsDesc.top_v = 1.0;
@@ -420,8 +447,13 @@ Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *, jobject) {
     // todo: manually implement it?
 
     // info("nativeRendered: Rendering to Display...");
-    CardboardDistortionRenderer_renderEyeToDisplay(CTX.distortionRenderer, 0, 0, 0, CTX.screenWidth,
-                                                   CTX.screenHeight, &viewsDescs[0],
+    CardboardDistortionRenderer_renderEyeToDisplay(CTX.distortionRenderer,
+                                                   0,
+                                                   0,
+                                                   0,
+                                                   CTX.screenWidth,
+                                                   CTX.screenHeight,
+                                                   &viewsDescs[0],
                                                    &viewsDescs[1]);
 }
 
