@@ -193,7 +193,7 @@ spotless {
     kotlin {
         // by default the target is every '.kt' and '.kts` file in the java sourcesets
         target '**/*.kt'
-        ktfmt()    // has its own section below
+        ktfmt().dropboxStyle()    // has its own section below
         licenseHeader '/* (C)$YEAR */' // or licenseHeaderFile
     }
 }

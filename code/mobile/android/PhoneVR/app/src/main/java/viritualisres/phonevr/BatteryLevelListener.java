@@ -1,3 +1,4 @@
+/* (C)2023 */
 package viritualisres.phonevr;
 
 public interface BatteryLevelListener {

@@ -1,3 +1,4 @@
+/* (C)2023 */
 package viritualisres.phonevr
 
 import android.annotation.SuppressLint
@@ -10,24 +11,17 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.activityScenarioRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.rule.GrantPermissionRule
-import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.UiObjectNotFoundException
-import androidx.test.uiautomator.UiSelector
-import org.junit.BeforeClass
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TestName
-import org.junit.runner.RunWith
-import viritualisres.phonevr.utils.PVRInstrumentationBase
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.lang.Thread.sleep
-
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TestName
+import viritualisres.phonevr.utils.PVRInstrumentationBase
 
 /*
  * SS Test All Activities Startup
@@ -39,24 +33,24 @@ import java.lang.Thread.sleep
  * build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/Pixel_2_API_30(AVD) - 11
  */
 // @RunWith(AndroidJUnit4::class)
-class ALVRActivityTest: PVRInstrumentationBase() {
+class ALVRActivityTest : PVRInstrumentationBase() {
 
     private val TAG: String? = javaClass.simpleName
 
     @get:Rule
-    var perms2:GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    var perms2: GrantPermissionRule =
+        GrantPermissionRule.grant(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
     @get:Rule
-    var perms8: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.RECORD_AUDIO);
+    var perms8: GrantPermissionRule =
+        GrantPermissionRule.grant(android.Manifest.permission.RECORD_AUDIO)
 
     @get:Rule
-    var perms7: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.CAMERA);
+    var perms7: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.CAMERA)
 
-    @get:Rule
-    var nameRule = TestName()
+    @get:Rule var nameRule = TestName()
 
-    @get:Rule
-    val activityScenarioRule = activityScenarioRule<ALVRActivity>()
+    @get:Rule val activityScenarioRule = activityScenarioRule<ALVRActivity>()
 
     private fun waitForADBTelnetServer() {
 
@@ -65,8 +59,7 @@ class ALVRActivityTest: PVRInstrumentationBase() {
         val fd = File(filesDir, "pvr-adb-telnet")
         val fsLock = File(lockFilesDir, "pvr-adb-telnet.lock")
 
-        while (fsLock.exists() || fd.exists())
-        {
+        while (fsLock.exists() || fd.exists()) {
             sleep(500)
             Log.d(TAG, "waitForADBTelnetServer: Waiting for ADB to get free")
         }
@@ -84,13 +77,13 @@ class ALVRActivityTest: PVRInstrumentationBase() {
         } finally {
             stream.close()
         }
-        while (fd.exists())
-        {
+        while (fd.exists()) {
             sleep(500)
             Log.d(TAG, "shutdownADBTelnetServer: Waiting for ADBTelnetServer to shutdown...")
         }
         Log.d(TAG, "shutdownADBTelnetServer: ADBTelnetServer is down.")
     }
+
     private fun sendADBCommand(cmd: String) {
         /*
         - Android Android 30 Emulator AVD Device - 28-Apr-2023 Tested
@@ -115,23 +108,37 @@ class ALVRActivityTest: PVRInstrumentationBase() {
 
         val filesDir = InstrumentationRegistry.getInstrumentation().targetContext.filesDir
         val lockFilesDir = File("/sdcard/")
-        Log.d(TAG, "sendADBCommand: filesDir is $filesDir isW: ${filesDir!!.canWrite()} isR: ${filesDir.canRead()}")
-        Log.d(TAG, "sendADBCommand: lockFilesDir is $lockFilesDir isW: ${lockFilesDir.canWrite()} isR: ${lockFilesDir.canRead()}")
-        //filesDir.mkdirs()
+        Log.d(
+            TAG,
+            "sendADBCommand: filesDir is $filesDir isW: ${filesDir!!.canWrite()} isR: ${filesDir.canRead()}")
+        Log.d(
+            TAG,
+            "sendADBCommand: lockFilesDir is $lockFilesDir isW: ${lockFilesDir.canWrite()} isR: ${lockFilesDir.canRead()}")
+        // filesDir.mkdirs()
 
         val fd = File(filesDir, "pvr-adb-telnet")
         val fsLock = File(lockFilesDir, "pvr-adb-telnet.lock")
-        Log.d(TAG, "sendADBCommand: fd: ${fd.absolutePath} isW: ${fd.canWrite()} | exists: ${fd.exists()} | size: ${fd.length()}")
-        Log.d(TAG, "sendADBCommand: lockFd: ${fsLock.absolutePath} isW: ${fsLock.canWrite()} | exists: ${fsLock.exists()} | size: ${fsLock.length()}")
+        Log.d(
+            TAG,
+            "sendADBCommand: fd: ${fd.absolutePath} isW: ${fd.canWrite()} | exists: ${fd.exists()} | size: ${fd.length()}")
+        Log.d(
+            TAG,
+            "sendADBCommand: lockFd: ${fsLock.absolutePath} isW: ${fsLock.canWrite()} | exists: ${fsLock.exists()} | size: ${fsLock.length()}")
 
         waitForADBTelnetServer()
 
-        if( !fsLock.exists() && !fd.exists())
-        {
-            // ADB TelnetServer will createlockfile wait 500ms <-> read cmdfile -> execute cmdfile -> delete cmdfile -> delete lockfile
-            // JavaTestApp, neither lockfile exists nor cmdfile exists -> create cmdfile -> write cmdfile
-            // JavaTestApp, else wait 500ms - Some race exists, its okay - Only a test not for end-user consumption
-            Log.d(TAG, "sendADBCommand: file is not locked and does not exist, ADB is free to execute telnet cmd")
+        if (!fsLock.exists() && !fd.exists()) {
+            // ADB TelnetServer will createlockfile wait 500ms <-> read cmdfile -> execute cmdfile
+            // ->
+            // delete cmdfile -> delete lockfile
+            // JavaTestApp, neither lockfile exists nor cmdfile exists -> create cmdfile -> write
+            // cmdfile
+            // JavaTestApp, else wait 500ms - Some race exists, its okay - Only a test not for
+            // end-user
+            // consumption
+            Log.d(
+                TAG,
+                "sendADBCommand: file is not locked and does not exist, ADB is free to execute telnet cmd")
             fd.createNewFile()
             val stream: FileOutputStream = FileOutputStream(fd)
             try {
@@ -144,16 +151,16 @@ class ALVRActivityTest: PVRInstrumentationBase() {
 
     private fun lookDown() {
         // set gravity acceleration g in Z Direction
-        sendADBCommand("sensor set acceleration 0:0:9.77622");
+        sendADBCommand("sensor set acceleration 0:0:9.77622")
     }
 
     private fun rotateAVDLandscape() {
         // set gravity acceleration g in Y Direction - real Mock
-        sendADBCommand("sensor set acceleration 9.77622:0:0");
+        sendADBCommand("sensor set acceleration 9.77622:0:0")
     }
 
     @SuppressLint("CheckResult")
-    @Test 
+    @Test
     @Throws(IOException::class)
     fun saveDeviceScreenBitmap() {
         // SKIP Cardboard API Asking to Scan QR
@@ -174,13 +181,13 @@ class ALVRActivityTest: PVRInstrumentationBase() {
 
         Log.d(TAG, "saveDeviceScreenBitmap: Executed AVD Commands, Taking screenshot...")
         try {
-            // First time going into VR mode android shows an annoying "You are in fullscreen dialog"
+            // First time going into VR mode android shows an annoying "You are in fullscreen
+            // dialog"
             onView(withText("Got it")).perform(click())
         } catch (e: NoMatchingViewException) {
             // View is not in hierarchy - which is okay
         }
-        takeScreenshot()
-            .writeToTestStorage("${javaClass.simpleName}_${nameRule.methodName}")
+        takeScreenshot().writeToTestStorage("${javaClass.simpleName}_${nameRule.methodName}")
 
         lookDown()
         waitForADBTelnetServer() // Wait for ADBTelnetServer to execute rotation
@@ -188,7 +195,7 @@ class ALVRActivityTest: PVRInstrumentationBase() {
 
         takeScreenshot()
             .writeToTestStorage("${javaClass.simpleName}_${nameRule.methodName}_LookingDown")
-        //shutdownADBTelnetServer()
+        // shutdownADBTelnetServer()
     }
     /*
     Uncomment this as a separate Test: Issue, Reopening (warm start) crashes ALVRActivity

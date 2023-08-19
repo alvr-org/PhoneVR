@@ -1,23 +1,24 @@
+/* (C)2023 */
 package viritualisres.phonevr;
+
+import static org.acra.ReportField.*;
 
 import android.app.Application;
 import android.content.Context;
-
 import org.acra.ACRA;
 import org.acra.annotation.AcraCore;
 import org.acra.annotation.AcraDialog;
 import org.acra.config.CoreConfigurationBuilder;
 import org.acra.data.StringFormat;
 
-import static org.acra.ReportField.*;
-
-@AcraCore(buildConfigClass = BuildConfig.class,
+@AcraCore(
+        buildConfigClass = BuildConfig.class,
         reportFormat = StringFormat.JSON,
         reportContent = {
             ANDROID_VERSION,
             APP_VERSION_CODE,
             APP_VERSION_NAME,
-            //APPLICATION_LOG,
+            // APPLICATION_LOG,
             AVAILABLE_MEM_SIZE,
             BRAND,
             BUILD,
@@ -52,18 +53,18 @@ import static org.acra.ReportField.*;
             USER_APP_START_DATE,
             USER_COMMENT,
             USER_CRASH_DATE,
-            USER_EMAIL },
-            reportSenderFactoryClasses = DiscordReportSenderFactory.class)
+            USER_EMAIL
+        },
+        reportSenderFactoryClasses = DiscordReportSenderFactory.class)
 
-//@AcraMailSender(mailTo = "phonevr.crash@gmail.com")
-@AcraDialog( reportDialogClass = ErrorReportingDialog.class )
-
+// @AcraMailSender(mailTo = "phonevr.crash@gmail.com")
+@AcraDialog(reportDialogClass = ErrorReportingDialog.class)
 public class ErrorReporting extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        CoreConfigurationBuilder builder = new CoreConfigurationBuilder(this)
-                .setBuildConfigClass(BuildConfig.class);
+        CoreConfigurationBuilder builder =
+                new CoreConfigurationBuilder(this).setBuildConfigClass(BuildConfig.class);
 
         /*SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault());
         String currentDateandTime = sdf.format(new Date());
