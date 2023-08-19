@@ -66,7 +66,9 @@ jobs:
 
     - name: Clang-format check
       shell: bash
-      run: make format-check
+      run: |
+        clang-format --version
+        make format-check
 
     - name: Building ${{matrix.platform}}-${{matrix.config}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
