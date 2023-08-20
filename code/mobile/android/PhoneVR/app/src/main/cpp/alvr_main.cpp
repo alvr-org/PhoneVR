@@ -194,8 +194,11 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_destro
     alvr_destroy();
 
     CardboardHeadTracker_destroy(CTX.headTracker);
+    CTX.headTracker = nullptr;
     CardboardLensDistortion_destroy(CTX.lensDistortion);
+    CTX.lensDistortion = nullptr;
     CardboardDistortionRenderer_destroy(CTX.distortionRenderer);
+    CTX.distortionRenderer = nullptr;
 }
 
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_resumeNative(JNIEnv *,
@@ -261,13 +264,21 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
         }
 
         info("renderingParamsChanged, sending new params to alvr");
-        CardboardLensDistortion_destroy(CTX.lensDistortion);
+        if (CTX.lensDistortion) {
+            CardboardLensDistortion_destroy(CTX.lensDistortion);
+            CTX.lensDistortion = nullptr;
+        }
+        info("renderingParamsChanged, destroyed distortion");
         CTX.lensDistortion =
             CardboardLensDistortion_create(buffer, size, CTX.screenWidth, CTX.screenHeight);
 
         CardboardQrCode_destroy(buffer);
+        *buffer = 0;
 
-        CardboardDistortionRenderer_destroy(CTX.distortionRenderer);
+        if (CTX.distortionRenderer) {
+            CardboardDistortionRenderer_destroy(CTX.distortionRenderer);
+            CTX.distortionRenderer = nullptr;
+        }
         CTX.distortionRenderer = CardboardOpenGlEs2DistortionRenderer_create();
 
         for (int eye = 0; eye < 2; eye++) {
@@ -283,6 +294,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
         }
 
         AlvrFov fovArr[2] = {getFov((CardboardEye) 0), getFov((CardboardEye) 1)};
+        info("renderingParamsChanged, sending new view configs (FOV) to alvr");
         alvr_send_views_config(fovArr, CTX.eyeOffsets[0] - CTX.eyeOffsets[1]);
     }
 
@@ -329,11 +341,12 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
         if (event.tag == ALVR_EVENT_HUD_MESSAGE_UPDATED) {
             auto message_length = alvr_hud_message(nullptr);
             auto message_buffer = std::vector<char>(message_length);
-            info("ALVR Poll Event: HUD Message Update - %s", &message_buffer[0]);
 
             alvr_hud_message(&message_buffer[0]);
+            info("ALVR Poll Event: HUD Message Update - %s", &message_buffer[0]);
 
-            alvr_update_hud_message_opengl(&message_buffer[0]);
+            if (message_length > 0)
+                alvr_update_hud_message_opengl(&message_buffer[0]);
         }
         if (event.tag == ALVR_EVENT_STREAMING_STARTED) {
             info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, generating and binding "
@@ -361,7 +374,6 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
             alvr_send_views_config(fovArr, CTX.eyeOffsets[0] - CTX.eyeOffsets[1]);
 
             info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, View configs sent...");
-            // todo: send battery
 
             auto leftIntHandle = (uint32_t) CTX.streamTextures[0];
             auto rightIntHandle = (uint32_t) CTX.streamTextures[1];
