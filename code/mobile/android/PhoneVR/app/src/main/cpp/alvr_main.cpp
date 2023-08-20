@@ -191,6 +191,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initia
 
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_destroyNative(JNIEnv *,
                                                                                         jobject) {
+    alvr_destroy_opengl();
     alvr_destroy();
 
     CardboardHeadTracker_destroy(CTX.headTracker);
