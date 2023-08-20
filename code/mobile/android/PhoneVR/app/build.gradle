@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.dsl.PackagingOptions
+
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
@@ -10,6 +12,8 @@ def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
+def defaultALVRFlavour = "--release"
+
 android {
     signingConfigs {
         releaseconfig {
@@ -20,14 +24,14 @@ android {
                 storePassword "test1234"
                 keyAlias "PhoneVRKeyPR"
                 keyPassword "test1234"
-                println "Configuring releaseconfigs for testing a PR..."
+                println "[PVR] Configuring releaseconfigs for testing a PR..."
             }
             else {
                 storeFile file(keystoreProperties['storeFile'])
                 storePassword System.getenv("Store")
                 keyAlias keystoreProperties['keyAlias']
                 keyPassword System.getenv("Key")
-                println "Configuring releaseconfigs for release (push) (not a PR)"
+                println "[PVR] Configuring releaseconfigs for release (push) (not a PR)"
             }
         }
     }
@@ -75,6 +79,7 @@ android {
                     cppFlags += "-D_DEBUG=1"
                 }
             }
+            defaultALVRFlavour = ""
         }
     }
     buildFeatures {
@@ -110,6 +115,23 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+
+    packagingOptions {
+        gradle.startParameter.getTaskNames().each { task ->
+            println("[PVR] task is " + task)
+            if (task.contains('debug') || task.contains('Debug')) {
+                def android = project.extensions.findByName("android")
+
+                if(android != null) {
+                    PackagingOptions packagingOptions = android["packagingOptions"]
+
+                    if (packagingOptions != null) {
+                        packagingOptions.doNotStrip = [ "**/*.so" ]
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -161,13 +183,18 @@ task extractNdk(type: Copy)  {
 
 task deleteNdk(type: Delete) {
     delete "libraries/"
+    delete "../ALVR/build/"
+    delete "../ALVR/target/"
 }
 
 task buildClientLib {
     doLast {
         exec {
             workingDir '../ALVR'
-            commandLine 'cargo', 'xtask', 'build-client-lib', '--release', '--no-stdcpp'
+            if(defaultALVRFlavour.length() > 0)
+                commandLine 'cargo', 'xtask', 'build-client-lib', '--no-stdcpp', defaultALVRFlavour
+            else
+                commandLine 'cargo', 'xtask', 'build-client-lib', '--no-stdcpp'
         }
     }
 }
