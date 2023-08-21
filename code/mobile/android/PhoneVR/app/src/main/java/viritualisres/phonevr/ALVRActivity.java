@@ -35,7 +35,7 @@ public class ALVRActivity extends AppCompatActivity
         System.loadLibrary("native-lib");
     }
 
-    private static final String TAG = ALVRActivity.class.getSimpleName();
+    private static final String TAG = ALVRActivity.class.getSimpleName() + "-Java";
 
     // Permission request codes
     private static final int PERMISSIONS_REQUEST_CODE = 2;
@@ -90,6 +90,7 @@ public class ALVRActivity extends AppCompatActivity
     @Override
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
+        Log.d(TAG, "onCreate ALVRActivity");
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -132,6 +133,7 @@ public class ALVRActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG, "Pausing ALVR Activity");
         pauseNative();
         glView.onPause();
         bMonitor.stopMonitoring(this);
@@ -140,6 +142,7 @@ public class ALVRActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "Resuming ALVR Activity");
 
         if (VERSION.SDK_INT < VERSION_CODES.Q && !isReadExternalStorageEnabled()) {
             final String[] permissions = new String[] {Manifest.permission.READ_EXTERNAL_STORAGE};
@@ -156,6 +159,7 @@ public class ALVRActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "Destroying ALVR Activity");
         destroyNative();
     }
 
