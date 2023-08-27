@@ -1,8 +1,8 @@
 <br/><br/>
-[![PhonveVR](./.github/LogoPVR.png)](https://github.com/PhoneVR-Developers/PhoneVR/releases)<br/><br/><br/>
+[![PhonveVR](./.github/LogoPVR.png)](https://github.com/PhoneVR-Developers/PhoneVR/releases)<br/>
 ![LogoPVRv0 3](https://github.com/PhoneVR-Developers/PhoneVR/assets/4137788/b32a23f6-4264-45f9-99cc-bbdd593a8e94)
 
-<br/><br/><br/>
+<br/>
 
 <img src="./.github/rep1.png" width="50%"><img src="./.github/rep2.jpg" width="50%">
 <sup>Pictures used for representational purposes</sup>
