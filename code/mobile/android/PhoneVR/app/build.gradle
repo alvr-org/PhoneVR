@@ -14,6 +14,8 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 def defaultALVRFlavour = "--release"
 
+System.setProperty("VERBOSE", "defined")
+
 android {
     signingConfigs {
         releaseconfig {
@@ -55,9 +57,6 @@ android {
             }
         }
 
-        //noinspection ChromeOsAbiSupport
-        ndk.abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86'
-
         defaultPublishConfig 'release'
         publishNonDefault true
         archivesBaseName = "PhoneVR-v$versionName"
@@ -68,6 +67,8 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable false
             signingConfig signingConfigs.releaseconfig
+            //noinspection ChromeOsAbiSupport
+            ndk.abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86'
         }
         debug {
             debuggable true
@@ -80,6 +81,7 @@ android {
                 }
             }
             defaultALVRFlavour = ""
+            ndk.abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
         }
     }
     buildFeatures {
