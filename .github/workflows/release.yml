@@ -88,6 +88,15 @@ jobs:
         submodules: 'true'
         ref: ${{ needs.prepare_release.outputs.release_ref }}
 
+    - name: Install LLVM and Clang
+      uses: KyleMayes/install-llvm-action@v1
+      with:
+        version: "16.0.0"
+      
+    - name: Clang-format check
+      shell: bash
+      run: make format-check
+
     # https://github.com/actions/runner-images/issues/842#issuecomment-1495115166
     - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
       shell: powershell
@@ -107,15 +116,6 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore ${{env.SOLUTION_FILE_PATH}}
     
-    - name: Install LLVM and Clang
-      uses: KyleMayes/install-llvm-action@v1
-      with:
-        version: "16.0"
-    
-    - name: Clang-format check
-      shell: bash
-      run: make format-check
-
     - name: Building ${{matrix.platform}}-${{matrix.config}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
