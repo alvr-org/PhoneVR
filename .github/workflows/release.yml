@@ -36,7 +36,7 @@ jobs:
       - name: Configure git
         run: git config --global core.autocrlf false
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'true'
 
@@ -83,7 +83,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'true'
         ref: ${{ needs.prepare_release.outputs.release_ref }}
@@ -134,7 +134,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ needs.prepare_release.outputs.release_ref }}
           submodules: 'true'
@@ -250,7 +250,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ needs.prepare_release.outputs.release_ref }}
 
