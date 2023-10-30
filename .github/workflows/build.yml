@@ -203,7 +203,7 @@ jobs:
           java-version: 17
 
       # https://github.com/iterative/cml/issues/1377
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: '16'
       
@@ -775,7 +775,7 @@ jobs:
   #           code/mobile/android/PhoneVR/app/build/outputs/androidTest-results/**/TEST-*.xml
       
   #     # https://github.com/iterative/cml/issues/1377
-  #     - uses: actions/setup-node@v3
+  #     - uses: actions/setup-node@v4
   #       with:
   #         node-version: '16'
       
