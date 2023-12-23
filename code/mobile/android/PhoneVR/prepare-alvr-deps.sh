@@ -14,6 +14,7 @@ rustup target add \
 # # mv ALVR-phonevr ALVR
 
 pushd ALVR
+cargo update
 cargo xtask prepare-deps --platform android $@
 popd
 
