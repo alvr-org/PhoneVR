@@ -149,7 +149,7 @@ jobs:
           echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
       - name: Set Up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'oracle'
           java-version: '17'
