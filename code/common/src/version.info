@@ -1,2 +1,2 @@
-#define PVR_BINVERSION 1,2,0
-#define PVR_STRVERSION "1.2.0-beta"
+#define PVR_BINVERSION 1,3,0
+#define PVR_STRVERSION "1.3.0-beta"
