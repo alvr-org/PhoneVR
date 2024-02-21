@@ -12,6 +12,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
 # find all src files
 file(GLOB_RECURSE  MY_SRC
     ../../../../common/libs/ifaddrs/*.c
+    ../../../../common/libs/json/single_include/*.hpp
     ../../../../common/src/*.cpp
     ../../../mobile-common/*.cpp
 )
@@ -31,6 +32,7 @@ target_include_directories(native-lib
     PUBLIC ../../../../common/libs/asio/asio/include
     PUBLIC ../../../../common/libs/eigen/Eigen
     PUBLIC ../../../../common/libs/ifaddrs
+    PUBLIC ../../../../common/libs/json/single_include/
 
     # my headers
     PUBLIC ../../../../common/src

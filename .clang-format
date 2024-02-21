@@ -12,7 +12,7 @@ AllowShortIfStatementsOnASingleLine: false
 AlignTrailingComments: true
 SpacesBeforeTrailingComments: 3
 # change the next line to All for Alistair's textbook style
-AlwaysBreakAfterReturnType: TopLevelDefinitions
+# AlwaysBreakAfterReturnType: TopLevelDefinitions
 #  #define SHORT_NAME       42
 #  #define LONGER_NAME      0x007f   # does nice spacing for macros
 AlignConsecutiveMacros: Consecutive
