@@ -21,7 +21,7 @@ class HMD : public ITrackedDeviceServerDriver,
             public IVRDisplayComponent,
             public IVRVirtualDisplay {   // todo: try to remove IVRDisplayComponent
 
-    float projRect[4];                   // left eye viewport, flip
+    float projRect[4];   // left eye viewport, flip
     float poseTmOffS;
 
     microseconds vstreamDT;
@@ -158,7 +158,7 @@ class HMD : public ITrackedDeviceServerDriver,
         VRProperties()->SetBoolProperty(propCont, Prop_DeviceIsWireless_Bool, true);
         VRProperties()->SetBoolProperty(propCont, Prop_DeviceIsCharging_Bool, false);
         VRProperties()->SetFloatProperty(
-            propCont, Prop_DeviceBatteryPercentage_Float, 1);       // TODO get from phone
+            propCont, Prop_DeviceBatteryPercentage_Float, 1);   // TODO get from phone
         VRProperties()->SetBoolProperty(
             propCont, Prop_Firmware_UpdateAvailable_Bool, false);   // TODO implement
         VRProperties()->SetBoolProperty(propCont, Prop_Firmware_ManualUpdate_Bool, true);

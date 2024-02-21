@@ -39,7 +39,7 @@ namespace {
         quatQueue;
 
     vector<x264_picture_t> vFrames(nVFrames);
-    int64_t pts = 0;                       // in microseconds
+    int64_t pts = 0;   // in microseconds
     int64_t vFrameDtUs;
     int whichFrame = 0;                    // syncronize rendering and encoding
     std::mutex whichFrameMtxs[nVFrames];   // if syncronization is out (cause lag) use as last
@@ -274,7 +274,7 @@ void PVRStartStreamer(string ip,
                          to_string(lastWhichFrame) + ", nVfs:" + to_string(nVFrames) +
                          ", wF:" + to_string(whichFrame));
             lastWhichFrame = whichFrame;
-            whichFrameMtxs[lastWhichFrame].lock();     // LOCK
+            whichFrameMtxs[lastWhichFrame].lock();   // LOCK
             auto totSz = x264_encoder_encode(enc, &nals, &nNals, &vFrames[lastWhichFrame], &outPic);
             whichFrameMtxs[lastWhichFrame].unlock();   // UNLOCK
 
@@ -285,7 +285,7 @@ void PVRStartStreamer(string ip,
             if (totSz > 0) {
                 PVR_DB("[PVRStartStreamer th] Rendering lWf:" + to_string(lastWhichFrame) +
                        ", wF:" + to_string(whichFrame));
-                quatQueueMutex.lock();                                   // LOCK
+                quatQueueMutex.lock();   // LOCK
                 while ((quatQueue.size() != 0) &&
                        (quatQueue.front().first.first < outPic.i_pts))   // handle skipped frames
                 {
@@ -311,12 +311,12 @@ void PVRStartStreamer(string ip,
                     qbuf[2] = quat.y();
                     qbuf[3] = quat.z();
                     *nbuf = totSz;
-                    fpsbuf[0] = fpsSteamVRApp;                               // VRApp FPS
-                    fpsbuf[1] = fpsEncoder;                                  // Encoder FPS
-                    fpsbuf[2] = fpsStreamWriter;                             // StreamWriter FPS
-                    fpsbuf[3] = fpsStreamer;                                 // Streamer FPS
+                    fpsbuf[0] = fpsSteamVRApp;     // VRApp FPS
+                    fpsbuf[1] = fpsEncoder;        // Encoder FPS
+                    fpsbuf[2] = fpsStreamWriter;   // StreamWriter FPS
+                    fpsbuf[3] = fpsStreamer;       // Streamer FPS
                     fpsbuf[4] = fpsRenderer;
-                    tDelaysBuf[0] = renderDur;                               // Renderer Delay
+                    tDelaysBuf[0] = renderDur;   // Renderer Delay
                     tDelaysBuf[1] =
                         (float) ((Clk::now() - time).count() / 1000000.0);   // Encoder Delay
                     *timestamp = (int64_t) duration_cast<microseconds>(
@@ -375,14 +375,14 @@ void PVRProcessFrame(uint64_t hdl, Quaternionf quat) {
 
         pts += vFrameDtUs;
 
-        quatQueueMutex.lock();     // LOCK
+        quatQueueMutex.lock();   // LOCK
         quatQueue.push({{pts, {Clk::now(), 0}}, quat});
         quatQueueMutex.unlock();   // UNLOCK
 
         // PVRUpdTexHdl() -> Blocking: This will wait if there is already a handle being rendered.
         PVRUpdTexHdl(hdl, newWhichFrame);   // Render Frame
 
-        quatQueueMutex.lock();              // LOCK
+        quatQueueMutex.lock();   // LOCK
         quatQueue.back().first.second.second =
             (Clk::now() - quatQueue.back().first.second.first).count() / 1000000.0;
         quatQueueMutex.unlock();   // UNLOCK

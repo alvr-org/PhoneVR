@@ -186,7 +186,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initia
                     viewHeight,
                     refreshRatesBuffer,
                     1,
-                    false, // By default disable FFE (can be force-enabled by Server Settings
+                    false,   // By default disable FFE (can be force-enabled by Server Settings
                     false);
 
     Cardboard_initializeAndroid(CTX.javaVm, CTX.javaContext);
@@ -276,7 +276,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
             }
             info("renderingParamsChanged, destroyed distortion");
             CTX.lensDistortion =
-                    CardboardLensDistortion_create(buffer, size, CTX.screenWidth, CTX.screenHeight);
+                CardboardLensDistortion_create(buffer, size, CTX.screenWidth, CTX.screenHeight);
 
             CardboardQrCode_destroy(buffer);
             *buffer = 0;
@@ -290,13 +290,13 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
             for (int eye = 0; eye < 2; eye++) {
                 CardboardMesh mesh;
                 CardboardLensDistortion_getDistortionMesh(
-                        CTX.lensDistortion, (CardboardEye) eye, &mesh);
-                CardboardDistortionRenderer_setMesh(CTX.distortionRenderer, &mesh,
-                                                    (CardboardEye) eye);
+                    CTX.lensDistortion, (CardboardEye) eye, &mesh);
+                CardboardDistortionRenderer_setMesh(
+                    CTX.distortionRenderer, &mesh, (CardboardEye) eye);
 
                 float matrix[16] = {};
                 CardboardLensDistortion_getEyeFromHeadMatrix(
-                        CTX.lensDistortion, (CardboardEye) eye, matrix);
+                    CTX.lensDistortion, (CardboardEye) eye, matrix);
                 CTX.eyeOffsets[eye] = matrix[12];
             }
 
@@ -320,7 +320,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                  CTX.glContextRecreated);
             glGenTextures(2, CTX.lobbyTextures);
 
-            for (auto &lobbyTexture: CTX.lobbyTextures) {
+            for (auto &lobbyTexture : CTX.lobbyTextures) {
                 glBindTexture(GL_TEXTURE_2D, lobbyTexture);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -365,14 +365,13 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                 alvr_get_settings_json(&settings_buffer[0]);
 
                 info("Got settings from ALVR Server - %s", &settings_buffer[0]);
-                if( settings_len > 900 ) // to workthough logcat buffer limit
+                if (settings_len > 900)   // to workthough logcat buffer limit
                     info("Got settings from ALVR Server - %s", &settings_buffer[900]);
                 json settings_json = json::parse(&settings_buffer[0]);
 
-
                 glGenTextures(2, CTX.streamTextures);
 
-                for (auto &streamTexture: CTX.streamTextures) {
+                for (auto &streamTexture : CTX.streamTextures) {
                     glBindTexture(GL_TEXTURE_2D, streamTexture);
                     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -401,44 +400,60 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                 render_config.view_resolution_height = config.view_height;
                 render_config.swapchain_textures = textureHandles;
                 render_config.swapchain_length = 1;
-                
+
                 render_config.enable_foveation = false;
-                if(!settings_json["video"].is_null()) {
-                    if(!settings_json["video"]["foveated_encoding"].is_null()) {
+                if (!settings_json["video"].is_null()) {
+                    if (!settings_json["video"]["foveated_encoding"].is_null()) {
                         info("settings_json.video.foveated_encoding is %s",
                              settings_json["video"]["foveated_encoding"].dump().c_str());
 
                         // Foveated encoding would be a "Enabled": {Array} or "Disabled" String
                         if (!settings_json["video"]["foveated_encoding"].is_string()) {
                             render_config.enable_foveation = true;
-                            render_config.foveation_center_size_x = settings_json["video"]["foveated_encoding"]["Enabled"]["center_shift_x"];
-                            render_config.foveation_center_size_y = settings_json["video"]["foveated_encoding"]["Enabled"]["center_size_y"];
-                            render_config.foveation_center_shift_x = settings_json["video"]["foveated_encoding"]["Enabled"]["center_shift_x"];
-                            render_config.foveation_center_shift_y = settings_json["video"]["foveated_encoding"]["Enabled"]["center_shift_y"];
-                            render_config.foveation_edge_ratio_x = settings_json["video"]["foveated_encoding"]["Enabled"]["edge_ratio_x"];
-                            render_config.foveation_edge_ratio_y = settings_json["video"]["foveated_encoding"]["Enabled"]["edge_ratio_y"];
-                        }
-                        else
+                            render_config.foveation_center_size_x =
+                                settings_json["video"]["foveated_encoding"]["Enabled"]
+                                             ["center_shift_x"];
+                            render_config.foveation_center_size_y =
+                                settings_json["video"]["foveated_encoding"]["Enabled"]
+                                             ["center_size_y"];
+                            render_config.foveation_center_shift_x =
+                                settings_json["video"]["foveated_encoding"]["Enabled"]
+                                             ["center_shift_x"];
+                            render_config.foveation_center_shift_y =
+                                settings_json["video"]["foveated_encoding"]["Enabled"]
+                                             ["center_shift_y"];
+                            render_config.foveation_edge_ratio_x =
+                                settings_json["video"]["foveated_encoding"]["Enabled"]
+                                             ["edge_ratio_x"];
+                            render_config.foveation_edge_ratio_y =
+                                settings_json["video"]["foveated_encoding"]["Enabled"]
+                                             ["edge_ratio_y"];
+                        } else
                             info("foveated_encoding is Disabled");
-                    }
-                    else
+                    } else
                         error("settings_json doesn't have a video.foveated_encoding key");
-                }
-                else
+                } else
                     error("settings_json doesn't have a video key");
 
                 info("Settings for foveation:");
                 info("render_config.enable_foveation: %b", render_config.enable_foveation);
-                info("render_config.foveation_center_size_x: %f", render_config.foveation_center_size_x);
-                info("render_config.foveation_center_size_y: %f", render_config.foveation_center_size_y);
-                info("render_config.foveation_center_shift_x: %f", render_config.foveation_center_shift_x);
-                info("render_config.foveation_center_shift_y: %f", render_config.foveation_center_shift_y);
-                info("render_config.foveation_edge_ratio_x: %f", render_config.foveation_edge_ratio_x);
-                info("render_config.foveation_edge_ratio_y: %f", render_config.foveation_edge_ratio_y);
+                info("render_config.foveation_center_size_x: %f",
+                     render_config.foveation_center_size_x);
+                info("render_config.foveation_center_size_y: %f",
+                     render_config.foveation_center_size_y);
+                info("render_config.foveation_center_shift_x: %f",
+                     render_config.foveation_center_shift_x);
+                info("render_config.foveation_center_shift_y: %f",
+                     render_config.foveation_center_shift_y);
+                info("render_config.foveation_edge_ratio_x: %f",
+                     render_config.foveation_edge_ratio_x);
+                info("render_config.foveation_edge_ratio_y: %f",
+                     render_config.foveation_edge_ratio_y);
 
                 alvr_start_stream_opengl(render_config);
 
-                info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, opengl stream started and input "
+                info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, opengl stream started and "
+                     "input "
                      "Thread started...");
                 CTX.streaming = true;
                 CTX.inputThread = std::thread(inputThread);
@@ -450,12 +465,13 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                 CTX.inputThread.join();
 
                 glDeleteTextures(2, CTX.streamTextures);
-                info("ALVR Poll Event: ALVR_EVENT_STREAMING_STOPPED, Stream stopped deleted textures.");
+                info("ALVR Poll Event: ALVR_EVENT_STREAMING_STOPPED, Stream stopped deleted "
+                     "textures.");
             }
         }
 
         CardboardEyeTextureDescription viewsDescs[2] = {};
-        for (auto &viewsDesc: viewsDescs) {
+        for (auto &viewsDesc : viewsDescs) {
             viewsDesc.left_u = 0.0;
             viewsDesc.right_u = 1.0;
             viewsDesc.top_v = 1.0;
@@ -511,10 +527,10 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                                                        CTX.screenHeight,
                                                        &viewsDescs[0],
                                                        &viewsDescs[1]);
-    }
-    catch (const json::exception& e)
-    {
-        error( std::string(std::string(__FUNCTION__) + std::string(__FILE_NAME__) + std::string(e.what())).c_str() );
+    } catch (const json::exception &e) {
+        error(std::string(std::string(__FUNCTION__) + std::string(__FILE_NAME__) +
+                          std::string(e.what()))
+                  .c_str());
     }
 }
 
