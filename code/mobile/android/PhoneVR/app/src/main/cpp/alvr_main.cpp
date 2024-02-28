@@ -1,18 +1,10 @@
-#include "alvr_client_core.h"
-#include "cardboard.h"
-#include <GLES3/gl3.h>
-#include <algorithm>
-#include <deque>
-#include <jni.h>
-#include <map>
-#include <thread>
-#include <unistd.h>
-#include <vector>
+#include "pvr_alvr.h"
 
-#include "common.h"
 #include "nlohmann/json.hpp"
 
 using namespace nlohmann;
+uint64_t HEAD_ID = alvr_path_string_to_id("/user/head");
+NativeContext CTX = {};
 
 void log(AlvrLogLevel level, const char *format, ...) {
     va_list args;
@@ -29,49 +21,6 @@ void log(AlvrLogLevel level, const char *format, ...) {
 
     va_end(args);
 }
-
-#define error(...) log(ALVR_LOG_LEVEL_ERROR, __VA_ARGS__)
-#define info(...)  log(ALVR_LOG_LEVEL_INFO, __VA_ARGS__)
-#define debug(...) log(ALVR_LOG_LEVEL_DEBUG, __VA_ARGS__)
-
-uint64_t HEAD_ID = alvr_path_string_to_id("/user/head");
-
-// Note: the Cardboard SDK cannot estimate display time and an heuristic is used instead.
-const uint64_t VSYNC_QUEUE_INTERVAL_NS = 50e6;
-const float FLOOR_HEIGHT = 1.5;
-const int MAXIMUM_TRACKING_FRAMES = 360;
-
-struct Pose {
-    float position[3];
-    AlvrQuat orientation;
-};
-
-struct NativeContext {
-    JavaVM *javaVm = nullptr;
-    jobject javaContext = nullptr;
-
-    CardboardHeadTracker *headTracker = nullptr;
-    CardboardLensDistortion *lensDistortion = nullptr;
-    CardboardDistortionRenderer *distortionRenderer = nullptr;
-
-    int screenWidth = 0;
-    int screenHeight = 0;
-
-    bool renderingParamsChanged = true;
-    bool glContextRecreated = false;
-
-    bool running = false;
-    bool streaming = false;
-    std::thread inputThread;
-
-    // Une one texture per eye, no need for swapchains.
-    GLuint lobbyTextures[2] = {};
-    GLuint streamTextures[2] = {};
-
-    float eyeOffsets[2] = {};
-};
-
-NativeContext CTX = {};
 
 int64_t GetBootTimeNano() {
     struct timespec res = {};
@@ -254,6 +203,14 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_setScr
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_sendBatteryLevel(
     JNIEnv *, jobject, jfloat level, jboolean plugged) {
     alvr_send_battery(HEAD_ID, level, plugged);
+}
+
+// https://github.com/google/filament/issues/3601
+// x86_64 emulator _64 needed for gfx
+void renderStreamNativePre(void *streamBuffer)
+{
+    if( streamBuffer != nullptr )
+        info("Got streamBuffer call from Alvr");
 }
 
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *,

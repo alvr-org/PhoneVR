@@ -136,7 +136,6 @@ public class ALVRActivity extends AppCompatActivity
         Log.d(TAG, "Pausing ALVR Activity");
         pauseNative();
         glView.onPause();
-        bMonitor.stopMonitoring(this);
     }
 
     @Override
