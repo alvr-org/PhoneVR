@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.BatteryManager;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.preference.PreferenceManager;
 import java.util.Objects;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -44,6 +46,10 @@ public class ALVRActivity extends AppCompatActivity
     private static final int PERMISSIONS_REQUEST_CODE = 2;
 
     private GLSurfaceView glView;
+
+    private Passthrough passthrough = null;
+
+    private SharedPreferences pref = null;
 
     private final BatteryMonitor bMonitor = new BatteryMonitor(this);
 
@@ -134,6 +140,14 @@ public class ALVRActivity extends AppCompatActivity
 
         // Prevents screen from dimming/locking.
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        pref = PreferenceManager.getDefaultSharedPreferences(this);
+        passthrough =
+                new Passthrough(
+                        pref,
+                        (SensorManager) getSystemService(SENSOR_SERVICE),
+                        width,
+                        height);
     }
 
     @Override
@@ -149,6 +163,7 @@ public class ALVRActivity extends AppCompatActivity
         pauseNative();
         glView.onPause();
         bMonitor.stopMonitoring(this);
+        passthrough.onPause();
     }
 
     @Override
@@ -163,6 +178,7 @@ public class ALVRActivity extends AppCompatActivity
             return;
         }
 
+        passthrough.onResume();
         glView.onResume();
         resumeNative();
         bMonitor.startMonitoring(this);
@@ -173,6 +189,7 @@ public class ALVRActivity extends AppCompatActivity
         super.onDestroy();
         Log.d(TAG, "Destroying ALVR Activity");
         destroyNative();
+        passthrough.releaseCamera();
     }
 
     @Override
@@ -186,7 +203,8 @@ public class ALVRActivity extends AppCompatActivity
     private class Renderer implements GLSurfaceView.Renderer {
         @Override
         public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-            surfaceCreatedNative();
+            int texID = surfaceCreatedNative();
+            passthrough.createTexture(texID);
         }
 
         @Override
@@ -196,6 +214,7 @@ public class ALVRActivity extends AppCompatActivity
 
         @Override
         public void onDrawFrame(GL10 gl10) {
+            passthrough.update();
             renderNative();
         }
     }
@@ -218,6 +237,10 @@ public class ALVRActivity extends AppCompatActivity
         boolean isChecked = prefs.getBoolean("max_brightness", true);
         toggleBrightness.setChecked(isChecked);
 
+        MenuItem box = popup.getMenu().findItem(R.id.passthrough);
+        if (box != null) {
+            box.setChecked(pref.getBoolean("passthrough", false));
+        }
         popup.setOnMenuItemClickListener(this);
         popup.show();
     }
@@ -243,6 +266,13 @@ public class ALVRActivity extends AppCompatActivity
             SharedPreferences.Editor editor = getSharedPreferences("settings", MODE_PRIVATE).edit();
             editor.putBoolean("max_brightness", item.isChecked());
             editor.apply();
+            return true;
+        } else if (item.getItemId() == R.id.passthrough_settings) {
+            Intent settings = new Intent(this, PassthroughSettingsActivity.class);
+            startActivity(settings);
+            return true;
+        } else if (item.getItemId() == R.id.passthrough) {
+            passthrough.changePassthroughMode();
             return true;
         }
         return false;
@@ -293,7 +323,7 @@ public class ALVRActivity extends AppCompatActivity
 
     private native void pauseNative();
 
-    private native void surfaceCreatedNative();
+    private native int surfaceCreatedNative();
 
     private native void setScreenResolutionNative(int width, int height);
 
