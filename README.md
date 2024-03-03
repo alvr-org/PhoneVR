@@ -49,7 +49,7 @@ PhoneVR(PVR) can be used with two servers ALVR and PVRServer. ALVR Server is rec
 | Linux Support (\*Partial\*)                                                    | ✅                                           | ❌                         |
 | Developers                                                                     | [Alvr-org](https://github.com/alvr-org/ALVR) | PhoneVR                    |
 | Supports other HMDs ? Quest etc.                                               | ✅                                           | ❌                         |
-| OpenSoruce                                                                     | ✅                                           | ✅                         |
+| Open-Source                                                                    | ✅                                           | ✅                         |
 | Network throttling                                                             | ✅                                           | ❌                         |
 | Average Latency                                                                | 150ms                                        | 1500ms                     |
 | VRApplication Graphics manipulation<br>(Brightness, resolution, contrast etc.) | ✅                                           | (Partial)                  |
