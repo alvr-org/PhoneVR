@@ -438,7 +438,7 @@ jobs:
           files: |
             code/mobile/android/PhoneVR/app/build/outputs/androidTest-results/**/TEST-*.xml
       
-      - uses: iterative/setup-cml@v1
+      - uses: iterative/setup-cml@v3
         if: github.event_name == 'pull_request' && always()
       
       - name: Publish Screenshots - Find Comment
@@ -779,7 +779,7 @@ jobs:
   #       with:
   #         node-version: '16'
       
-  #     - uses: iterative/setup-cml@v1
+  #     - uses: iterative/setup-cml@v3
   #       if: always()
       
   #     - name: Publish Screenshots - Find Comment
@@ -1191,7 +1191,7 @@ jobs:
       #     files: |
       #       code/mobile/android/PhoneVR/app/build/outputs/androidTest-results/**/TEST-*.xml
       
-      # - uses: iterative/setup-cml@v1
+      # - uses: iterative/setup-cml@v3
       #   if: always()
       
       # - name: Publish Screenshots - Find Comment
