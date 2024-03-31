@@ -187,6 +187,15 @@ task deleteNdk(type: Delete) {
     delete "../ALVR/target/"
 }
 
+task cleanCargo {
+    doLast {
+        exec {
+            workingDir '../ALVR'
+            commandLine 'cargo', 'clean'
+        }
+    }
+}
+
 task buildClientLib {
     doLast {
         exec {
@@ -231,4 +240,5 @@ preBuild.dependsOn("spotlessCheck")
 build.dependsOn(extractNdk)
 build.dependsOn(buildClientLib)
 
+clean.dependsOn(cleanCargo)
 clean.dependsOn(deleteNdk)
