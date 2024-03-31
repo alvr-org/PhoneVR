@@ -171,14 +171,14 @@ void inputThread() {
 // }
 
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initializeNative(
-    JNIEnv *env, jobject obj, jint screenWidth, jint screenHeight) {
+    JNIEnv *env, jobject obj, jint screenWidth, jint screenHeight, jfloat refreshRate) {
     CTX.javaVm = jVM;
     CTX.javaContext = env->NewGlobalRef(obj);
 
     uint32_t viewWidth = std::max(screenWidth, screenHeight) / 2;
     uint32_t viewHeight = std::min(screenWidth, screenHeight);
 
-    float refreshRatesBuffer[1] = {60.f};
+    float refreshRatesBuffer[1] = {refreshRate };
 
     alvr_initialize((void *) CTX.javaVm,
                     (void *) CTX.javaContext,
