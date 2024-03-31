@@ -464,10 +464,10 @@ namespace vr {
         VREvent_WirelessDisconnect = 112,
         VREvent_WirelessReconnect = 113,
 
-        VREvent_ButtonPress = 200,           // data is controller
-        VREvent_ButtonUnpress = 201,         // data is controller
-        VREvent_ButtonTouch = 202,           // data is controller
-        VREvent_ButtonUntouch = 203,         // data is controller
+        VREvent_ButtonPress = 200,     // data is controller
+        VREvent_ButtonUnpress = 201,   // data is controller
+        VREvent_ButtonTouch = 202,     // data is controller
+        VREvent_ButtonUntouch = 203,   // data is controller
 
         VREvent_MouseMove = 300,             // data is mouse
         VREvent_MouseButtonDown = 301,       // data is mouse
@@ -478,10 +478,10 @@ namespace vr {
         VREvent_TouchPadMove = 306,          // data is mouse
         VREvent_OverlayFocusChanged = 307,   // data is overlay, global event
 
-        VREvent_InputFocusCaptured = 400,    // data is process DEPRECATED
-        VREvent_InputFocusReleased = 401,    // data is process DEPRECATED
-        VREvent_SceneFocusLost = 402,        // data is process
-        VREvent_SceneFocusGained = 403,      // data is process
+        VREvent_InputFocusCaptured = 400,   // data is process DEPRECATED
+        VREvent_InputFocusReleased = 401,   // data is process DEPRECATED
+        VREvent_SceneFocusLost = 402,       // data is process
+        VREvent_SceneFocusGained = 403,     // data is process
         VREvent_SceneApplicationChanged =
             404,   // data is process - The App actually drawing the scene changed (usually to or
                    // from the compositor)
@@ -615,9 +615,9 @@ namespace vr {
         k_EDeviceActivityLevel_Unknown = -1,
         k_EDeviceActivityLevel_Idle = 0,   // No activity for the last 10 seconds
         k_EDeviceActivityLevel_UserInteraction =
-            1,                             // Activity (movement or prox sensor) is happening now
+            1,   // Activity (movement or prox sensor) is happening now
         k_EDeviceActivityLevel_UserInteraction_Timeout =
-            2,                             // No activity for the last 0.5 seconds
+            2,   // No activity for the last 0.5 seconds
         k_EDeviceActivityLevel_Standby =
             3,   // Idle for at least 5 seconds (configurable in Settings -> Power Management)
     };
@@ -1248,8 +1248,8 @@ namespace vr {
 
         uint32_t m_nFrameSequence;   // Starts from 0 when stream starts.
 
-        uint32_t m_nBufferIndex;     // Identifies which buffer the image data is hosted
-        uint32_t m_nBufferCount;     // Total number of configured buffers
+        uint32_t m_nBufferIndex;   // Identifies which buffer the image data is hosted
+        uint32_t m_nBufferCount;   // Total number of configured buffers
 
         uint32_t m_nExposureTime;
 
