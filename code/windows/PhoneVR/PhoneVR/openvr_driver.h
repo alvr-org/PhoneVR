@@ -1177,7 +1177,7 @@ namespace vr {
 
 #endif   // _INCLUDE_VRTYPES_H
 
-         // vrannotation.h
+// vrannotation.h
 #ifdef API_GEN
 #define VR_CLANG_ATTR(ATTR) __attribute__((annotate(ATTR)))
 #else

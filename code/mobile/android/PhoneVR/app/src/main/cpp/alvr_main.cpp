@@ -10,6 +10,9 @@
 #include <vector>
 
 #include "common.h"
+#include "nlohmann/json.hpp"
+
+using namespace nlohmann;
 
 void log(AlvrLogLevel level, const char *format, ...) {
     va_list args;
@@ -150,12 +153,12 @@ void inputThread() {
 
         AlvrDeviceMotion headMotion = {};
         headMotion.device_id = HEAD_ID;
-        headMotion.position[0] = headPose.position[0];
-        headMotion.position[1] = headPose.position[1];
-        headMotion.position[2] = headPose.position[2];
-        headMotion.orientation = headPose.orientation;
+        headMotion.pose.position[0] = headPose.position[0];
+        headMotion.pose.position[1] = headPose.position[1];
+        headMotion.pose.position[2] = headPose.position[2];
+        headMotion.pose.orientation = headPose.orientation;
 
-        alvr_send_tracking(targetTimestampNs, &headMotion, 1 /* , nullptr, nullptr */);
+        alvr_send_tracking(targetTimestampNs, &headMotion, 1, nullptr, nullptr);
 
         deadline += std::chrono::nanoseconds((uint64_t) (1e9 / 60.f / 3));
         std::this_thread::sleep_until(deadline);
@@ -183,6 +186,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initia
                     viewHeight,
                     refreshRatesBuffer,
                     1,
+                    false,   // By default disable FFE (can be force-enabled by Server Settings
                     false);
 
     Cardboard_initializeAndroid(CTX.javaVm, CTX.javaContext);
@@ -254,220 +258,280 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_sendBa
 
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *,
                                                                                        jobject) {
-    if (CTX.renderingParamsChanged) {
-        info("renderingParamsChanged, processing new params");
-        uint8_t *buffer;
-        int size;
-        CardboardQrCode_getSavedDeviceParams(&buffer, &size);
+    try {
+        if (CTX.renderingParamsChanged) {
+            info("renderingParamsChanged, processing new params");
+            uint8_t *buffer;
+            int size;
+            CardboardQrCode_getSavedDeviceParams(&buffer, &size);
 
-        if (size == 0) {
-            return;
+            if (size == 0) {
+                return;
+            }
+
+            info("renderingParamsChanged, sending new params to alvr");
+            if (CTX.lensDistortion) {
+                CardboardLensDistortion_destroy(CTX.lensDistortion);
+                CTX.lensDistortion = nullptr;
+            }
+            info("renderingParamsChanged, destroyed distortion");
+            CTX.lensDistortion =
+                CardboardLensDistortion_create(buffer, size, CTX.screenWidth, CTX.screenHeight);
+
+            CardboardQrCode_destroy(buffer);
+            *buffer = 0;
+
+            if (CTX.distortionRenderer) {
+                CardboardDistortionRenderer_destroy(CTX.distortionRenderer);
+                CTX.distortionRenderer = nullptr;
+            }
+            CTX.distortionRenderer = CardboardOpenGlEs2DistortionRenderer_create();
+
+            for (int eye = 0; eye < 2; eye++) {
+                CardboardMesh mesh;
+                CardboardLensDistortion_getDistortionMesh(
+                    CTX.lensDistortion, (CardboardEye) eye, &mesh);
+                CardboardDistortionRenderer_setMesh(
+                    CTX.distortionRenderer, &mesh, (CardboardEye) eye);
+
+                float matrix[16] = {};
+                CardboardLensDistortion_getEyeFromHeadMatrix(
+                    CTX.lensDistortion, (CardboardEye) eye, matrix);
+                CTX.eyeOffsets[eye] = matrix[12];
+            }
+
+            AlvrFov fovArr[2] = {getFov((CardboardEye) 0), getFov((CardboardEye) 1)};
+            info("renderingParamsChanged, sending new view configs (FOV) to alvr");
+            alvr_send_views_config(fovArr, CTX.eyeOffsets[0] - CTX.eyeOffsets[1]);
         }
 
-        info("renderingParamsChanged, sending new params to alvr");
-        if (CTX.lensDistortion) {
-            CardboardLensDistortion_destroy(CTX.lensDistortion);
-            CTX.lensDistortion = nullptr;
-        }
-        info("renderingParamsChanged, destroyed distortion");
-        CTX.lensDistortion =
-            CardboardLensDistortion_create(buffer, size, CTX.screenWidth, CTX.screenHeight);
+        // Note: if GL context is recreated, old resources are already freed.
+        if (CTX.renderingParamsChanged && !CTX.glContextRecreated) {
+            info("Pausing ALVR since glContext is not recreated, deleting textures");
+            alvr_pause_opengl();
 
-        CardboardQrCode_destroy(buffer);
-        *buffer = 0;
-
-        if (CTX.distortionRenderer) {
-            CardboardDistortionRenderer_destroy(CTX.distortionRenderer);
-            CTX.distortionRenderer = nullptr;
-        }
-        CTX.distortionRenderer = CardboardOpenGlEs2DistortionRenderer_create();
-
-        for (int eye = 0; eye < 2; eye++) {
-            CardboardMesh mesh;
-            CardboardLensDistortion_getDistortionMesh(
-                CTX.lensDistortion, (CardboardEye) eye, &mesh);
-            CardboardDistortionRenderer_setMesh(CTX.distortionRenderer, &mesh, (CardboardEye) eye);
-
-            float matrix[16] = {};
-            CardboardLensDistortion_getEyeFromHeadMatrix(
-                CTX.lensDistortion, (CardboardEye) eye, matrix);
-            CTX.eyeOffsets[eye] = matrix[12];
+            glDeleteTextures(2, CTX.lobbyTextures);
         }
 
-        AlvrFov fovArr[2] = {getFov((CardboardEye) 0), getFov((CardboardEye) 1)};
-        info("renderingParamsChanged, sending new view configs (FOV) to alvr");
-        alvr_send_views_config(fovArr, CTX.eyeOffsets[0] - CTX.eyeOffsets[1]);
-    }
+        if (CTX.renderingParamsChanged || CTX.glContextRecreated) {
+            info("Rebuilding, binding textures, Resuming ALVR since glContextRecreated %b, "
+                 "renderingParamsChanged %b",
+                 CTX.renderingParamsChanged,
+                 CTX.glContextRecreated);
+            glGenTextures(2, CTX.lobbyTextures);
 
-    // Note: if GL context is recreated, old resources are already freed.
-    if (CTX.renderingParamsChanged && !CTX.glContextRecreated) {
-        info("Pausing ALVR since glContext is not recreated, deleting textures");
-        alvr_pause_opengl();
-
-        glDeleteTextures(2, CTX.lobbyTextures);
-    }
-
-    if (CTX.renderingParamsChanged || CTX.glContextRecreated) {
-        info("Rebuilding, binding textures, Resuming ALVR since glContextRecreated %b, "
-             "renderingParamsChanged %b",
-             CTX.renderingParamsChanged,
-             CTX.glContextRecreated);
-        glGenTextures(2, CTX.lobbyTextures);
-
-        for (auto &lobbyTexture : CTX.lobbyTextures) {
-            glBindTexture(GL_TEXTURE_2D, lobbyTexture);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexImage2D(GL_TEXTURE_2D,
-                         0,
-                         GL_RGB,
-                         CTX.screenWidth / 2,
-                         CTX.screenHeight,
-                         0,
-                         GL_RGB,
-                         GL_UNSIGNED_BYTE,
-                         nullptr);
-        }
-
-        const uint32_t *targetViews[2] = {(uint32_t *) &CTX.lobbyTextures[0],
-                                          (uint32_t *) &CTX.lobbyTextures[1]};
-        alvr_resume_opengl(CTX.screenWidth / 2, CTX.screenHeight, targetViews, 1);
-
-        CTX.renderingParamsChanged = false;
-        CTX.glContextRecreated = false;
-    }
-
-    AlvrEvent event;
-    while (alvr_poll_event(&event)) {
-        if (event.tag == ALVR_EVENT_HUD_MESSAGE_UPDATED) {
-            auto message_length = alvr_hud_message(nullptr);
-            auto message_buffer = std::vector<char>(message_length);
-
-            alvr_hud_message(&message_buffer[0]);
-            info("ALVR Poll Event: HUD Message Update - %s", &message_buffer[0]);
-
-            if (message_length > 0)
-                alvr_update_hud_message_opengl(&message_buffer[0]);
-        }
-        if (event.tag == ALVR_EVENT_STREAMING_STARTED) {
-            info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, generating and binding "
-                 "textures...");
-            auto config = event.STREAMING_STARTED;
-
-            glGenTextures(2, CTX.streamTextures);
-
-            for (auto &streamTexture : CTX.streamTextures) {
-                glBindTexture(GL_TEXTURE_2D, streamTexture);
+            for (auto &lobbyTexture : CTX.lobbyTextures) {
+                glBindTexture(GL_TEXTURE_2D, lobbyTexture);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glTexImage2D(GL_TEXTURE_2D,
                              0,
                              GL_RGB,
-                             config.view_width,
-                             config.view_height,
+                             CTX.screenWidth / 2,
+                             CTX.screenHeight,
                              0,
                              GL_RGB,
                              GL_UNSIGNED_BYTE,
                              nullptr);
             }
 
-            AlvrFov fovArr[2] = {getFov((CardboardEye) 0), getFov((CardboardEye) 1)};
-            alvr_send_views_config(fovArr, CTX.eyeOffsets[0] - CTX.eyeOffsets[1]);
+            const uint32_t *targetViews[2] = {(uint32_t *) &CTX.lobbyTextures[0],
+                                              (uint32_t *) &CTX.lobbyTextures[1]};
+            alvr_resume_opengl(CTX.screenWidth / 2, CTX.screenHeight, targetViews, 1);
 
-            info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, View configs sent...");
-
-            auto leftIntHandle = (uint32_t) CTX.streamTextures[0];
-            auto rightIntHandle = (uint32_t) CTX.streamTextures[1];
-            const uint32_t *textureHandles[2] = {&leftIntHandle, &rightIntHandle};
-
-            auto render_config = AlvrStreamConfig{};
-            render_config.view_resolution_width = config.view_width;
-            render_config.view_resolution_height = config.view_height;
-            render_config.swapchain_textures = textureHandles;
-            render_config.swapchain_length = 1;
-            render_config.enable_foveation = config.enable_foveation;
-            render_config.foveation_center_size_x = config.foveation_center_shift_x;
-            render_config.foveation_center_size_y = config.foveation_center_size_y;
-            render_config.foveation_center_shift_x = config.foveation_center_shift_x;
-            render_config.foveation_center_shift_y = config.foveation_center_shift_y;
-            render_config.foveation_edge_ratio_x = config.foveation_edge_ratio_x;
-            render_config.foveation_edge_ratio_y = config.foveation_edge_ratio_y;
-
-            alvr_start_stream_opengl(render_config);
-
-            info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, opengl stream started and input "
-                 "Thread started...");
-            CTX.streaming = true;
-            CTX.inputThread = std::thread(inputThread);
-
-        } else if (event.tag == ALVR_EVENT_STREAMING_STOPPED) {
-            info("ALVR Poll Event: ALVR_EVENT_STREAMING_STOPPED, Waiting for inputThread to "
-                 "join...");
-            CTX.streaming = false;
-            CTX.inputThread.join();
-
-            glDeleteTextures(2, CTX.streamTextures);
-            info("ALVR Poll Event: ALVR_EVENT_STREAMING_STOPPED, Stream stopped deleted textures.");
-        }
-    }
-
-    CardboardEyeTextureDescription viewsDescs[2] = {};
-    for (auto &viewsDesc : viewsDescs) {
-        viewsDesc.left_u = 0.0;
-        viewsDesc.right_u = 1.0;
-        viewsDesc.top_v = 1.0;
-        viewsDesc.bottom_v = 0.0;
-    }
-
-    if (CTX.streaming) {
-        void *streamHardwareBuffer = nullptr;
-        auto timestampNs = alvr_get_frame(&streamHardwareBuffer);
-
-        if (timestampNs == -1) {
-            return;
+            CTX.renderingParamsChanged = false;
+            CTX.glContextRecreated = false;
         }
 
-        uint32_t swapchainIndices[2] = {0, 0};
-        alvr_render_stream_opengl(streamHardwareBuffer, swapchainIndices);
+        AlvrEvent event;
+        while (alvr_poll_event(&event)) {
+            if (event.tag == ALVR_EVENT_HUD_MESSAGE_UPDATED) {
+                auto message_length = alvr_hud_message(nullptr);
+                auto message_buffer = std::vector<char>(message_length);
 
-        alvr_report_submit(timestampNs, 0);
+                alvr_hud_message(&message_buffer[0]);
+                info("ALVR Poll Event: HUD Message Update - %s", &message_buffer[0]);
 
-        viewsDescs[0].texture = CTX.streamTextures[0];
-        viewsDescs[1].texture = CTX.streamTextures[1];
-    } else {
-        Pose pose = getPose(GetBootTimeNano() + VSYNC_QUEUE_INTERVAL_NS);
+                if (message_length > 0)
+                    alvr_update_hud_message_opengl(&message_buffer[0]);
+            }
+            if (event.tag == ALVR_EVENT_STREAMING_STARTED) {
+                info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, generating and binding "
+                     "textures...");
+                auto config = event.STREAMING_STARTED;
 
-        AlvrViewInput viewInputs[2] = {};
-        for (int eye = 0; eye < 2; eye++) {
-            float headToEye[3] = {CTX.eyeOffsets[eye], 0.0, 0.0};
-            float rotatedHeadToEye[3];
-            quatVecMultiply(pose.orientation, headToEye, rotatedHeadToEye);
+                auto settings_len = alvr_get_settings_json(nullptr);
+                auto settings_buffer = std::vector<char>(settings_len);
+                alvr_get_settings_json(&settings_buffer[0]);
 
-            viewInputs[eye].orientation = pose.orientation;
-            viewInputs[eye].position[0] = pose.position[0] - rotatedHeadToEye[0];
-            viewInputs[eye].position[1] = pose.position[1] - rotatedHeadToEye[1];
-            viewInputs[eye].position[2] = pose.position[2] - rotatedHeadToEye[2];
-            viewInputs[eye].fov = getFov((CardboardEye) eye);
-            viewInputs[eye].swapchain_index = 0;
+                info("Got settings from ALVR Server - %s", &settings_buffer[0]);
+                if (settings_len > 900)   // to workthough logcat buffer limit
+                    info("Got settings from ALVR Server - %s", &settings_buffer[900]);
+                json settings_json = json::parse(&settings_buffer[0]);
+
+                glGenTextures(2, CTX.streamTextures);
+
+                for (auto &streamTexture : CTX.streamTextures) {
+                    glBindTexture(GL_TEXTURE_2D, streamTexture);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                    glTexImage2D(GL_TEXTURE_2D,
+                                 0,
+                                 GL_RGB,
+                                 config.view_width,
+                                 config.view_height,
+                                 0,
+                                 GL_RGB,
+                                 GL_UNSIGNED_BYTE,
+                                 nullptr);
+                }
+
+                AlvrFov fovArr[2] = {getFov((CardboardEye) 0), getFov((CardboardEye) 1)};
+                alvr_send_views_config(fovArr, CTX.eyeOffsets[0] - CTX.eyeOffsets[1]);
+
+                info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, View configs sent...");
+
+                auto leftIntHandle = (uint32_t) CTX.streamTextures[0];
+                auto rightIntHandle = (uint32_t) CTX.streamTextures[1];
+                const uint32_t *textureHandles[2] = {&leftIntHandle, &rightIntHandle};
+
+                auto render_config = AlvrStreamConfig{};
+                render_config.view_resolution_width = config.view_width;
+                render_config.view_resolution_height = config.view_height;
+                render_config.swapchain_textures = textureHandles;
+                render_config.swapchain_length = 1;
+
+                render_config.enable_foveation = false;
+                if (!settings_json["video"].is_null()) {
+                    if (!settings_json["video"]["foveated_encoding"].is_null()) {
+                        info("settings_json.video.foveated_encoding is %s",
+                             settings_json["video"]["foveated_encoding"].dump().c_str());
+
+                        // Foveated encoding would be a "Enabled": {Array} or "Disabled" String
+                        if (!settings_json["video"]["foveated_encoding"].is_string()) {
+                            render_config.enable_foveation = true;
+                            render_config.foveation_center_size_x =
+                                settings_json["video"]["foveated_encoding"]["Enabled"]
+                                             ["center_shift_x"];
+                            render_config.foveation_center_size_y =
+                                settings_json["video"]["foveated_encoding"]["Enabled"]
+                                             ["center_size_y"];
+                            render_config.foveation_center_shift_x =
+                                settings_json["video"]["foveated_encoding"]["Enabled"]
+                                             ["center_shift_x"];
+                            render_config.foveation_center_shift_y =
+                                settings_json["video"]["foveated_encoding"]["Enabled"]
+                                             ["center_shift_y"];
+                            render_config.foveation_edge_ratio_x =
+                                settings_json["video"]["foveated_encoding"]["Enabled"]
+                                             ["edge_ratio_x"];
+                            render_config.foveation_edge_ratio_y =
+                                settings_json["video"]["foveated_encoding"]["Enabled"]
+                                             ["edge_ratio_y"];
+                        } else
+                            info("foveated_encoding is Disabled");
+                    } else
+                        error("settings_json doesn't have a video.foveated_encoding key");
+                } else
+                    error("settings_json doesn't have a video key");
+
+                info("Settings for foveation:");
+                info("render_config.enable_foveation: %b", render_config.enable_foveation);
+                info("render_config.foveation_center_size_x: %f",
+                     render_config.foveation_center_size_x);
+                info("render_config.foveation_center_size_y: %f",
+                     render_config.foveation_center_size_y);
+                info("render_config.foveation_center_shift_x: %f",
+                     render_config.foveation_center_shift_x);
+                info("render_config.foveation_center_shift_y: %f",
+                     render_config.foveation_center_shift_y);
+                info("render_config.foveation_edge_ratio_x: %f",
+                     render_config.foveation_edge_ratio_x);
+                info("render_config.foveation_edge_ratio_y: %f",
+                     render_config.foveation_edge_ratio_y);
+
+                alvr_start_stream_opengl(render_config);
+
+                info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, opengl stream started and "
+                     "input "
+                     "Thread started...");
+                CTX.streaming = true;
+                CTX.inputThread = std::thread(inputThread);
+
+            } else if (event.tag == ALVR_EVENT_STREAMING_STOPPED) {
+                info("ALVR Poll Event: ALVR_EVENT_STREAMING_STOPPED, Waiting for inputThread to "
+                     "join...");
+                CTX.streaming = false;
+                CTX.inputThread.join();
+
+                glDeleteTextures(2, CTX.streamTextures);
+                info("ALVR Poll Event: ALVR_EVENT_STREAMING_STOPPED, Stream stopped deleted "
+                     "textures.");
+            }
         }
-        alvr_render_lobby_opengl(viewInputs);
 
-        viewsDescs[0].texture = CTX.lobbyTextures[0];
-        viewsDescs[1].texture = CTX.lobbyTextures[1];
+        CardboardEyeTextureDescription viewsDescs[2] = {};
+        for (auto &viewsDesc : viewsDescs) {
+            viewsDesc.left_u = 0.0;
+            viewsDesc.right_u = 1.0;
+            viewsDesc.top_v = 1.0;
+            viewsDesc.bottom_v = 0.0;
+        }
+
+        if (CTX.streaming) {
+            void *streamHardwareBuffer = nullptr;
+            auto timestampNs = alvr_get_frame(&streamHardwareBuffer);
+
+            if (timestampNs == -1) {
+                return;
+            }
+
+            uint32_t swapchainIndices[2] = {0, 0};
+            alvr_render_stream_opengl(streamHardwareBuffer, swapchainIndices);
+
+            alvr_report_submit(timestampNs, 0);
+
+            viewsDescs[0].texture = CTX.streamTextures[0];
+            viewsDescs[1].texture = CTX.streamTextures[1];
+        } else {
+            Pose pose = getPose(GetBootTimeNano() + VSYNC_QUEUE_INTERVAL_NS);
+
+            AlvrViewInput viewInputs[2] = {};
+            for (int eye = 0; eye < 2; eye++) {
+                float headToEye[3] = {CTX.eyeOffsets[eye], 0.0, 0.0};
+                float rotatedHeadToEye[3];
+                quatVecMultiply(pose.orientation, headToEye, rotatedHeadToEye);
+
+                viewInputs[eye].orientation = pose.orientation;
+                viewInputs[eye].position[0] = pose.position[0] - rotatedHeadToEye[0];
+                viewInputs[eye].position[1] = pose.position[1] - rotatedHeadToEye[1];
+                viewInputs[eye].position[2] = pose.position[2] - rotatedHeadToEye[2];
+                viewInputs[eye].fov = getFov((CardboardEye) eye);
+                viewInputs[eye].swapchain_index = 0;
+            }
+            alvr_render_lobby_opengl(viewInputs);
+
+            viewsDescs[0].texture = CTX.lobbyTextures[0];
+            viewsDescs[1].texture = CTX.lobbyTextures[1];
+        }
+
+        // Note: the Cardboard SDK does not support reprojection!
+        // todo: manually implement it?
+
+        // info("nativeRendered: Rendering to Display...");
+        CardboardDistortionRenderer_renderEyeToDisplay(CTX.distortionRenderer,
+                                                       0,
+                                                       0,
+                                                       0,
+                                                       CTX.screenWidth,
+                                                       CTX.screenHeight,
+                                                       &viewsDescs[0],
+                                                       &viewsDescs[1]);
+    } catch (const json::exception &e) {
+        error(std::string(std::string(__FUNCTION__) + std::string(__FILE_NAME__) +
+                          std::string(e.what()))
+                  .c_str());
     }
-
-    // Note: the Cardboard SDK does not support reprojection!
-    // todo: manually implement it?
-
-    // info("nativeRendered: Rendering to Display...");
-    CardboardDistortionRenderer_renderEyeToDisplay(CTX.distortionRenderer,
-                                                   0,
-                                                   0,
-                                                   0,
-                                                   CTX.screenWidth,
-                                                   CTX.screenHeight,
-                                                   &viewsDescs[0],
-                                                   &viewsDescs[1]);
 }
 
 extern "C" JNIEXPORT void JNICALL
