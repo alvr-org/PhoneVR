@@ -89,7 +89,7 @@ jobs:
         ref: ${{ needs.prepare_release.outputs.release_ref }}
 
     - name: Install LLVM and Clang
-      uses: KyleMayes/install-llvm-action@v1
+      uses: KyleMayes/install-llvm-action@v2
       with:
         version: "16.0.0"
       
