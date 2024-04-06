@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -97,7 +98,12 @@ public class ALVRActivity extends AppCompatActivity
         int width = displayMetrics.widthPixels;
         int height = displayMetrics.heightPixels;
 
-        initializeNative(width, height);
+        // get refresh rate of the device
+        Display display = getWindowManager().getDefaultDisplay();
+        float refreshRate = display.getRefreshRate();
+        Log.i(TAG, "Refresh rate: " + refreshRate);
+
+        initializeNative(width, height, refreshRate);
 
         setContentView(R.layout.activity_vr);
         glView = findViewById(R.id.surface_view);
@@ -248,7 +254,8 @@ public class ALVRActivity extends AppCompatActivity
                                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
-    private native void initializeNative(int screenWidth, int screenHeight);
+    private native void initializeNative(
+            int screenWidth, int screenHeight, float screenRefreshRate);
 
     private native void destroyNative();
 
