@@ -2,6 +2,7 @@
 #include "cardboard.h"
 #include <GLES3/gl3.h>
 #include <algorithm>
+#include <android/log.h>
 #include <deque>
 #include <jni.h>
 #include <map>
@@ -13,6 +14,8 @@
 #include "nlohmann/json.hpp"
 
 using namespace nlohmann;
+
+const char LOG_TAG[] = "ALVR_PVR_NATIVE";
 
 void log(AlvrLogLevel level, const char *format, ...) {
     va_list args;
@@ -27,6 +30,21 @@ void log(AlvrLogLevel level, const char *format, ...) {
 
     alvr_log(level, buf);
 
+    switch (level) {
+    case ALVR_LOG_LEVEL_DEBUG:
+        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "%s", buf);
+        break;
+    case ALVR_LOG_LEVEL_INFO:
+        __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "%s", buf);
+        break;
+    case ALVR_LOG_LEVEL_ERROR:
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "%s", buf);
+        break;
+    case ALVR_LOG_LEVEL_WARN:
+        __android_log_print(ANDROID_LOG_WARN, LOG_TAG, "%s", buf);
+        break;
+    }
+
     va_end(args);
 }
 
@@ -40,11 +58,6 @@ uint64_t HEAD_ID = alvr_path_string_to_id("/user/head");
 const uint64_t VSYNC_QUEUE_INTERVAL_NS = 50e6;
 const float FLOOR_HEIGHT = 1.5;
 const int MAXIMUM_TRACKING_FRAMES = 360;
-
-struct Pose {
-    float position[3];
-    AlvrQuat orientation;
-};
 
 struct NativeContext {
     JavaVM *javaVm = nullptr;
@@ -69,6 +82,9 @@ struct NativeContext {
     GLuint streamTextures[2] = {};
 
     float eyeOffsets[2] = {};
+    AlvrFov fovArr[2] = {};
+    AlvrViewParams viewParams[2] = {};
+    AlvrDeviceMotion deviceMotion = {};
 };
 
 NativeContext CTX = {};
@@ -98,6 +114,15 @@ void quatVecMultiply(AlvrQuat q, float v[3], float out[3]) {
     }
 }
 
+void offsetPosWithQuat(AlvrQuat q, float offset[3], float outPos[3]) {
+    float rotatedOffset[3];
+    quatVecMultiply(q, offset, rotatedOffset);
+
+    outPos[0] += rotatedOffset[0];
+    outPos[1] += rotatedOffset[1] + FLOOR_HEIGHT;
+    outPos[2] += rotatedOffset[2];
+}
+
 AlvrFov getFov(CardboardEye eye) {
     float f[4];
     CardboardLensDistortion_getFieldOfView(CTX.lensDistortion, eye, f);
@@ -111,8 +136,8 @@ AlvrFov getFov(CardboardEye eye) {
     return fov;
 }
 
-Pose getPose(uint64_t timestampNs) {
-    Pose pose = {};
+AlvrPose getPose(uint64_t timestampNs) {
+    AlvrPose pose = {};
 
     float pos[3];
     float q[4];
@@ -121,24 +146,28 @@ Pose getPose(uint64_t timestampNs) {
     auto inverseOrientation = AlvrQuat{q[0], q[1], q[2], q[3]};
     pose.orientation = inverseQuat(inverseOrientation);
 
-    // FIXME: The position is calculated wrong. It behaves correctly when leaning side to side but
-    // the overall position is wrong when facing left, right or back. float positionBig[3] = {pos[0]
-    // * 5, pos[1] * 5, pos[2] * 5}; float headPos[3]; quatVecMultiply(pose.orientation,
-    // positionBig, headPos);
-
-    pose.position[0] = 0;   //-headPos[0];
-    pose.position[1] = /*-headPos[1]*/ +FLOOR_HEIGHT;
-    pose.position[2] = 0;   //-headPos[2];
-
-    debug("returning pos (%f,%f,%f) orient (%f, %f, %f, %f)",
-          pos[0],
-          pos[1],
-          pos[2],
-          q[0],
-          q[1],
-          q[2],
-          q[3]);
     return pose;
+}
+
+void updateViewConfigs(uint64_t targetTimestampNs = 0) {
+    if (!targetTimestampNs)
+        targetTimestampNs = GetBootTimeNano() + alvr_get_head_prediction_offset_ns();
+
+    AlvrPose headPose = getPose(targetTimestampNs);
+
+    CTX.deviceMotion.device_id = HEAD_ID;
+    CTX.deviceMotion.pose = headPose;
+
+    float headToEye[3] = {CTX.eyeOffsets[kLeft], 0.0, 0.0};
+
+    CTX.viewParams[kLeft].pose = headPose;
+    offsetPosWithQuat(headPose.orientation, headToEye, CTX.viewParams[kLeft].pose.position);
+    CTX.viewParams[kLeft].fov = CTX.fovArr[kLeft];
+
+    headToEye[0] = CTX.eyeOffsets[kRight];
+    CTX.viewParams[kRight].pose = headPose;
+    offsetPosWithQuat(headPose.orientation, headToEye, CTX.viewParams[kRight].pose.position);
+    CTX.viewParams[kRight].fov = CTX.fovArr[kRight];
 }
 
 void inputThread() {
@@ -146,19 +175,12 @@ void inputThread() {
 
     info("inputThread: thread staring...");
     while (CTX.streaming) {
-        debug("inputThread: streaming...");
-        uint64_t targetTimestampNs = GetBootTimeNano() + alvr_get_head_prediction_offset_ns();
 
-        Pose headPose = getPose(targetTimestampNs);
+        auto targetTimestampNs = GetBootTimeNano() + alvr_get_head_prediction_offset_ns();
+        updateViewConfigs(targetTimestampNs);
 
-        AlvrDeviceMotion headMotion = {};
-        headMotion.device_id = HEAD_ID;
-        headMotion.pose.position[0] = headPose.position[0];
-        headMotion.pose.position[1] = headPose.position[1];
-        headMotion.pose.position[2] = headPose.position[2];
-        headMotion.pose.orientation = headPose.orientation;
-
-        alvr_send_tracking(targetTimestampNs, &headMotion, 1, nullptr, nullptr);
+        alvr_send_tracking(
+            targetTimestampNs, CTX.viewParams, &CTX.deviceMotion, 1, nullptr, nullptr);
 
         deadline += std::chrono::nanoseconds((uint64_t) (1e9 / 60.f / 3));
         std::this_thread::sleep_until(deadline);
@@ -178,16 +200,23 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initia
     uint32_t viewWidth = std::max(screenWidth, screenHeight) / 2;
     uint32_t viewHeight = std::min(screenWidth, screenHeight);
 
+    alvr_initialize_android_context((void *) CTX.javaVm, (void *) CTX.javaContext);
+
     float refreshRatesBuffer[1] = {refreshRate};
 
-    alvr_initialize((void *) CTX.javaVm,
-                    (void *) CTX.javaContext,
-                    viewWidth,
-                    viewHeight,
-                    refreshRatesBuffer,
-                    1,
-                    false,   // By default disable FFE (can be force-enabled by Server Settings
-                    false);
+    AlvrClientCapabilities caps = {};
+    caps.default_view_height = viewHeight;
+    caps.default_view_width = viewWidth;
+    caps.external_decoder = false;
+    caps.refresh_rates = refreshRatesBuffer;
+    caps.refresh_rates_count = 1;
+    caps.foveated_encoding =
+        true;   // By default disable FFE (can be force-enabled by Server Settings
+    caps.encoder_high_profile = true;
+    caps.encoder_10_bits = true;
+    caps.encoder_av1 = true;
+
+    alvr_initialize(caps);
 
     Cardboard_initializeAndroid(CTX.javaVm, CTX.javaContext);
     CTX.headTracker = CardboardHeadTracker_create();
@@ -300,9 +329,11 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                 CTX.eyeOffsets[eye] = matrix[12];
             }
 
-            AlvrFov fovArr[2] = {getFov((CardboardEye) 0), getFov((CardboardEye) 1)};
-            info("renderingParamsChanged, sending new view configs (FOV) to alvr");
-            alvr_send_views_config(fovArr, CTX.eyeOffsets[0] - CTX.eyeOffsets[1]);
+            CTX.fovArr[0] = getFov((CardboardEye) 0);
+            CTX.fovArr[1] = getFov((CardboardEye) 1);
+
+            info("renderingParamsChanged, updating new view configs (FOV) to alvr");
+            // alvr_send_views_config(fovArr, CTX.eyeOffsets[0] - CTX.eyeOffsets[1]);
         }
 
         // Note: if GL context is recreated, old resources are already freed.
@@ -337,7 +368,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
 
             const uint32_t *targetViews[2] = {(uint32_t *) &CTX.lobbyTextures[0],
                                               (uint32_t *) &CTX.lobbyTextures[1]};
-            alvr_resume_opengl(CTX.screenWidth / 2, CTX.screenHeight, targetViews, 1);
+            alvr_resume_opengl(CTX.screenWidth / 2, CTX.screenHeight, targetViews, 1, true);
 
             CTX.renderingParamsChanged = false;
             CTX.glContextRecreated = false;
@@ -386,10 +417,10 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                                  nullptr);
                 }
 
-                AlvrFov fovArr[2] = {getFov((CardboardEye) 0), getFov((CardboardEye) 1)};
-                alvr_send_views_config(fovArr, CTX.eyeOffsets[0] - CTX.eyeOffsets[1]);
+                CTX.fovArr[0] = getFov((CardboardEye) 0);
+                CTX.fovArr[1] = getFov((CardboardEye) 1);
 
-                info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, View configs sent...");
+                info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, View configs updated...");
 
                 auto leftIntHandle = (uint32_t) CTX.streamTextures[0];
                 auto rightIntHandle = (uint32_t) CTX.streamTextures[1];
@@ -480,7 +511,9 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
 
         if (CTX.streaming) {
             void *streamHardwareBuffer = nullptr;
-            auto timestampNs = alvr_get_frame(&streamHardwareBuffer);
+
+            AlvrViewParams dummyViewParams;
+            auto timestampNs = alvr_get_frame(&dummyViewParams, &streamHardwareBuffer);
 
             if (timestampNs == -1) {
                 return;
@@ -494,18 +527,15 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
             viewsDescs[0].texture = CTX.streamTextures[0];
             viewsDescs[1].texture = CTX.streamTextures[1];
         } else {
-            Pose pose = getPose(GetBootTimeNano() + VSYNC_QUEUE_INTERVAL_NS);
+            AlvrPose pose = getPose(GetBootTimeNano() + VSYNC_QUEUE_INTERVAL_NS);
 
             AlvrViewInput viewInputs[2] = {};
             for (int eye = 0; eye < 2; eye++) {
                 float headToEye[3] = {CTX.eyeOffsets[eye], 0.0, 0.0};
-                float rotatedHeadToEye[3];
-                quatVecMultiply(pose.orientation, headToEye, rotatedHeadToEye);
+                // offset head pos to Eye Position
+                offsetPosWithQuat(pose.orientation, headToEye, viewInputs[eye].pose.position);
 
-                viewInputs[eye].orientation = pose.orientation;
-                viewInputs[eye].position[0] = pose.position[0] - rotatedHeadToEye[0];
-                viewInputs[eye].position[1] = pose.position[1] - rotatedHeadToEye[1];
-                viewInputs[eye].position[2] = pose.position[2] - rotatedHeadToEye[2];
+                viewInputs[eye].pose.orientation = pose.orientation;
                 viewInputs[eye].fov = getFov((CardboardEye) eye);
                 viewInputs[eye].swapchain_index = 0;
             }
