@@ -139,9 +139,8 @@ AlvrPose getPose(uint64_t timestampNs) {
     return pose;
 }
 
-void updateViewConfigs(uint64_t targetTimestampNs = 0)
-{
-    if(!targetTimestampNs)
+void updateViewConfigs(uint64_t targetTimestampNs = 0) {
+    if (!targetTimestampNs)
         targetTimestampNs = GetBootTimeNano() + alvr_get_head_prediction_offset_ns();
 
     AlvrPose headPose = getPose(targetTimestampNs);
@@ -170,7 +169,8 @@ void inputThread() {
         auto targetTimestampNs = GetBootTimeNano() + alvr_get_head_prediction_offset_ns();
         updateViewConfigs(targetTimestampNs);
 
-        alvr_send_tracking(targetTimestampNs, CTX.viewParams, &CTX.deviceMotion, 1, nullptr, nullptr);
+        alvr_send_tracking(
+            targetTimestampNs, CTX.viewParams, &CTX.deviceMotion, 1, nullptr, nullptr);
 
         deadline += std::chrono::nanoseconds((uint64_t) (1e9 / 60.f / 3));
         std::this_thread::sleep_until(deadline);
