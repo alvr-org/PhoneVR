@@ -501,8 +501,8 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
         if (CTX.streaming) {
             void *streamHardwareBuffer = nullptr;
 
-            updateViewConfigs();
-            auto timestampNs = alvr_get_frame(CTX.viewParams, &streamHardwareBuffer);
+            AlvrViewParams dummyViewParams;
+            auto timestampNs = alvr_get_frame(&dummyViewParams, &streamHardwareBuffer);
 
             if (timestampNs == -1) {
                 return;
