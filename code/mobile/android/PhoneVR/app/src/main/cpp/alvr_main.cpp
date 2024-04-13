@@ -86,11 +86,10 @@ struct NativeContext {
     AlvrViewParams viewParams[2] = {};
     AlvrDeviceMotion deviceMotion = {};
 
-    NativeContext()
-    {
-        memset(&fovArr, 0, (sizeof(fovArr))/sizeof(int));
-        memset(&viewParams, 0, (sizeof(viewParams))/sizeof(int));
-        memset(&deviceMotion, 0, (sizeof(deviceMotion))/sizeof(int));
+    NativeContext() {
+        memset(&fovArr, 0, (sizeof(fovArr)) / sizeof(int));
+        memset(&viewParams, 0, (sizeof(viewParams)) / sizeof(int));
+        memset(&deviceMotion, 0, (sizeof(deviceMotion)) / sizeof(int));
     }
 };
 
