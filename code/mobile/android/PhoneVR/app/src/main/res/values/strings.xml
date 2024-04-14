@@ -40,4 +40,5 @@
     </string>
     <string name="switch_phonevr_server">Switch PhoneVR Server</string>
     <string name="remember_choice">Remember choice</string>
+    <string name="max_brightness">Max Brightness</string>
 </resources>
