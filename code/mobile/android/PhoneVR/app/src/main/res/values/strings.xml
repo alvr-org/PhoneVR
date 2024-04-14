@@ -38,4 +38,6 @@
     <string name="switch_viewer">
             Switch Cardboard viewer
     </string>
+    <string name="switch_phonevr_server">Switch PhoneVR Server</string>
+    <string name="remember_choice">Remember choice</string>
 </resources>

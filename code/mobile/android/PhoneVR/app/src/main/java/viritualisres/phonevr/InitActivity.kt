@@ -3,13 +3,13 @@ package viritualisres.phonevr
 
 import android.content.Intent
 import android.os.Bundle
-import android.text.Html.FROM_HTML_MODE_LEGACY
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
 import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.text.HtmlCompat
 
 class InitActivity : AppCompatActivity() {
@@ -32,14 +32,47 @@ class InitActivity : AppCompatActivity() {
         tvBody.text = String.format(resources.getString(R.string.phonevr_support_packages), result)
         tvBody.movementMethod = LinkMovementMethod.getInstance()
         Linkify.addLinks(tvBody, Linkify.WEB_URLS)
+
+        val prefs = getSharedPreferences("prefs", MODE_PRIVATE)
+        val swVRemember = findViewById<SwitchCompat>(R.id.remeber_server)
+        swVRemember.isChecked = prefs.getBoolean("remember", false)
+
+        // check if alvr_server setting exists == first run
+        // if user has chosen to show server selection menu from respective main activities,
+        // ALVRActivity or MainActivity
+        // Not kept in Resume() to prevent looping when coming back from AlvrActivity, or others
+        if (prefs.contains("alvr_server") && prefs.getBoolean("remember", false)) {
+            var intent = Intent(this, ALVRActivity::class.java)
+            if (!prefs.getBoolean("alvr_server", true)) {
+                intent = Intent(this, MainActivity::class.java)
+            }
+            startActivity(intent)
+        }
+
+        swVRemember.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("remember", isChecked).apply()
+            if (!isChecked) {
+                prefs.edit().remove("alvr_server").apply()
+            }
+        }
     }
 
     fun btOnClickALVRStreamer(view: View) {
+        val prefs = getSharedPreferences("prefs", MODE_PRIVATE)
+        // Save choice after first open. alvr_server as boolean
+        if (prefs.getBoolean("remember", false))
+            prefs.edit().putBoolean("alvr_server", true).apply()
+
         val intent = Intent(this, ALVRActivity::class.java)
         startActivity(intent)
     }
 
     fun btOnClickPVRStreamer(view: View) {
+        val prefs = getSharedPreferences("prefs", MODE_PRIVATE)
+
+        if (prefs.getBoolean("remember", false))
+            prefs.edit().putBoolean("alvr_server", false).apply()
+
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
     }

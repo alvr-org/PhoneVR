@@ -214,6 +214,16 @@ public class ALVRActivity extends AppCompatActivity
         if (item.getItemId() == R.id.switch_viewer) {
             switchViewerNative();
             return true;
+        } else if (item.getItemId() == R.id.switch_server) {
+            // remove alvr_server prefs
+            SharedPreferences.Editor editor = getSharedPreferences("prefs", MODE_PRIVATE).edit();
+            editor.remove("alvr_server");
+            editor.apply();
+
+            // start InitActivity and clear back history
+            Intent intent = new Intent(this, InitActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
         }
         return false;
     }
