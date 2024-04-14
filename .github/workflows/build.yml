@@ -227,14 +227,14 @@ jobs:
           build-root-directory: ${{env.GRADLE_DIR}}
           cache-read-only: ${{ false }}
 
-      # - name: AVD cache
-      #   uses: actions/cache@v3
-      #   id: avd-cache
-      #   with:
-      #     path: |
-      #       ~/.android/avd/*
-      #       ~/.android/adb*
-      #     key: avd-${{ matrix.api-level }}
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}-${{ env.EMU_TARGET }}-${{ env.EMU_PROFILE }}-${{ env.EMU_AVD_NAME }}
       
       # Create AVD with some redundancy - 3 Checks
       - name: create AVD and generate snapshot for caching
@@ -351,6 +351,9 @@ jobs:
           emulator-boot-timeout: ${{ env.EMU_TIMEOUT }}
           script: |
             adb shell settings put secure immersive_mode_confirmations confirmed
+            adb uninstall viritualisres.phonevr.test
+            adb uninstall viritualisres.phonevr
+
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
             # adb logcat -b all > logcat.log            
@@ -374,6 +377,9 @@ jobs:
           emulator-boot-timeout: ${{ env.EMU_TIMEOUT }}
           script: |
             adb shell settings put secure immersive_mode_confirmations confirmed
+            adb uninstall viritualisres.phonevr.test
+            adb uninstall viritualisres.phonevr
+
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
             # adb logcat -b all > logcat.log
@@ -397,6 +403,9 @@ jobs:
           emulator-boot-timeout: ${{ env.EMU_TIMEOUT }}
           script: |
             adb shell settings put secure immersive_mode_confirmations confirmed
+            adb uninstall viritualisres.phonevr.test
+            adb uninstall viritualisres.phonevr
+            
             adb shell "logcat -b all -v color" &
             ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
             # adb logcat -b all > logcat.log            
