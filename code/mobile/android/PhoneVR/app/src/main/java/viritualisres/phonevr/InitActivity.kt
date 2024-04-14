@@ -2,12 +2,14 @@
 package viritualisres.phonevr
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.text.HtmlCompat
@@ -68,12 +70,24 @@ class InitActivity : AppCompatActivity() {
     }
 
     fun btOnClickPVRStreamer(view: View) {
-        val prefs = getSharedPreferences("prefs", MODE_PRIVATE)
+        // Check if SYSTEM ABI supports other than x86_64 ABI, since libGVR has no support for
+        // x86_64
+        if (Build.SUPPORTED_ABIS.contains("x86") ||
+            Build.SUPPORTED_ABIS.contains("arm64-v8a") ||
+            Build.SUPPORTED_ABIS.contains("armeabi-v7a")) {
+            val prefs = getSharedPreferences("prefs", MODE_PRIVATE)
 
-        if (prefs.getBoolean("remember", false))
-            prefs.edit().putBoolean("alvr_server", false).apply()
+            if (prefs.getBoolean("remember", false))
+                prefs.edit().putBoolean("alvr_server", false).apply()
 
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        } else {
+            Toast.makeText(
+                    this,
+                    "Your device ONLY supports x86_64 ABI, which is not supported by GoogleVR",
+                    Toast.LENGTH_LONG)
+                .show()
+        }
     }
 }

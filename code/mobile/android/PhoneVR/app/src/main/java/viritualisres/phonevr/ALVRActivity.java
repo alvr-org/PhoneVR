@@ -34,7 +34,7 @@ public class ALVRActivity extends AppCompatActivity
         implements PopupMenu.OnMenuItemClickListener, BatteryLevelListener {
 
     static {
-        System.loadLibrary("native-lib");
+        System.loadLibrary("native-lib-alvr");
     }
 
     private static final String TAG = ALVRActivity.class.getSimpleName() + "-Java";
