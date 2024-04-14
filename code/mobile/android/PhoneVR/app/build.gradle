@@ -55,9 +55,6 @@ android {
             }
         }
 
-        //noinspection ChromeOsAbiSupport
-        ndk.abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86'
-
         defaultPublishConfig 'release'
         publishNonDefault true
         archivesBaseName = "PhoneVR-v$versionName"

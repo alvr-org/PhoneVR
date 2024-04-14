@@ -10,7 +10,6 @@
 #include <unistd.h>
 #include <vector>
 
-#include "common.h"
 #include "nlohmann/json.hpp"
 
 using namespace nlohmann;
@@ -187,14 +186,13 @@ void inputThread() {
     }
 }
 
-// extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *) {
-//     CTX.javaVm = vm;
-//     return JNI_VERSION_1_6;
-// }
+ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *) {
+     CTX.javaVm = vm;
+     return JNI_VERSION_1_6;
+ }
 
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initializeNative(
     JNIEnv *env, jobject obj, jint screenWidth, jint screenHeight, jfloat refreshRate) {
-    CTX.javaVm = jVM;
     CTX.javaContext = env->NewGlobalRef(obj);
 
     uint32_t viewWidth = std::max(screenWidth, screenHeight) / 2;
