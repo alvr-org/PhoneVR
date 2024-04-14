@@ -160,7 +160,11 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         init {
-            System.loadLibrary("native-lib")
+            // check if android supports x86 abi
+            if (Build.SUPPORTED_ABIS.contains("x86") ||
+                Build.SUPPORTED_ABIS.contains("arm64-v8a") ||
+                Build.SUPPORTED_ABIS.contains("armeabi-v7a"))
+                System.loadLibrary("native-lib-gvr")
         }
     }
 }
