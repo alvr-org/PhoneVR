@@ -320,9 +320,8 @@ jobs:
             emulator-boot-timeout: ${{ env.EMU_TIMEOUT }}
             script: |
               adb shell settings put secure immersive_mode_confirmations confirmed
-              adb uninstall viritualisres.phonevr.test || true
-              adb uninstall viritualisres.phonevr || true
-
+              ./gradlew :app:uninstallAll
+              
               adb shell "logcat -b all -v color" &
               ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
               # adb logcat -b all > logcat.log            
