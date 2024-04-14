@@ -8,7 +8,9 @@ import androidx.test.core.graphics.writeToTestStorage
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.pressBack
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
+import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
@@ -154,6 +156,10 @@ class ALVRActivityTest : PVRInstrumentationBase() {
         sendADBCommand("sensor set acceleration 0:0:9.77622")
     }
 
+    private fun lookFrontDown() {
+        sendADBCommand("sensor set acceleration 9.3:0:3.8")
+    }
+
     private fun rotateAVDLandscape() {
         // set gravity acceleration g in Y Direction - real Mock
         sendADBCommand("sensor set acceleration 9.77622:0:0")
@@ -189,12 +195,23 @@ class ALVRActivityTest : PVRInstrumentationBase() {
         }
         takeScreenshot().writeToTestStorage("${javaClass.simpleName}_${nameRule.methodName}")
 
+        onView(withId(R.id.ui_settings_button)).perform(click())
+        sleep(1000)
+        takeScreenshot().writeToTestStorage("${javaClass.simpleName}_${nameRule.methodName}_Popup")
+        onView(isRoot()).perform(pressBack()) // Close popup
+
+        lookFrontDown()
+        waitForADBTelnetServer() // Wait for ADBTelnetServer to execute rotation
+        sleep(1000)
+        takeScreenshot()
+            .writeToTestStorage("${javaClass.simpleName}_${nameRule.methodName}_LookingFrontDown")
+
         lookDown()
         waitForADBTelnetServer() // Wait for ADBTelnetServer to execute rotation
         sleep(1000)
-
         takeScreenshot()
             .writeToTestStorage("${javaClass.simpleName}_${nameRule.methodName}_LookingDown")
+
         // shutdownADBTelnetServer()
     }
     /*

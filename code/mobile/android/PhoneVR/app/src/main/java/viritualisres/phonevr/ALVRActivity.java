@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import java.util.Objects;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -43,10 +45,10 @@ public class ALVRActivity extends AppCompatActivity
 
     private GLSurfaceView glView;
 
-    private BatteryMonitor bMonitor = new BatteryMonitor(this);
+    private final BatteryMonitor bMonitor = new BatteryMonitor(this);
 
-    public class BatteryMonitor extends BroadcastReceiver {
-        private BatteryLevelListener listener;
+    public static class BatteryMonitor extends BroadcastReceiver {
+        private final BatteryLevelListener listener;
 
         public BatteryMonitor(BatteryLevelListener listener) {
             this.listener = listener;
@@ -65,7 +67,7 @@ public class ALVRActivity extends AppCompatActivity
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)) {
+            if (Objects.equals(intent.getAction(), Intent.ACTION_BATTERY_CHANGED)) {
                 // Get the current battery level and scale
                 int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
                 int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100);
@@ -122,9 +124,13 @@ public class ALVRActivity extends AppCompatActivity
                 });
 
         // Forces screen to max brightness.
-        WindowManager.LayoutParams layout = getWindow().getAttributes();
-        layout.screenBrightness = 1.f;
-        getWindow().setAttributes(layout);
+        // get setting max_brightness boolean and set brightness to max if required
+        SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
+        if (prefs.getBoolean("max_brightness", true)) {
+            WindowManager.LayoutParams layout = getWindow().getAttributes();
+            layout.screenBrightness = 1.f;
+            getWindow().setAttributes(layout);
+        }
 
         // Prevents screen from dimming/locking.
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -205,6 +211,13 @@ public class ALVRActivity extends AppCompatActivity
         PopupMenu popup = new PopupMenu(this, view);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.settings_menu, popup.getMenu());
+
+        MenuItem toggleBrightness = popup.getMenu().findItem(R.id.max_brightness_toggle);
+        // get setting max_brightness boolean from settings
+        SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
+        boolean isChecked = prefs.getBoolean("max_brightness", true);
+        toggleBrightness.setChecked(isChecked);
+
         popup.setOnMenuItemClickListener(this);
         popup.show();
     }
@@ -213,6 +226,13 @@ public class ALVRActivity extends AppCompatActivity
     public boolean onMenuItemClick(MenuItem item) {
         if (item.getItemId() == R.id.switch_viewer) {
             switchViewerNative();
+            return true;
+        } else if (item.getItemId() == R.id.max_brightness_toggle) {
+            // Save app setting boolean max_brightness == true
+            item.setChecked(!item.isChecked());
+            SharedPreferences.Editor editor = getSharedPreferences("settings", MODE_PRIVATE).edit();
+            editor.putBoolean("max_brightness", item.isChecked());
+            editor.apply();
             return true;
         }
         return false;
