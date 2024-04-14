@@ -288,6 +288,21 @@
         android:text="@string/share_logs"/>
     </LinearLayout>
 
+    <Button
+        android:id="@+id/btSwitchServer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="60dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:text="@string/switch_phonevr_server"
+        app:layout_constraintBottom_toTopOf="@id/textViewLog"
+        app:layout_constraintTop_toBottomOf="@+id/btLayout"
+        tools:layout_editor_absoluteX="10dp" />
+
     <TextView
         android:id="@+id/textViewLog"
         android:layout_width="0dp"
@@ -297,7 +312,7 @@
         android:text="@string/log_recent_100_lines"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btLayout"
+        app:layout_constraintTop_toBottomOf="@+id/btSwitchServer"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp" />

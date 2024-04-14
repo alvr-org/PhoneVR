@@ -66,7 +66,8 @@
                 android:resource="@xml/provider_paths_app" />
         </provider>
         <activity
-            android:name=".MainActivity"/>
+            android:name=".MainActivity"
+            android:launchMode="singleTop" />
         <activity
             android:name=".GameActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -87,8 +88,8 @@
         <activity
             android:name=".ALVRActivity"
             android:screenOrientation="landscape"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
-        </activity>
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:launchMode="singleTop" />
     </application>
 
 </manifest>

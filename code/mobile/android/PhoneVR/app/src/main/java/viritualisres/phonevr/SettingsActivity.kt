@@ -105,6 +105,17 @@ class SettingsActivity : AppCompatActivity() {
                 OpenFileWithIntent(File(getExternalFilesDir(null).toString() + "/PVR/pvrlog.txt"))
             }
         }
+
+        val btSwitchServer: Button = findViewById(R.id.btSwitchServer)
+        btSwitchServer.setOnClickListener {
+            val prefs = getSharedPreferences("prefs", MODE_PRIVATE)
+            prefs.edit().remove("alvr_server").apply()
+
+            // Start initActivity and let user choose the server again. Clear back history
+            val intent = Intent(this@SettingsActivity, InitActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            startActivity(intent)
+        }
     }
     /*
      * Zips a file at a location and places the resulting zip file at the toLocation
