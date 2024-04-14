@@ -186,10 +186,10 @@ void inputThread() {
     }
 }
 
- extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *) {
-     CTX.javaVm = vm;
-     return JNI_VERSION_1_6;
- }
+extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *) {
+    CTX.javaVm = vm;
+    return JNI_VERSION_1_6;
+}
 
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initializeNative(
     JNIEnv *env, jobject obj, jint screenWidth, jint screenHeight, jfloat refreshRate) {
