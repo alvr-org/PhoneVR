@@ -77,13 +77,19 @@ struct NativeContext {
     std::thread inputThread;
 
     // Une one texture per eye, no need for swapchains.
-    GLuint lobbyTextures[2] = {};
-    GLuint streamTextures[2] = {};
+    GLuint lobbyTextures[2] = {0, 0};
+    GLuint streamTextures[2] = {0, 0};
 
-    float eyeOffsets[2] = {};
+    float eyeOffsets[2] = {0.0, 0.0};
     AlvrFov fovArr[2] = {};
     AlvrViewParams viewParams[2] = {};
     AlvrDeviceMotion deviceMotion = {};
+
+    NativeContext() {
+        memset(&fovArr, 0, (sizeof(fovArr)) / sizeof(int));
+        memset(&viewParams, 0, (sizeof(viewParams)) / sizeof(int));
+        memset(&deviceMotion, 0, (sizeof(deviceMotion)) / sizeof(int));
+    }
 };
 
 NativeContext CTX = {};
@@ -117,9 +123,9 @@ void offsetPosWithQuat(AlvrQuat q, float offset[3], float outPos[3]) {
     float rotatedOffset[3];
     quatVecMultiply(q, offset, rotatedOffset);
 
-    outPos[0] += rotatedOffset[0];
-    outPos[1] += rotatedOffset[1] + FLOOR_HEIGHT;
-    outPos[2] += rotatedOffset[2];
+    outPos[0] -= rotatedOffset[0];
+    outPos[1] -= rotatedOffset[1] - FLOOR_HEIGHT;
+    outPos[2] -= rotatedOffset[2];
 }
 
 AlvrFov getFov(CardboardEye eye) {
@@ -327,8 +333,8 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                 CTX.eyeOffsets[eye] = matrix[12];
             }
 
-            CTX.fovArr[0] = getFov((CardboardEye) 0);
-            CTX.fovArr[1] = getFov((CardboardEye) 1);
+            CTX.fovArr[kLeft] = getFov(kLeft);
+            CTX.fovArr[kRight] = getFov(kRight);
 
             info("renderingParamsChanged, updating new view configs (FOV) to alvr");
             // alvr_send_views_config(fovArr, CTX.eyeOffsets[0] - CTX.eyeOffsets[1]);
