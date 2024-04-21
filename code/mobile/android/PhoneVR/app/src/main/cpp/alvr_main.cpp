@@ -9,47 +9,12 @@
 #include <thread>
 #include <unistd.h>
 #include <vector>
+#include <EGL/egl.h>
 
 #include "nlohmann/json.hpp"
+#include "utils.h"
 
 using namespace nlohmann;
-
-const char LOG_TAG[] = "ALVR_PVR_NATIVE";
-
-void log(AlvrLogLevel level, const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-
-    char buf[1024];
-    int count = vsnprintf(buf, sizeof(buf), format, args);
-    if (count > (int) sizeof(buf))
-        count = (int) sizeof(buf);
-    if (count > 0 && buf[count - 1] == '\n')
-        buf[count - 1] = '\0';
-
-    alvr_log(level, buf);
-
-    switch (level) {
-    case ALVR_LOG_LEVEL_DEBUG:
-        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "%s", buf);
-        break;
-    case ALVR_LOG_LEVEL_INFO:
-        __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "%s", buf);
-        break;
-    case ALVR_LOG_LEVEL_ERROR:
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "%s", buf);
-        break;
-    case ALVR_LOG_LEVEL_WARN:
-        __android_log_print(ANDROID_LOG_WARN, LOG_TAG, "%s", buf);
-        break;
-    }
-
-    va_end(args);
-}
-
-#define error(...) log(ALVR_LOG_LEVEL_ERROR, __VA_ARGS__)
-#define info(...)  log(ALVR_LOG_LEVEL_INFO, __VA_ARGS__)
-#define debug(...) log(ALVR_LOG_LEVEL_DEBUG, __VA_ARGS__)
 
 uint64_t HEAD_ID = alvr_path_string_to_id("/user/head");
 
@@ -90,6 +55,9 @@ struct NativeContext {
         memset(&viewParams, 0, (sizeof(viewParams)) / sizeof(int));
         memset(&deviceMotion, 0, (sizeof(deviceMotion)) / sizeof(int));
     }
+
+    EGLDisplay eglDisplay;
+    EGLSurface eglSurface;
 };
 
 NativeContext CTX = {};
@@ -345,7 +313,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
             info("Pausing ALVR since glContext is not recreated, deleting textures");
             alvr_pause_opengl();
 
-            glDeleteTextures(2, CTX.lobbyTextures);
+            GL(glDeleteTextures(2, CTX.lobbyTextures));
         }
 
         if (CTX.renderingParamsChanged || CTX.glContextRecreated) {
@@ -353,13 +321,15 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                  "renderingParamsChanged %b",
                  CTX.renderingParamsChanged,
                  CTX.glContextRecreated);
-            glGenTextures(2, CTX.lobbyTextures);
+            GL(glGenTextures(2, CTX.lobbyTextures));
 
             for (auto &lobbyTexture : CTX.lobbyTextures) {
-                glBindTexture(GL_TEXTURE_2D, lobbyTexture);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexImage2D(GL_TEXTURE_2D,
+                GL(glBindTexture(GL_TEXTURE_2D, lobbyTexture));
+                GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+                GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+                GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+                GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+                GL(glTexImage2D(GL_TEXTURE_2D,
                              0,
                              GL_RGB,
                              CTX.screenWidth / 2,
@@ -367,7 +337,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                              0,
                              GL_RGB,
                              GL_UNSIGNED_BYTE,
-                             nullptr);
+                             nullptr));
             }
 
             const uint32_t *targetViews[2] = {(uint32_t *) &CTX.lobbyTextures[0],
@@ -404,13 +374,15 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                     info("Got settings from ALVR Server - %s", &settings_buffer[900]);
                 json settings_json = json::parse(&settings_buffer[0]);
 
-                glGenTextures(2, CTX.streamTextures);
+                GL(glGenTextures(2, CTX.streamTextures));
 
                 for (auto &streamTexture : CTX.streamTextures) {
-                    glBindTexture(GL_TEXTURE_2D, streamTexture);
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                    glTexImage2D(GL_TEXTURE_2D,
+                    GL(glBindTexture(GL_TEXTURE_2D, streamTexture));
+                    GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+                    GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+                    GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+                    GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+                    GL(glTexImage2D(GL_TEXTURE_2D,
                                  0,
                                  GL_RGB,
                                  config.view_width,
@@ -418,7 +390,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                                  0,
                                  GL_RGB,
                                  GL_UNSIGNED_BYTE,
-                                 nullptr);
+                                 nullptr));
                 }
 
                 CTX.fovArr[0] = getFov((CardboardEye) 0);
@@ -499,7 +471,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                 CTX.streaming = false;
                 CTX.inputThread.join();
 
-                glDeleteTextures(2, CTX.streamTextures);
+                GL(glDeleteTextures(2, CTX.streamTextures));
                 info("ALVR Poll Event: ALVR_EVENT_STREAMING_STOPPED, Stream stopped deleted "
                      "textures.");
             }
