@@ -54,9 +54,6 @@ struct NativeContext {
         memset(&viewParams, 0, (sizeof(viewParams)) / sizeof(int));
         memset(&deviceMotion, 0, (sizeof(deviceMotion)) / sizeof(int));
     }
-
-    EGLDisplay eglDisplay;
-    EGLSurface eglSurface;
 };
 
 NativeContext CTX = {};
