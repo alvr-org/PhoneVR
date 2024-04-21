@@ -9,7 +9,6 @@
 #include <thread>
 #include <unistd.h>
 #include <vector>
-#include <EGL/egl.h>
 
 #include "nlohmann/json.hpp"
 #include "utils.h"
@@ -330,14 +329,14 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                 GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
                 GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
                 GL(glTexImage2D(GL_TEXTURE_2D,
-                             0,
-                             GL_RGB,
-                             CTX.screenWidth / 2,
-                             CTX.screenHeight,
-                             0,
-                             GL_RGB,
-                             GL_UNSIGNED_BYTE,
-                             nullptr));
+                                0,
+                                GL_RGB,
+                                CTX.screenWidth / 2,
+                                CTX.screenHeight,
+                                0,
+                                GL_RGB,
+                                GL_UNSIGNED_BYTE,
+                                nullptr));
             }
 
             const uint32_t *targetViews[2] = {(uint32_t *) &CTX.lobbyTextures[0],
@@ -383,14 +382,14 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                     GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
                     GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
                     GL(glTexImage2D(GL_TEXTURE_2D,
-                                 0,
-                                 GL_RGB,
-                                 config.view_width,
-                                 config.view_height,
-                                 0,
-                                 GL_RGB,
-                                 GL_UNSIGNED_BYTE,
-                                 nullptr));
+                                    0,
+                                    GL_RGB,
+                                    config.view_width,
+                                    config.view_height,
+                                    0,
+                                    GL_RGB,
+                                    GL_UNSIGNED_BYTE,
+                                    nullptr));
                 }
 
                 CTX.fovArr[0] = getFov((CardboardEye) 0);
