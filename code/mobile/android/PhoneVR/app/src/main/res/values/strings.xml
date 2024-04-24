@@ -53,6 +53,7 @@
     <string name="delay_string">Delay in ms</string>
     <string name="lower_bound">Lower Bound</string>
     <string name="upper_bound">Upper Bound</string>
+    <string name="double_tap_test_graph">Double Tap Test Graph</string>
     <string name="passthrough_settings">Passthrough Settings</string>
     <string name="passthrough">Passthrough</string>
 </resources>

@@ -40,6 +40,16 @@
             app:title="@string/upper_bound"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
+    <PreferenceCategory app:title="@string/double_tap_test_graph"
+        app:dependency="passthrough_tap">
+        <Preference
+            app:title="Test Chart"
+            app:dependency="passthrough_tap"
+            app:key="chart"
+            app:layout="@layout/chart_layout"
+            />
+    </PreferenceCategory>
+
 
 
 </PreferenceScreen>
