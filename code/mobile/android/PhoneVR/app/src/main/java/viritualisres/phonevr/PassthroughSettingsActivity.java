@@ -2,6 +2,8 @@
 package viritualisres.phonevr;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,24 +12,23 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceGroupAdapter;
+import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.PreferenceViewHolder;
 import androidx.recyclerview.widget.RecyclerView;
-import ir.mahdiparastesh.hellocharts.model.Axis;
-import ir.mahdiparastesh.hellocharts.model.Line;
-import ir.mahdiparastesh.hellocharts.model.LineChartData;
-import ir.mahdiparastesh.hellocharts.model.PointValue;
-import ir.mahdiparastesh.hellocharts.model.Viewport;
-import ir.mahdiparastesh.hellocharts.util.ChartUtils;
 import ir.mahdiparastesh.hellocharts.view.LineChartView;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PassthroughSettingsActivity extends AppCompatActivity {
+
+    private static SharedPreferences sharedPref;
+    private static SensorManager sensorManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
         setContentView(R.layout.activity_passthrough_settings);
         if (savedInstanceState == null) {
             getSupportFragmentManager()
@@ -42,11 +43,13 @@ public class PassthroughSettingsActivity extends AppCompatActivity {
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
-        private final int numberOfLines = 4;
-        private final int numberOfPoints = 12;
         private LineChartView chart = null;
+        private Passthrough passthrough;
+        private GraphAdapter graphAdapter;
 
-        float[][] randomNumbersTab = new float[numberOfLines][numberOfPoints];
+        public SettingsFragment() {
+            super();
+        }
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -66,70 +69,13 @@ public class PassthroughSettingsActivity extends AppCompatActivity {
                     View customLayout = holder.itemView;
                     if (customLayout.getId() == R.id.chartLayout) {
                         chart = customLayout.findViewById(R.id.chart);
-                        generateValues();
-                        generateData(chart);
-                        resetViewport(chart);
+                        graphAdapter = new GraphAdapter(100, chart);
+                        passthrough = new Passthrough(sharedPref, sensorManager, 640, 480);
+                        passthrough.onResume(graphAdapter);
                     }
                     return holder;
                 }
             };
-        }
-
-        private void generateValues() {
-            for (int i = 0; i < numberOfLines; ++i) {
-                for (int j = 0; j < numberOfPoints; ++j) {
-                    randomNumbersTab[i][j] = (float) Math.random() * 100f;
-                }
-            }
-        }
-
-        private void generateData(LineChartView chart) {
-            List<Line> lines = new ArrayList<>();
-            for (int i = 0; i < numberOfLines; ++i) {
-
-                List<PointValue> values = new ArrayList<>();
-                for (int j = 0; j < numberOfPoints; ++j) {
-                    values.add(new PointValue(j, randomNumbersTab[i][j]));
-                }
-
-                Line line = new Line(values);
-                line.setColor(ChartUtils.COLORS[i]);
-                // line.setShape(shape);
-                // line.setCubic(isCubic);
-                // line.setFilled(isFilled);
-                // line.setHasLabels(hasLabels);
-                // line.setHasLabelsOnlyForSelected(hasLabelForSelected);
-                // line.setHasLines(hasLines);
-                // line.setHasPoints(hasPoints);
-                // line.setHasGradientToTransparent(hasGradientToTransparent);
-                // if (pointsHaveDifferentColor)
-                //    line.setPointColor(ChartUtils.COLORS[(i + 1) % ChartUtils.COLORS.length]);
-                lines.add(line);
-            }
-
-            LineChartData data = new LineChartData(lines);
-
-            Axis axisX = new Axis();
-            Axis axisY = new Axis().setHasLines(true);
-            axisX.setName("Axis X");
-            axisY.setName("Axis Y");
-
-            data.setAxisXBottom(axisX);
-            data.setAxisYLeft(axisY);
-
-            data.setBaseValue(Float.NEGATIVE_INFINITY);
-            chart.setLineChartData(data);
-        }
-
-        private void resetViewport(LineChartView chart) {
-            // Reset viewport height range to (0,100)
-            final Viewport v = new Viewport(chart.getMaximumViewport());
-            v.bottom = 0;
-            v.top = 100;
-            v.left = 0;
-            v.right = numberOfPoints - 1;
-            chart.setMaximumViewport(v);
-            chart.setCurrentViewport(v);
         }
     }
 }

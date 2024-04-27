@@ -34,6 +34,8 @@ public class Passthrough implements SensorEventListener {
 
     private final SensorManager mSensorManager;
 
+    private GraphAdapter graphAdapter = null;
+
     private final int displayWidth;
 
     private final int displayHeight;
@@ -84,7 +86,7 @@ public class Passthrough implements SensorEventListener {
         }
 
         if (timestampAfterCandidate == 0) {
-            timestampAfterCandidate = event.timestamp;
+            timestampAfterCandidate = event.timestamp - 1;
         }
 
         boolean initialFull = event.timestamp - timestamp > passthroughDelayInMs * 1000000L;
@@ -92,6 +94,7 @@ public class Passthrough implements SensorEventListener {
                 event.timestamp - timestampAfterCandidate > passthroughDelayInMs * 1000000L;
 
         // gather data for passthrough_delay_ms, we get a data point approx. each 60ms
+        String axesName[] = {"X", "Y", "Z"};
         for (int i = 0; i < accelStore.length; ++i) {
             // derivative, absolute
             accelStore[i].add(event.values[i]);
@@ -120,6 +123,12 @@ public class Passthrough implements SensorEventListener {
                     accelAbs[axis].add(
                             Math.abs(accelStore[axis].get(i) - accelStore[axis].get(i - 1)));
                 }
+                if (graphAdapter != null) {
+                    graphAdapter.addValue(
+                            event.timestamp,
+                            axesName[axis],
+                            accelAbs[axis].get(accelAbs[axis].size() - 1));
+                }
             }
 
             // get the mean for each axis and sum them up
@@ -132,6 +141,9 @@ public class Passthrough implements SensorEventListener {
             }
             float sumMean = axisMean[0] + axisMean[1] + axisMean[2];
             cumSums.add(sumMean);
+            if (graphAdapter != null) {
+                graphAdapter.addValue(event.timestamp, "sumMean", sumMean);
+            }
 
             if (cumSums.size() < accelAbs[0].size()) {
                 return;
@@ -199,6 +211,15 @@ public class Passthrough implements SensorEventListener {
                 }
             }
         }
+        if (graphAdapter != null) {
+            graphAdapter.addValue(
+                    event.timestamp, "Candidate", timestampAfterCandidate == event.timestamp);
+            graphAdapter.addValue(event.timestamp, "Trigger", triggerIsSet);
+            graphAdapter.addValue(event.timestamp, "upperBound", detectionUpperBound);
+            graphAdapter.addValue(event.timestamp, "lowerBound", detectionLowerBound);
+            graphAdapter.refresh();
+            this.updateSettings();
+        }
 
         Log.v(
                 TAG + "-AccSensor",
@@ -214,6 +235,29 @@ public class Passthrough implements SensorEventListener {
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
+    protected void onResume(GraphAdapter graphAdapter) {
+        this.graphAdapter = graphAdapter;
+        this.onResume();
+    }
+
+    protected void updateSettings() {
+        try {
+            passthroughDelayInMs = Long.parseLong(mPref.getString("passthrough_delay", "600"));
+        } catch (Exception e) {
+            passthroughDelayInMs = 600;
+        }
+        try {
+            detectionLowerBound = Float.parseFloat(mPref.getString("passthrough_lower", "0.8"));
+        } catch (Exception e) {
+            detectionLowerBound = 0.8f;
+        }
+        try {
+            detectionUpperBound = Float.parseFloat(mPref.getString("passthrough_upper", "4"));
+        } catch (Exception e) {
+            detectionUpperBound = 4.f;
+        }
+    }
+
     protected void onResume() {
         SharedPreferences.Editor edit = mPref.edit();
         edit.putBoolean("passthrough", false);
@@ -222,22 +266,7 @@ public class Passthrough implements SensorEventListener {
         timestamp = 0;
         halfSize = 0;
         if (mPref.getBoolean("passthrough_tap", true)) {
-            try {
-                passthroughDelayInMs = Long.parseLong(mPref.getString("passthrough_delay", "600"));
-            } catch (Exception e) {
-                passthroughDelayInMs = 600;
-            }
-            try {
-                detectionLowerBound = Float.parseFloat(mPref.getString("passthrough_lower", "0.8"));
-            } catch (Exception e) {
-                detectionLowerBound = 0.8f;
-            }
-            try {
-                detectionUpperBound = Float.parseFloat(mPref.getString("passthrough_upper", "4"));
-            } catch (Exception e) {
-                detectionUpperBound = 4.f;
-            }
-
+            updateSettings();
             if (mAccelerometer != null) {
                 mSensorManager.registerListener(
                         this, mAccelerometer, SensorManager.SENSOR_DELAY_UI);
