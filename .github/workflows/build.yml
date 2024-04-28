@@ -179,7 +179,7 @@ jobs:
 
   Test_APK:
     name: Test APK
-    runs-on: macos-latest
+    runs-on: macos-12
     env:
       EMU_OPTS: -no-window -gpu swiftshader_indirect -no-boot-anim -camera-back virtualscene # -verbose -noaudio 
       EMU_PROFILE: pixel_2
@@ -196,6 +196,19 @@ jobs:
         with:
           submodules: 'true'
 
+      # - name: Test
+      #   run: |
+      #     cat $GITHUB_ENV
+      #     cat $GITHUB_PATH
+      #     echo $GITHUB_ENV
+      #     echo $GITHUB_PATH
+      #     echo $PATH
+      #     echo "ANDROID_NDK=/Users/runner/Library/Android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
+      #     echo "ANDROID_NDK_HOME=/Users/runner/Library/Android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
+      #     echo "ANDROID_NDK_LATEST_HOME=/Users/runner/Library/Android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
+      #     echo "ANDROID_NDK_ROOT=/Users/runner/Library/Android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
+      #     echo $PATH
+      
       - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
