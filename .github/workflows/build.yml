@@ -198,6 +198,9 @@ jobs:
 
       - name: Test
         run: |
+          cat $GITHUB_ENV
+          cat $GITHUB_PATH
+          echo $GITHUB_ENV
           echo $GITHUB_PATH
       
       - uses: nttld/setup-ndk@v1
