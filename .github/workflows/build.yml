@@ -196,6 +196,15 @@ jobs:
         with:
           submodules: 'true'
 
+      - name: Test
+        run: |
+          echo $env
+      
+      - uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25c
+          local-cache: true
+
       - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
