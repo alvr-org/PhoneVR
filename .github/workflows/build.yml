@@ -203,12 +203,12 @@ jobs:
           echo $GITHUB_ENV
           echo $GITHUB_PATH
           echo $PATH
+          echo "ANDROID_NDK=/Users/runner/Library/Android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=/Users/runner/Library/Android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
+          echo "ANDROID_NDK_LATEST_HOME=/Users/runner/Library/Android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=/Users/runner/Library/Android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
+          echo $PATH
       
-      - uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r25c
-          local-cache: true
-
       - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
