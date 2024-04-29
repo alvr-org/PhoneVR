@@ -415,7 +415,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                             render_config.enable_foveation = true;
                             render_config.foveation_center_size_x =
                                 settings_json["video"]["foveated_encoding"]["Enabled"]
-                                             ["center_shift_x"];
+                                             ["center_size_x"];
                             render_config.foveation_center_size_y =
                                 settings_json["video"]["foveated_encoding"]["Enabled"]
                                              ["center_size_y"];
