@@ -56,8 +56,9 @@ PhoneVR(PVR) can be used with two servers ALVR and PVRServer. ALVR Server is rec
 | Code backend                                                                   | Rust + C++                                   | C++                        |
 
 ### A. Installation using ALVR Server
-* Currently only **[ALVR v20.7.1](https://github.com/alvr-org/ALVR/releases/tag/v20.7.1)** (latest stable) is supported by PhoneVR.
+* Currently only **[ALVR v20.8.0](https://github.com/alvr-org/ALVR/releases/tag/v20.8.0)** (latest stable) is supported by PhoneVR.
   * Older version
+    - PhoneVR v1.4.0-beta -> ALVR v20.7.1
     - PhoneVR v1.3.0-beta -> ALVR v20.6.1
     - PhoneVR v1.2.0-beta -> ALVR v20.5.0
     - PhoneVR v1.1.0-beta -> ALVR v20.2.1
