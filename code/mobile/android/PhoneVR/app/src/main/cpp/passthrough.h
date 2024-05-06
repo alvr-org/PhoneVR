@@ -1,4 +1,5 @@
 #ifndef PHONEVR_PASSTHROUGH_H
+#define PHONEVR_PASSTHROUGH_H
 
 #include "cardboard.h"
 
@@ -23,7 +24,5 @@ GLuint passthrough_init(PassthroughInfo *info);
 void passthrough_cleanup(PassthroughInfo *info);
 void passthrough_setup(PassthroughInfo *info);
 void passthrough_render(PassthroughInfo *info, CardboardEyeTextureDescription viewDescs[]);
-
-#define PHONEVR_PASSTHROUGH_H
 
 #endif   // PHONEVR_PASSTHROUGH_H

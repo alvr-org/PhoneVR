@@ -20,7 +20,7 @@ import java.util.Locale;
 public class Passthrough implements SensorEventListener {
 
     static {
-        System.loadLibrary("native-lib");
+        System.loadLibrary("native-lib-alvr");
     }
 
     private static final String TAG = Passthrough.class.getSimpleName() + "-Java";
@@ -154,50 +154,45 @@ public class Passthrough implements SensorEventListener {
                 // these may occur on any axis
                 for (List<Float> elem : accelAbs) {
                     // we look at two halves of the passthrough_delay
-                    // we check:
-                    // - if in the first and second half is a real peak
-                    // - whether the peaks are in the bounds
-                    // - if the summed mean is in the bounds
-                    // - if the first summed mean is below lower_bound
-                    //   (to assure a resting stage before the triggering)
-                    // - if the second maximum is decending under the lower bound until curr value
-                    // If all is fulfilled we consider this a potential passthrough_change event.
-                    // The sum must then decend under lower bound until passthrough_delay
-                    int middle = halfSize - 1;
-                    List<Float> t1 = elem.subList(0, halfSize);
-                    List<Float> t2 = elem.subList(middle, elem.size());
+                    List<Float> t1 = elem.subList(0, halfSize + 1);
+                    List<Float> t2 = elem.subList(halfSize, elem.size());
 
+                    // and get the maxima
                     float max1 = Collections.max(t1);
                     float max2 = Collections.max(t2);
-
-                    if (max1 - t1.get(0) < detectionLowerBound
-                            || max1 - t1.get(t1.size() - 1) < detectionLowerBound
-                            || max2 - t2.get(0) < detectionLowerBound
-                            || max2 - t2.get(t2.size() - 1) < detectionLowerBound
-                            || max1 < detectionLowerBound
-                            || max1 > detectionUpperBound
-                            || max2 < detectionLowerBound
-                            || max2 > detectionUpperBound
-                            || sumMean < detectionLowerBound
-                            || sumMean > detectionUpperBound) {
-                        continue;
-                    }
-
-                    int end2 = 0;
-                    for (int i = 0; i < t2.size(); ++i) {
-                        if (t2.get(i) == max2) {
+                    // and check whether the 2nd half goes belowe lower bound
+                    int end2 = t2.indexOf(max2);
+                    for (int i = end2; i < t2.size(); ++i) {
+                        if (t2.get(i) < detectionLowerBound) {
                             end2 = i;
-                        }
-                        if (end2 > 0) {
-                            if (t2.get(i) < detectionLowerBound) {
-                                end2 = i;
-                                break;
-                            }
+                            break;
                         }
                     }
 
-                    if (cumSums.get(0) < Math.max(detectionLowerBound - 0.3f, 0.5f)
-                            && t2.get(end2) < max2) {
+                    // We check
+                    if (t1.get(halfSize - 1) > t2.get(0) // if halfSize is a local minimum
+                            && t2.get(1) > t2.get(0)
+                            && max1 - t1.get(0) >= detectionLowerBound // max - start > lower bound
+                            && max1 - t1.get(t1.size() - 1)
+                                    >= detectionLowerBound // max - end > lower bound
+                            && max2 - t2.get(0) >= detectionLowerBound
+                            && max2 - t2.get(t2.size() - 1) >= detectionLowerBound
+                            && max1 >= detectionLowerBound // max are in bounds
+                            && max1 <= detectionUpperBound
+                            && max2 >= detectionLowerBound
+                            && max2 <= detectionUpperBound
+                            && sumMean >= detectionLowerBound // sumMean is in bounds
+                            && sumMean <= detectionUpperBound
+                            && t2.get(end2) < max2 // the 2nd half goes below lower bound
+                            && cumSums.get(0)
+                                    < Math.max(
+                                            detectionLowerBound - 0.3f,
+                                            0.5f) // the first sumMean (of window) is below lower
+                    // bounds
+                    ) {
+                        // If all is fulfilled we consider this a potential passthrough_change
+                        // event.
+                        // The sum must then decend under lower bound until passthrough_delay
                         timestampAfterCandidate = event.timestamp;
                         break;
                     }

@@ -3,8 +3,8 @@
 #include <GLES2/gl2ext.h>
 #include <vector>
 
-#include "passthrough.h"
 #include "utils.h"
+#include "passthrough.h"
 
 GLuint LoadGLShader(GLenum type, const char *shader_source) {
     GLuint shader = GL(glCreateShader(type));

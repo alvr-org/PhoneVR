@@ -144,10 +144,7 @@ public class ALVRActivity extends AppCompatActivity
         pref = PreferenceManager.getDefaultSharedPreferences(this);
         passthrough =
                 new Passthrough(
-                        pref,
-                        (SensorManager) getSystemService(SENSOR_SERVICE),
-                        width,
-                        height);
+                        pref, (SensorManager) getSystemService(SENSOR_SERVICE), width, height);
     }
 
     @Override
