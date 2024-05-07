@@ -16,7 +16,6 @@ import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.PreferenceViewHolder;
 import androidx.recyclerview.widget.RecyclerView;
-import ir.mahdiparastesh.hellocharts.view.LineChartView;
 
 public class PassthroughSettingsActivity extends AppCompatActivity {
 
@@ -43,7 +42,6 @@ public class PassthroughSettingsActivity extends AppCompatActivity {
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
-        private LineChartView chart = null;
         private Passthrough passthrough;
         private GraphAdapter graphAdapter;
 
@@ -68,8 +66,7 @@ public class PassthroughSettingsActivity extends AppCompatActivity {
                     PreferenceViewHolder holder = super.onCreateViewHolder(parent, viewType);
                     View customLayout = holder.itemView;
                     if (customLayout.getId() == R.id.chartLayout) {
-                        chart = customLayout.findViewById(R.id.chart);
-                        graphAdapter = new GraphAdapter(100, chart);
+                        graphAdapter = new GraphAdapter(100, customLayout);
                         passthrough = new Passthrough(sharedPref, sensorManager, 640, 480);
                         passthrough.onResume(graphAdapter);
                     }

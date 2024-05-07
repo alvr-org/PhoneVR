@@ -132,9 +132,12 @@ android {
     }
 }
 
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation fileTree(dir: "libraries", include: ['hellocharts-2.6.5.aar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
@@ -161,6 +164,7 @@ dependencies {
 
     implementation platform('com.google.firebase:firebase-bom:26.0.0')
     implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }
 
 // The dependencies for NDK builds live inside the .aar files so they need to

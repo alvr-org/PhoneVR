@@ -1,13 +1,13 @@
 /* (C)2024 */
 package viritualisres.phonevr;
 
-import ir.mahdiparastesh.hellocharts.model.Axis;
-import ir.mahdiparastesh.hellocharts.model.Line;
-import ir.mahdiparastesh.hellocharts.model.LineChartData;
-import ir.mahdiparastesh.hellocharts.model.PointValue;
-import ir.mahdiparastesh.hellocharts.model.Viewport;
-import ir.mahdiparastesh.hellocharts.util.ChartUtils;
-import ir.mahdiparastesh.hellocharts.view.LineChartView;
+import android.view.View;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class GraphAdapter {
 
-    private final LineChartView chart;
+    private final LineChart chart;
     private List<Long> timestamps = new ArrayList<>();
     private Map<String, List<Float>> lines = new HashMap<>();
     private List<String> keyOrder = new ArrayList<>();
@@ -23,9 +23,9 @@ public class GraphAdapter {
     private int len;
     private float max = 10.f;
 
-    public GraphAdapter(int len, LineChartView chart) {
+    public GraphAdapter(int len, View customView) {
         this.len = len;
-        this.chart = chart;
+        this.chart = customView.findViewById(R.id.chart);
     }
 
     private int checkTimestamp(Long ts) {
@@ -38,22 +38,11 @@ public class GraphAdapter {
         return timestamps.indexOf(ts) + 1;
     }
 
-    private void resetViewport() {
-        Viewport v = new Viewport(chart.getMaximumViewport());
-        v.bottom = 0;
-        v.top = (int) max;
-        v.left = 0;
-        v.right = this.len - 1;
-        chart.setMaximumViewport(v);
-        chart.setCurrentViewport(v);
-    }
-
     public void addValue(Long ts, String name, Float value) {
         int position = checkTimestamp(ts);
         if (!lines.containsKey(name)) {
             lines.put(name, new ArrayList<>());
             keyOrder.add(name);
-            color.add(ChartUtils.pickColor());
         }
         List<Float> list = lines.get(name);
         list.add(value);
@@ -74,31 +63,33 @@ public class GraphAdapter {
     }
 
     public void refresh() {
-        List<Line> _lines = new ArrayList<>();
+        // List<LineDataSet> _lines = new ArrayList<>();
+        LineData data = new LineData();
         for (int j = 0; j < keyOrder.size(); ++j) {
             String name = keyOrder.get(j);
             List<Float> elems = lines.get(name);
-            List<PointValue> values = new ArrayList<>();
+            List<Entry> values = new ArrayList<>();
             for (int i = 0; i < elems.size(); ++i) {
-                values.add(new PointValue(i, elems.get(i)));
+                values.add(new Entry(i, elems.get(i)));
             }
-            Line line = new Line(values);
-            line.setColor(color.get(j));
-            line.setHasPoints(false);
-            _lines.add(line);
+            LineDataSet line = new LineDataSet(values, name);
+            if (j > 4) {
+                line.setColor(ColorTemplate.LIBERTY_COLORS[j - 5]);
+            } else {
+                line.setColor(ColorTemplate.JOYFUL_COLORS[j]);
+            }
+            line.setDrawCircles(false);
+            line.setLineWidth(2.f);
+            data.addDataSet(line);
         }
-        LineChartData data = new LineChartData(_lines);
+        chart.setData(data);
 
-        Axis axisX = new Axis();
-        Axis axisY = new Axis().setHasLines(true);
-        axisX.setName("Time");
-        axisY.setName("Values");
+        YAxis yaxis = chart.getAxisLeft();
+        chart.getAxisRight().setEnabled(false);
+        yaxis.setAxisMaximum(10);
+        yaxis.setAxisMinimum(0);
 
-        data.setAxisXBottom(axisX);
-        data.setAxisYLeft(axisY);
-
-        data.setBaseValue(Float.NEGATIVE_INFINITY);
-        chart.setLineChartData(data);
-        resetViewport();
+        chart.invalidate();
+        // resetViewport();
     }
 }
