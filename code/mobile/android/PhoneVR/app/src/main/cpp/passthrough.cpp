@@ -3,8 +3,8 @@
 #include <GLES2/gl2ext.h>
 #include <vector>
 
-#include "utils.h"
 #include "passthrough.h"
+#include "utils.h"
 
 GLuint LoadGLShader(GLenum type, const char *shader_source) {
     GLuint shader = GL(glCreateShader(type));
@@ -134,14 +134,14 @@ void passthrough_setup(PassthroughInfo *info) {
     GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 
     GL(glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RGB,
-                 *(info->screenWidth),
-                 *(info->screenHeight),
-                 0,
-                 GL_RGB,
-                 GL_UNSIGNED_BYTE,
-                 0));
+                    0,
+                    GL_RGB,
+                    *(info->screenWidth),
+                    *(info->screenHeight),
+                    0,
+                    GL_RGB,
+                    GL_UNSIGNED_BYTE,
+                    0));
 
     // Generate depth buffer to perform depth test.
     GL(glGenRenderbuffers(1, &(info->passthroughDepthRenderBuffer)));
@@ -171,9 +171,9 @@ void passthrough_render(PassthroughInfo *info, CardboardEyeTextureDescription vi
     // Draw Passthrough video for each eye
     for (int eye = 0; eye < 2; ++eye) {
         GL(glViewport(eye == kLeft ? 0 : *(info->screenWidth) / 2,
-                   0,
-                   *(info->screenWidth) / 2,
-                   *(info->screenHeight)));
+                      0,
+                      *(info->screenWidth) / 2,
+                      *(info->screenHeight)));
 
         GL(glUseProgram(passthroughProgram_));
         GL(glActiveTexture(GL_TEXTURE0));
@@ -182,7 +182,7 @@ void passthrough_render(PassthroughInfo *info, CardboardEyeTextureDescription vi
         // Draw Mesh
         GL(glEnableVertexAttribArray(texturePositionParam_));
         GL(glVertexAttribPointer(
-                texturePositionParam_, 2, GL_FLOAT, false, 0, info->passthroughVertices));
+            texturePositionParam_, 2, GL_FLOAT, false, 0, info->passthroughVertices));
         GL(glEnableVertexAttribArray(textureUvParam_));
         GL(glVertexAttribPointer(textureUvParam_, 2, GL_FLOAT, false, 0, passthroughTexCoords));
 

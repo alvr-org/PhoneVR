@@ -13,11 +13,11 @@
 const char LOG_TAG[] = "ALVR_PVR_NATIVE";
 
 static void log(AlvrLogLevel level,
-         const char *FILE_NAME,
-         unsigned int LINE_NO,
-         const char *FUNC,
-         const char *format,
-         ...) {
+                const char *FILE_NAME,
+                unsigned int LINE_NO,
+                const char *FUNC,
+                const char *format,
+                ...) {
     va_list args;
     va_start(args, format);
 

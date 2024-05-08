@@ -11,8 +11,8 @@
 #include <vector>
 
 #include "nlohmann/json.hpp"
-#include "utils.h"
 #include "passthrough.h"
+#include "utils.h"
 
 using namespace nlohmann;
 
@@ -341,7 +341,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                      CTX.glContextRecreated);
                 GL(glGenTextures(2, CTX.lobbyTextures));
 
-                for (auto &lobbyTexture: CTX.lobbyTextures) {
+                for (auto &lobbyTexture : CTX.lobbyTextures) {
                     GL(glBindTexture(GL_TEXTURE_2D, lobbyTexture));
                     GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
                     GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
