@@ -1,6 +1,8 @@
 #include "alvr_client_core.h"
-#include <GLES2/gl2ext.h>
+// clang-format off
 #include <GLES3/gl3.h>
+#include <GLES2/gl2ext.h>
+// clang-format on
 #include <vector>
 
 #include "passthrough.h"
