@@ -95,7 +95,7 @@ android {
     }
     project.gradle.taskGraph.whenReady {
         android.productFlavors.all { flavor ->
-            // Capitalize (as Gralde is case-sensitive).
+            // Capitalize (as Gradle is case-sensitive).
             def flavorName = flavor.name.substring(0, 1).toUpperCase() + flavor.name.substring(1)
 
             // At last, configure.
@@ -132,6 +132,10 @@ android {
     }
 }
 
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -140,6 +144,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.1'
 
     implementation "androidx.tracing:tracing:1.1.0"
+    implementation 'androidx.preference:preference:1.2.1'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation "androidx.test.ext:junit-ktx:$extJUnitVersion"
@@ -159,6 +164,7 @@ dependencies {
 
     implementation platform('com.google.firebase:firebase-bom:26.0.0')
     implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }
 
 // The dependencies for NDK builds live inside the .aar files so they need to
