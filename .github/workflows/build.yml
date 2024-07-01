@@ -62,7 +62,7 @@ jobs:
         "--add", "Microsoft.VisualStudio.Component.VC.140", `
         "--add", "Microsoft.VisualStudio.Component.VC.141", `
         "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
-        "--norestart", "--force", "--wait" -Wait -PassThru
+        "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2.0.0
