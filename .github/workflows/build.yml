@@ -10,10 +10,9 @@ env:
   GRADLE_DIR: code/mobile/android/PhoneVR
   ORG_FULL: PhoneVR-Developers/PhoneVR
 
-# permissions:
-#   checks: write
-#   pull-requests: write
-permissions: write-all
+permissions:
+  checks: write
+  pull-requests: write
 
 on:
   push:
@@ -58,9 +57,9 @@ jobs:
       run: |
         env
 
-        # tree "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools" /F
-        # tree "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" /F
-        # VCTargetsPath="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\"
+        # tree "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools" /F - empty folder
+        # tree "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" /F - github-runners MSVS Installation folder
+        # VCTargetsPath="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\" where Microsoft.Cpp.Default.props resides
 
         $VS_BTOOLS_EXE="vs_buildtools.exe"
         $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_buildtools.exe"
@@ -79,10 +78,6 @@ jobs:
       uses: microsoft/setup-msbuild@v2.0.0
       with:
         vs-version: '17'
-
-    # - name: Restore NuGet packages
-    #   working-directory: ${{env.GITHUB_WORKSPACE}}
-    #   run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
     - name: Building ${{matrix.platform}}-${{matrix.config}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
