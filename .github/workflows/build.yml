@@ -507,7 +507,6 @@ jobs:
           elif [ "$EVENT" == 'repository_dispatch' ]
           then
             sha=${{ github.event.client_payload.pull_request.head.sha }}
-          else
           elif [ "$EVENT" == 'workflow_run' ]
           then
             sha=${{ github.event.workflow_run.head_sha}}
