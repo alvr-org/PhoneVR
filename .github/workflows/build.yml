@@ -53,21 +53,23 @@ jobs:
         make format-check
   
     # https://github.com/actions/runner-images/issues/842#issuecomment-1495115166
-    - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
-      shell: powershell
-      run: |
-        env
+    # - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
+    #   shell: powershell
+    #   run: |
+    #     env
 
-        $VS_BTOOLS_EXE="vs_buildtools.exe"
-        $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_buildtools.exe"
-        Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
-        Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
-        "--add", "Microsoft.VisualStudio.Component.VC.v141.x86.x64", `
-        "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
-        "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru -nonewwindow
+    #     $VS_BTOOLS_EXE="vs_buildtools.exe"
+    #     $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_buildtools.exe"
+    #     Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
+    #     Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
+    #     "--add", "Microsoft.VisualStudio.Component.VC.v141.x86.x64", `
+    #     "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
+    #     "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru -nonewwindow
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2.0.0
+      with:
+        vs-version: '17'
 
     # - name: Restore NuGet packages
     #   working-directory: ${{env.GITHUB_WORKSPACE}}
