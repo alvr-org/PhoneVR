@@ -30,6 +30,8 @@ on:
 jobs:
   Build_PVR_Server:
     name: Build PhoneVR Server
+    if: github.event_name != 'repository_dispatch'
+
     strategy:
       fail-fast: false
       matrix:
@@ -103,6 +105,7 @@ jobs:
   Build_APK:
     name: Build Android APK
     runs-on: ubuntu-latest
+    if: github.event_name != 'repository_dispatch'
 
     steps:
       - uses: actions/checkout@v4
@@ -227,6 +230,7 @@ jobs:
           )
         with:
           ref: 'refs/pull/${{ github.event.client_payload.pull_request.number }}/merge'
+          submodules: 'true'
 
       # - name: Test
       #   run: |
@@ -553,7 +557,7 @@ jobs:
           ) && always()
         env:
           number: ${{ github.event.client_payload.pull_request.number }}
-          job: ${{ github.job }}
+          job: ${{ github.job.name }}
           # Conveniently, job.status maps to https://developer.github.com/v3/checks/runs/#update-a-check-run
           conclusion: ${{ job.status }} 
         with:
