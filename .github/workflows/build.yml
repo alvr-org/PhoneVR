@@ -55,8 +55,10 @@ jobs:
     - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
       shell: powershell
       run: |
-        npm install --global --production windows-build-tools
+        env
         
+        npm install --global --production windows-build-tools
+
         $VS_BTOOLS_EXE="vs_buildtools.exe"
         $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_buildtools.exe"
         Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
