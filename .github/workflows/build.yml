@@ -61,7 +61,7 @@ jobs:
         Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
         "--add", "Microsoft.VisualStudio.Component.VC.v141.x86.x64", `
         "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
-        "--norestart", "--force", "--wait" -Wait -PassThru -nonewwindow
+        "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru -nonewwindow
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2.0.0
