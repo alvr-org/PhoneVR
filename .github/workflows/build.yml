@@ -53,15 +53,15 @@ jobs:
         make format-check
   
     # https://github.com/actions/runner-images/issues/842#issuecomment-1495115166
-    - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
+    - name: Install MSVC 2017 (v141) and Windows 8.1 SDK for MSVS2022
       shell: powershell
       run: |
         env
 
-        $VS_BTOOLS_EXE="vs_buildtools.exe"
-        $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_buildtools.exe"
+        $VS_BTOOLS_EXE="vs_enterprise.exe"
+        $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_enterprise.exe"
         Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
-        Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
+        Start-Process -FilePath ./vs_enterprise.exe -ArgumentList `
         "--add", "Microsoft.VisualStudio.Component.VC.v141.x86.x64", `
         "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
         "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru -nonewwindow
