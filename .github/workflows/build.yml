@@ -557,7 +557,7 @@ jobs:
           ) && always()
         env:
           number: ${{ github.event.client_payload.pull_request.number }}
-          job: ${{ github.job.name }}
+          job: ${{ github.job }}
           # Conveniently, job.status maps to https://developer.github.com/v3/checks/runs/#update-a-check-run
           conclusion: ${{ job.status }} 
         with:
