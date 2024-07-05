@@ -70,7 +70,7 @@ jobs:
         "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru -nonewwindow
 
         Invoke-WebRequest -Uri https://go.microsoft.com/fwlink/p/?LinkId=323507 -OutFile sdk81setup.exe
-        Start-Process -FilePath .\sdk81setup.exe -ArgumentList "/features" "/q" -Wait -PassThru -nonewwindow
+        Start-Process -FilePath ./sdk81setup.exe -ArgumentList "/features" "/q" -Wait -PassThru -nonewwindow
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2.0.0
