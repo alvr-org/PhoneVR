@@ -19,6 +19,8 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  repository_dispatch:
+    types: [ok-to-test-command]
   workflow_dispatch:
 
 # defaults:
@@ -209,8 +211,22 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        if: github.event_name != 'repository_dispatch'
         with:
           submodules: 'true'
+      
+      # Check out merge commit for Signed Pull Request
+      - name: Fork based /ok-to-test checkout
+        uses: actions/checkout@v3
+        if: | 
+          github.event_name == 'repository_dispatch' &&
+          github.event.client_payload.slash_command.args.named.sha != '' &&
+          contains(
+            github.event.client_payload.pull_request.head.sha,
+            github.event.client_payload.slash_command.args.named.sha
+          )
+        with:
+          ref: 'refs/pull/${{ github.event.client_payload.pull_request.number }}/merge'
 
       # - name: Test
       #   run: |
@@ -391,8 +407,26 @@ jobs:
           files: |
             code/mobile/android/PhoneVR/app/build/outputs/androidTest-results/**/TEST-*.xml
       
+      - name: Publish Test Results in Comment (Signed)
+        uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        if: |
+          github.event_name == 'repository_dispatch' &&
+          github.event.client_payload.slash_command.args.named.sha != '' &&
+          contains(
+            github.event.client_payload.pull_request.head.sha,
+            github.event.client_payload.slash_command.args.named.sha
+          ) && always()
+        with:
+          report_individual_runs: true
+          report_suite_logs: 'any'
+          deduplicate_classes_by_file_name: true          
+          comment_title: '🛠 Test Results'
+          commit: ${{ github.event.client_payload.pull_request.head.sha }}
+          files: |
+            code/mobile/android/PhoneVR/app/build/outputs/androidTest-results/**/TEST-*.xml
+      
       - uses: iterative/setup-cml@v1
-        if: github.event_name == 'pull_request' && always()
+        if: (github.event_name == 'repository_dispatch' || github.event_name == 'pull_request') && always()
       
       - name: Publish Screenshots - Find Comment
         if: github.event_name == 'pull_request' && always()
@@ -403,9 +437,25 @@ jobs:
           body-includes: '# 📷 Screenshots of tests:'
           direction: last
           comment-author: 'github-actions[bot]'
+      
+      - name: Publish Screenshots - Find Comment (Signed)
+        if: |
+          github.event_name == 'repository_dispatch' &&
+          github.event.client_payload.slash_command.args.named.sha != '' &&
+          contains(
+            github.event.client_payload.pull_request.head.sha,
+            github.event.client_payload.slash_command.args.named.sha
+          ) && always()
+        uses: peter-evans/find-comment@v3
+        id: fcs
+        with:
+          issue-number: ${{ github.event.client_payload.pull_request.number }}
+          body-includes: '# 📷 Screenshots of tests:'
+          direction: last
+          comment-author: 'github-actions[bot]'
 
       - name: Publish Screenshots - build comment
-        if: github.event_name == 'pull_request' && always()
+        if: (github.event_name == 'repository_dispatch' || github.event_name == 'pull_request') && always()
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EVENT: ${{ github.event_name }}
@@ -454,6 +504,9 @@ jobs:
           if [ "$EVENT" == 'pull_request' ]
           then
             sha=${{ github.event.pull_request.head.sha}}
+          elif [ "$EVENT" == 'repository_dispatch' ]
+          then
+            sha=${{ github.event.client_payload.pull_request.head.sha }}
           elif [ "$EVENT" == 'workflow_run' ]
           then
             sha=${{ github.event.workflow_run.head_sha}}
@@ -473,6 +526,59 @@ jobs:
           edit-mode: replace
           issue-number: ${{ github.event.number }}
       
+      - name: Publish Screehnshots - Update or Create Comment (Signed)
+        if: |
+          github.event_name == 'repository_dispatch' &&
+          github.event.client_payload.slash_command.args.named.sha != '' &&
+          contains(
+            github.event.client_payload.pull_request.head.sha,
+            github.event.client_payload.slash_command.args.named.sha
+          ) && always()
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.fcs.outputs.comment-id }}
+          body-file: ${{env.GRADLE_DIR}}/comment.md
+          edit-mode: replace
+          issue-number: ${{ github.event.client_payload.pull_request.number }}
+      
+      - name: Update Check Run (Signed)
+        uses: actions/github-script@v7
+        id: update-check-run
+        if:  |
+          github.event_name == 'repository_dispatch' &&
+          github.event.client_payload.slash_command.args.named.sha != '' &&
+          contains(
+            github.event.client_payload.pull_request.head.sha,
+            github.event.client_payload.slash_command.args.named.sha
+          ) && always()
+        env:
+          number: ${{ github.event.client_payload.pull_request.number }}
+          job: ${{ github.job }}
+          # Conveniently, job.status maps to https://developer.github.com/v3/checks/runs/#update-a-check-run
+          conclusion: ${{ job.status }} 
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: pull } = await github.rest.pulls.get({
+              ...context.repo,
+              pull_number: process.env.number
+            });
+            const ref = pull.head.sha;
+            const { data: checks } = await github.rest.checks.listForRef({
+              ...context.repo,
+              ref
+            });
+            const check = checks.check_runs.filter(c => c.name === process.env.job);
+            if( check ) {
+              const { data: result } = await github.rest.checks.update({
+                ...context.repo,
+                check_run_id: check[0].id,
+                status: 'completed',
+                conclusion: process.env.conclusion
+              });
+              return result;
+            }
+
       - name: Save AVD Cache
         uses: actions/cache/save@v4
         if: always() && !steps.avd-cache.outputs.cache-hit && steps.avd_create.outcome == 'success'
