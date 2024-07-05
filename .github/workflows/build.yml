@@ -85,7 +85,7 @@ jobs:
       run: | 
         env
         
-        $env:VCTargetsPath="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170"
+        $env:VCTargetsPath="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\"
         
         env
 
