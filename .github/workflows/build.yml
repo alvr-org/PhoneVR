@@ -61,10 +61,10 @@ jobs:
         tree "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools" /F
         tree "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise" /F
 
-        $VS_BTOOLS_EXE="vs_enterprise.exe"
-        $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_enterprise.exe"
+        $VS_BTOOLS_EXE="vs_buildtools.exe"
+        $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_buildtools.exe"
         Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
-        Start-Process -FilePath ./vs_enterprise.exe -ArgumentList `
+        Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
         "--add", "Microsoft.VisualStudio.Component.VC.v141.x86.x64", `
         "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
         "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru -nonewwindow
