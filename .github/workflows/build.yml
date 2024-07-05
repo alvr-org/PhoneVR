@@ -572,7 +572,10 @@ jobs:
               ...context.repo,
               ref
             });
+            console.log(checks);
             const check = checks.check_runs.filter(c => c.name === process.env.job);
+            console.log(check);
+            console.log("job: " + process.env.job);
             if( check ) {
               const { data: result } = await github.rest.checks.update({
                 ...context.repo,
