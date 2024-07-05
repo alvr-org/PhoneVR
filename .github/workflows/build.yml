@@ -58,8 +58,8 @@ jobs:
       run: |
         env
 
-        tree "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools" /F
-        tree "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" /F
+        # tree "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools" /F
+        # tree "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" /F
 
         $VS_BTOOLS_EXE="vs_buildtools.exe"
         $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_buildtools.exe"
@@ -83,6 +83,10 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: | 
+        env
+        
+        $env:VCTargetsPath="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170"
+        
         env
 
         msbuild /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
