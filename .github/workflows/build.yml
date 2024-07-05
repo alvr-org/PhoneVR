@@ -59,7 +59,7 @@ jobs:
         env
 
         tree "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools" /F
-        tree "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise" /F
+        tree "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" /F
 
         $VS_BTOOLS_EXE="vs_buildtools.exe"
         $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_buildtools.exe"
