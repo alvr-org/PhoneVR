@@ -1,0 +1,55 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/passthrough">
+
+        <EditTextPreference
+            app:defaultValue="0.5"
+            app:key="passthrough_fraction"
+            app:summary="@string/fraction_summary"
+            app:title="@string/passthrough_fraction"
+            app:useSimpleSummaryProvider="false" />
+        <SwitchPreference
+            app:key="passthrough_recording"
+            app:title="@string/set_recording_hint"
+            app:summary="@string/recording_hint_summary"
+            app:defaultValue="true"/>
+        <SwitchPreference
+            app:key="passthrough_tap"
+            app:title="@string/experimental_double_tap_detection"
+            app:summary="@string/double_tap_summary"
+            app:defaultValue="true"/>
+    </PreferenceCategory>
+    <PreferenceCategory app:title="@string/double_tap_configuration"
+        app:dependency="passthrough_tap">
+        <EditTextPreference
+            app:defaultValue="600"
+            app:dependency="passthrough_tap"
+            app:key="passthrough_delay"
+            app:title="@string/delay_string"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="0.8"
+            app:dependency="passthrough_tap"
+            app:key="passthrough_lower"
+            app:title="@string/lower_bound"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="4"
+            app:dependency="passthrough_tap"
+            app:key="passthrough_upper"
+            app:title="@string/upper_bound"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+    <PreferenceCategory app:title="@string/double_tap_test_graph"
+        app:dependency="passthrough_tap">
+        <Preference
+            app:title="Test Chart"
+            app:dependency="passthrough_tap"
+            app:key="chart"
+            app:layout="@layout/chart_layout"
+            />
+    </PreferenceCategory>
+
+
+
+</PreferenceScreen>

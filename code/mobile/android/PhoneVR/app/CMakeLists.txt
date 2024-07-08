@@ -21,6 +21,7 @@ file(GLOB_RECURSE GVR_SRC
 
 add_library(native-lib-alvr SHARED
     src/main/cpp/alvr_main.cpp
+    src/main/cpp/passthrough.cpp
     ${LIB_SRC}
 )
 

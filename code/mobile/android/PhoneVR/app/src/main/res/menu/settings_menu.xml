@@ -10,4 +10,11 @@
         android:id="@+id/max_brightness_toggle"
         android:title="@string/max_brightness"
         android:checkable="true"/>
+    <item
+        android:id="@+id/passthrough_settings"
+        android:title="@string/passthrough_settings" />
+    <item
+        android:id="@+id/passthrough"
+        android:checkable="true"
+        android:title="@string/passthrough" />
 </menu>
