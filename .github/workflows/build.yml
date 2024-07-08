@@ -220,7 +220,7 @@ jobs:
       
       # Check out merge commit for Signed Pull Request
       - name: Fork based /ok-to-test checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: | 
           github.event_name == 'repository_dispatch' &&
           github.event.client_payload.slash_command.args.named.sha != '' &&
