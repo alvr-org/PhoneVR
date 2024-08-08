@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">PhoneVR</string>
+    <string name="app_name_full">PhoneVR</string>
+    <string name="app_name_lite">PhoneVR Lite</string>
     <string name="app_crash_toast">Oh no :( PVR has unfortunately crashed. Dev team will be notified. You can create an issue on Github or Discord.</string>
     <string name="pc_ip">PC IP</string>
     <string name="auto">Auto</string>
@@ -30,7 +31,7 @@
     </string-array>
     <string name="title_activity_vr">ALVR</string>
     <string name="read_storage_permission">
-            Hello Cardboard requires to read your external storage to load device parameters.
+            PhoneVR requires to read your external storage to load device parameters.
     </string>
     <string name="low_storage_error">
             Detector dependencies cannot be downloaded due to low device storage

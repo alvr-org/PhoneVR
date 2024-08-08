@@ -217,6 +217,9 @@ public class ALVRActivity extends AppCompatActivity
         SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
         boolean isChecked = prefs.getBoolean("max_brightness", true);
         toggleBrightness.setChecked(isChecked);
+        if (BuildConfig.FLAVOR.equals("noGvr")) {
+            popup.getMenu().removeItem(R.id.switch_server);
+        }
 
         popup.setOnMenuItemClickListener(this);
         popup.show();
@@ -234,7 +237,8 @@ public class ALVRActivity extends AppCompatActivity
             editor.apply();
 
             // start InitActivity and clear back history
-            Intent intent = new Intent(this, InitActivity.class);
+            Intent intent = new Intent();
+            intent.setClassName(getPackageName(), getPackageName() + ".InitActivity");
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         } else if (item.getItemId() == R.id.max_brightness_toggle) {

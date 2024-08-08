@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="viritualisres.phonevr">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -46,15 +45,6 @@
         android:theme="@style/AppTheme"
         tools:replace="android:extractNativeLibs"
         android:extractNativeLibs="true">
-        <activity
-            android:name=".InitActivity"
-            android:label="@string/app_name"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -65,20 +55,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths_app" />
         </provider>
-        <activity
-            android:name=".MainActivity"
-            android:launchMode="singleTop" />
-        <activity
-            android:name=".GameActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:enableVrMode="@string/gvr_vr_mode_component"
-            android:resizeableActivity="false"
-            android:screenOrientation="landscape"
-            android:theme="@style/GameTheme" />
-        <activity
-            android:name=".SettingsActivity"
-            android:label="Settings"
-            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".ErrorReportingDialog"
             android:excludeFromRecents="true"
