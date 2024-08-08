@@ -14,11 +14,6 @@ file(GLOB_RECURSE LIB_SRC
     ../../../../common/libs/json/single_include/*.hpp
 )
 
-file(GLOB_RECURSE GVR_SRC
-    ../../../../common/src/*.cpp
-    ../../../mobile-common/*.cpp
-)
-
 add_library(native-lib-alvr SHARED
     src/main/cpp/alvr_main.cpp
     ${LIB_SRC}
@@ -44,27 +39,6 @@ target_link_libraries(native-lib-alvr
     ${libs_dir}/jni/${ANDROID_ABI}/libGfxPluginCardboard.so
 )
 
-IF (NOT "${ANDROID_ABI}" STREQUAL "x86_64")
-    add_library(native-lib-gvr SHARED
-        src/main/cpp/native-lib.cpp
-        ${LIB_SRC}
-        ${GVR_SRC}
-    )
-
-    target_include_directories(native-lib-gvr
-        PUBLIC ./libraries/headers
-        PUBLIC ../../../../common/libs/asio/asio/include
-        PUBLIC ../../../../common/libs/eigen/Eigen
-        PUBLIC ../../../../common/libs/ifaddrs
-        PUBLIC ../../../../common/libs/json/single_include/
-
-        PUBLIC ../../../../common/src
-        PUBLIC ../../../mobile-common
-    )
-
-    target_link_libraries(native-lib-gvr
-        log android EGL GLESv3 mediandk
-        ${libs_dir}/jni/${ANDROID_ABI}/libgvr.so
-        ${libs_dir}/jni/${ANDROID_ABI}/libgvr_audio.so
-    )
-ENDIF ()
+IF(${HAVEGVR})
+add_subdirectory(src/gvr)
+ENDIF()

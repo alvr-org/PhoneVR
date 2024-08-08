@@ -152,7 +152,7 @@ jobs:
           ls -alh
           cd code/mobile/android/PhoneVR
           chmod +x prepare-alvr-deps.sh
-          bash prepare-alvr-deps.sh
+          bash prepare-alvr-deps.sh nogvr
       
       - name: Change gradle wrapper permissions
         run: |
@@ -160,37 +160,73 @@ jobs:
           chmod +x ./gradlew
           ls -alh
           ls -alh app
-
+      
       # Create APK Debug
-      - name: Build apk debug project (APK)
+      - name: Build apk noGvr debug project (APK)
         run:  |
           cd code/mobile/android/PhoneVR
-          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleDebug --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleNoGvrDebug --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
 
       # Create APK Release
-      - name: Build apk release project (APK)
+      - name: Build apk noGvr release project (APK)
         env:
           Key: ${{ secrets.KEY }}
           Store: ${{ secrets.STORE }}
         run:  |
           cd code/mobile/android/PhoneVR
-          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assemble --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleNoGvrRelease --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+
+      - name: Prepare deps
+        run: |          
+          ls -alh
+          cd code/mobile/android/PhoneVR
+          chmod +x prepare-alvr-deps.sh
+          bash prepare-alvr-deps.sh
+      
+      # Create APK Debug
+      - name: Build apk gvr debug project (APK)
+        run:  |
+          cd code/mobile/android/PhoneVR
+          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleGvrDebug --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+
+      # Create APK Release
+      - name: Build apk gvr release project (APK)
+        env:
+          Key: ${{ secrets.KEY }}
+          Store: ${{ secrets.STORE }}
+        run:  |
+          cd code/mobile/android/PhoneVR
+          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleGvrRelease --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
 
       # Upload Artifact Build
-      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/debug/
+      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/gvr/debug/
       - name: Upload APK Debug
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
-          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/debug/
+          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/gvr/debug/
 
-      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/release/
+      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/gvr/release/
       - name: Upload APK Release
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
-          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/release/
+          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/gvr/release/
   
+      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/noGvr/debug/
+      - name: Upload APK Debug
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/noGvr/debug/
+
+      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/noGvr/release/
+      - name: Upload APK Release
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/noGvr/release/
+
       - name: Upload Build outputs on failure
         if: failure()
         uses: actions/upload-artifact@v2
