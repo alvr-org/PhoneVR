@@ -129,6 +129,7 @@ android {
     }
 
     packagingOptions {
+        jniLibs.useLegacyPackaging = true
         gradle.startParameter.getTaskNames().each { task ->
             println("[PVR] task is " + task)
             if (task.contains('debug') || task.contains('Debug')) {
