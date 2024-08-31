@@ -27,11 +27,11 @@ rm -r cardboard
 
 # Download sdk source$
 CARB_REPO_NAME="cardboard-master"
-rm -r "${CARB_REPO_NAME}"
+rm -rf "${CARB_REPO_NAME}"
 # curl -sLS "https://github.com/googlevr/cardboard/archive/refs/heads/master.zip" > download.zip
-curl -sLS "https://github.com/nift4/cardboard/archive/refs/heads/master.zip" > download.zip
-unzip download.zip
-rm download.zip
+git clone --recursive "https://github.com/nift4/cardboard" -b master cardboard-master
+# unzip download.zip
+# rm download.zip
 
 # Build sdk
 pushd "${CARB_REPO_NAME}"
@@ -42,7 +42,7 @@ popd
 mkdir cardboard
 mv "${CARB_REPO_NAME}/sdk/build/outputs/aar/sdk-release.aar" cardboard/cardboard-sdk.aar
 cp "${CARB_REPO_NAME}/sdk/include/cardboard.h" cardboard/cardboard.h
-rm -r "${CARB_REPO_NAME}"
+rm -rf "${CARB_REPO_NAME}"
 
 rm -r "gvr-android-sdk-1.200"
 if [ ! $nogvr ]; then
