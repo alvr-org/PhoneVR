@@ -420,13 +420,14 @@ jobs:
             echo "shutdown meow !" >> pvr-adb-telnet.sd
             cat log.txt
 
-      # build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/GPlay_Pixel_2_API_30(AVD) - 11/ALVRActivityTest_saveDeviceScreenBitmap.png
+      # build/outputs/connected_android_test_additional_output/gvrDebugAndroidTest/connected/GPlay_Pixel_2_API_30(AVD) - 11/ALVRActivityTest_saveDeviceScreenBitmap.png
       - uses: actions/upload-artifact@v3
         if: always()
         with:
           name: Test results
           path: |
-            **/app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*
+            **/app/build/outputs/connected_android_test_additional_output/gvrDebugAndroidTest/connected/*
+            **/app/build/outputs/connected_android_test_additional_output/noGvrDebugAndroidTest/connected/*
             **/app/build/reports
             **/app/build/test-results
             **/app/build/outputs/androidTest-results
@@ -510,11 +511,11 @@ jobs:
           echo "" >> comment.md
 
           # ls -alh
-          # ls -alh app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/
-          # stat 'app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/Pixel_2(AVD) - 11/InitActivityTest_saveDeviceScreenBitmap.png'
+          # ls -alh app/build/outputs/connected_android_test_additional_output/gvrDebugAndroidTest/connected/
+          # stat 'app/build/outputs/connected_android_test_additional_output/gvrDebugAndroidTest/connected/Pixel_2(AVD) - 11/InitActivityTest_saveDeviceScreenBitmap.png'
 
           # for each AVD Image
-          for ss_test_avd in app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/*; do 
+          for ss_test_avd in app/build/outputs/connected_android_test_additional_output/gvrDebugAndroidTest/connected/*; do 
 
             ls -alh "$ss_test_avd"
             echo "$ss_test_avd"
@@ -525,7 +526,7 @@ jobs:
             echo "" >> comment.md
 
             # for each .png in that AVD folder
-            for ss_test in "app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/$ss_test_avd_desc/"*.png; do 
+            for ss_test in "app/build/outputs/connected_android_test_additional_output/gvrDebugAndroidTest/connected/$ss_test_avd_desc/"*.png; do 
               
               ss_test_desc=$(basename "$ss_test" .png)
               
