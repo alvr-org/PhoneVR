@@ -254,7 +254,7 @@ jobs:
         with:
           ref: ${{ needs.prepare_release.outputs.release_ref }}
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ env.PROJECT_NAME }}-Server-Release # depends on line 118 Above (Upload Build Output job's with.name)
           path: ./build_artifacts/
