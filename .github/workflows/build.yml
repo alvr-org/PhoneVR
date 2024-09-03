@@ -400,7 +400,7 @@ jobs:
       
       # app\build\outputs\androidTest-results\connected\TEST-GPlay_Pixel_2_API_30(AVD) - 11-_app-.xml
       - name: Publish Test Results in Comment
-        uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        uses: EnricoMi/publish-unit-test-result-action/macos@v2
         # if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && always()
         if: github.event_name == 'pull_request' && always()
         with:
@@ -412,7 +412,7 @@ jobs:
             code/mobile/android/PhoneVR/app/build/outputs/androidTest-results/**/TEST-*.xml
       
       - name: Publish Test Results in Comment (Signed)
-        uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        uses: EnricoMi/publish-unit-test-result-action/macos@v2
         if: |
           github.event_name == 'repository_dispatch' &&
           github.event.client_payload.slash_command.args.named.sha != '' &&
