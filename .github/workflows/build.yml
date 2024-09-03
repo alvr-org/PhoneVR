@@ -27,10 +27,6 @@ on:
 #   run:
 #     working-directory: code/mobile/android/PhoneVR
 
-with:
-  root_log_level: DEBUG
-  log_level: DEBUG
-
 jobs:
   Build_PVR_Server:
     name: Build PhoneVR Server
@@ -449,6 +445,8 @@ jobs:
           report_suite_logs: 'any'
           deduplicate_classes_by_file_name: true          
           comment_title: '🛠 Test Results'
+          root_log_level: DEBUG
+          log_level: DEBUG
           files: |
             code/mobile/android/PhoneVR/app/build/outputs/androidTest-results/**/TEST-*.xml
       
