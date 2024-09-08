@@ -253,7 +253,17 @@ jobs:
         if: github.event_name != 'repository_dispatch'
         with:
           submodules: 'true'
-      
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+
       # https://github.com/ReactiveCircus/android-emulator-runner/pull/366
       - name: Enable KVM
         run: |
