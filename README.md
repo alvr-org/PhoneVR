@@ -141,6 +141,9 @@ This Project is presently under testing. But, pull requests are welcome.
 * Android App: App folder: `<root>/code/mobile/android/PhoneVR`
   * Compiled/Tested on `Android Studio 4.0.1`
   * For testing, this project has 2 Build Configs, Debug and Release. Debug has lots of debugging callouts to logcat from both JAVA and JNI.
+  * There are also two build flavours: gvr and noGvr. The gvr flavour is a superset of the noGvr flavour that adds support for legacy PhoneVR server with Google VR SDK (deprecated).
+    * The source code of the gvr flavour is in app/src/gvr/ and app/src/main/. The code of the noGvr flavour is in app/src/noGvr/ and app/src/main/. Respectively, any shared code in app/src/main/ has to be tested with both flavours.
+    * The prepare-alvr-deps.sh script, which needs to be run before building supports the optional "nogvr" argument. If you run the script without arguments, you can build both flavours. If you run the script with the "nogvr" argument, you can only build the noGvr flavour.
   * PhoneVR is Android AVD compatible, though PhoneVR Server networking is also AVD compatible, but ALVR Server networking need some more work for simulation.
     * PhoneVR APK when run on AVD automatically assigns 10.0.2.2 (default emu addr) to pcIP
     * After starting the AVD Emulator, need to run "adb forward tcp:33333 tcp:33333", in terminal/cmd, this will enable PVRServer -> Android Emulator based PVRAndroidApp communication.
