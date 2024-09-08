@@ -2,14 +2,12 @@
 package viritualisres.phonevr
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.text.HtmlCompat
@@ -29,9 +27,10 @@ class InitActivity : AppCompatActivity() {
         val tvBody = findViewById<TextView>(R.id.body)
         Log.d(
             "PVR-JAVA",
-            "res: '${ resources.getString(R.string.phonevr_support_packages) }', html: '${result.toString()}'")
+            "res: '${ resources.getString(R.string.phonevr_support_packages_nogvr) }', html: '${result.toString()}'")
 
-        tvBody.text = String.format(resources.getString(R.string.phonevr_support_packages), result)
+        tvBody.text =
+            String.format(resources.getString(R.string.phonevr_support_packages_nogvr), result)
         tvBody.movementMethod = LinkMovementMethod.getInstance()
         Linkify.addLinks(tvBody, Linkify.WEB_URLS)
 
@@ -44,9 +43,7 @@ class InitActivity : AppCompatActivity() {
         // ALVRActivity or MainActivity
         // Not kept in Resume() to prevent looping when coming back from AlvrActivity, or others
         if (prefs.contains("alvr_server") && prefs.getBoolean("remember", false)) {
-            var intent =
-                if (prefs.getBoolean("alvr_server", true)) Intent(this, ALVRActivity::class.java)
-                else Intent(this, MainActivity::class.java)
+            var intent = Intent(this, ALVRActivity::class.java)
             startActivity(intent)
         }
 
@@ -66,27 +63,5 @@ class InitActivity : AppCompatActivity() {
 
         val intent = Intent(this, ALVRActivity::class.java)
         startActivity(intent)
-    }
-
-    fun btOnClickPVRStreamer(view: View) {
-        // Check if SYSTEM ABI supports other than x86_64 ABI, since libGVR has no support for
-        // x86_64
-        if (Build.SUPPORTED_ABIS.contains("x86") ||
-            Build.SUPPORTED_ABIS.contains("arm64-v8a") ||
-            Build.SUPPORTED_ABIS.contains("armeabi-v7a")) {
-            val prefs = getSharedPreferences("prefs", MODE_PRIVATE)
-
-            if (prefs.getBoolean("remember", false))
-                prefs.edit().putBoolean("alvr_server", false).apply()
-
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-        } else {
-            Toast.makeText(
-                    this,
-                    "Your device ONLY supports x86_64 ABI, which is not supported by GoogleVR",
-                    Toast.LENGTH_LONG)
-                .show()
-        }
     }
 }

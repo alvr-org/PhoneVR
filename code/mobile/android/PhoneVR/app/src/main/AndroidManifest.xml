@@ -46,6 +46,15 @@
         tools:replace="android:extractNativeLibs"
         android:extractNativeLibs="true">
 
+        <activity
+            android:name=".InitActivity"
+            android:label="@string/app_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

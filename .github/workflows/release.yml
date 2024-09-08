@@ -232,6 +232,9 @@ jobs:
         run: |
           cd "$GRADLE_DIR/$MAIN_PROJECT_MODULE/build/outputs/apk/gvr/release/"
           mv -f PhoneVR*.apk PhoneVR.apk
+          cd -
+          cd "$GRADLE_DIR/$MAIN_PROJECT_MODULE/build/outputs/apk/noGvr/release/"
+          mv -f PhoneVR*.apk PhoneVR-noGvr.apk
 
       - name: Upload PVR APK
         uses: actions/upload-release-asset@v1
@@ -241,6 +244,16 @@ jobs:
           upload_url: ${{ needs.prepare_release.outputs.upload_url }}
           asset_path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/gvr/release/PhoneVR.apk
           asset_name: PhoneVR-v${{ github.event.inputs.version }}.apk
+          asset_content_type: application/vnd.android.package-archive
+
+      - name: Upload PVR APK
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.prepare_release.outputs.upload_url }}
+          asset_path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/noGvr/release/PhoneVR-noGvr.apk
+          asset_name: PhoneVR-v${{ github.event.inputs.version }}-noGvr.apk
           asset_content_type: application/vnd.android.package-archive
   
   # Step is needed because the PVRServerBuild runs as a matrix and adds files to the same artifact

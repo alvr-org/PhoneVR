@@ -78,7 +78,7 @@ android {
         }
     }
     buildFeatures {
-        buildConfig = true
+        buildConfig = true // TODO: Remove BuildConfig, Gradle suggests this usage is inefficient > v8 disabled by default
         viewBinding true
     }
     flavorDimensions "gvr"
@@ -93,12 +93,15 @@ android {
         }
         noGvr {
             dimension "gvr"
-            versionNameSuffix "-lite"
+            versionNameSuffix "-nogvr"
         }
     }
     sourceSets {
         main {
             jniLibs.srcDirs = ["libraries/jni", "../ALVR/build/alvr_client_core"]
+        }
+        gvr {
+            jniLibs.srcDirs = ["libraries/jni", "libraries_gvr/jni", "../ALVR/build/alvr_client_core"]
         }
     }
     externalNativeBuild {
@@ -191,7 +194,7 @@ task extractNdk(type: Copy)  {
     if (file("../gvr-android-sdk-1.200/libraries/sdk-base-1.200.0.aar").exists()) {
         copy {
             from zipTree("../gvr-android-sdk-1.200/libraries/sdk-base-1.200.0.aar")
-            into "libraries/"
+            into "libraries_gvr/"
             include "headers/vr/gvr/capi/**/*h"
             include "jni/**/libgvr_audio.so"
             include "jni/**/libgvr.so"

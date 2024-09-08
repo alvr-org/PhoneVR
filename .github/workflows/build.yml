@@ -522,11 +522,37 @@ jobs:
             ss_test_avd_desc=$(basename "$ss_test_avd")
 
             echo "" >> comment.md
-            echo "### 📱 $ss_test_avd_desc" >> comment.md
+            echo "### 📱gvr: $ss_test_avd_desc" >> comment.md
             echo "" >> comment.md
 
             # for each .png in that AVD folder
             for ss_test in "app/build/outputs/connected_android_test_additional_output/gvrDebugAndroidTest/connected/$ss_test_avd_desc/"*.png; do 
+              
+              ss_test_desc=$(basename "$ss_test" .png)
+              
+              echo "" >> comment.md
+              echo "#### 🔧 $ss_test_desc" >> comment.md
+              echo "" >> comment.md
+
+              echo "$WK_DIR + / + $ss_test"
+              echo '<p float="left">' >> comment.md
+              cml-publish "$ss_test" | gsed -E 's/.+/<img width="70%" src="\0"\/>/' >> comment.md
+              echo '</p>' >> comment.md
+
+            done
+          done
+          for ss_test_avd in app/build/outputs/connected_android_test_additional_output/noGvrDebugAndroidTest/connected/*; do 
+
+            ls -alh "$ss_test_avd"
+            echo "$ss_test_avd"
+            ss_test_avd_desc=$(basename "$ss_test_avd")
+
+            echo "" >> comment.md
+            echo "### 📱noGvr: $ss_test_avd_desc" >> comment.md
+            echo "" >> comment.md
+
+            # for each .png in that AVD folder
+            for ss_test in "app/build/outputs/connected_android_test_additional_output/noGvrDebugAndroidTest/connected/$ss_test_avd_desc/"*.png; do 
               
               ss_test_desc=$(basename "$ss_test" .png)
               
