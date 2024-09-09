@@ -217,7 +217,24 @@ jobs:
         if: github.event_name != 'repository_dispatch'
         with:
           submodules: 'true'
-      
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+
+      # https://github.com/ReactiveCircus/android-emulator-runner/pull/366
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       # Check out merge commit for Signed Pull Request
       - name: Fork based /ok-to-test checkout
         uses: actions/checkout@v4
@@ -245,10 +262,10 @@ jobs:
       #     echo "ANDROID_NDK_ROOT=/Users/runner/Library/Android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
       #     echo $PATH
       
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v1
-        with:
-          version: "16.0.0"
+      # - name: Install LLVM and Clang
+      #   uses: KyleMayes/install-llvm-action@v1
+      #   with:
+      #     version: "16.0.0"
 
       - name: Set Up JDK
         uses: actions/setup-java@v4
