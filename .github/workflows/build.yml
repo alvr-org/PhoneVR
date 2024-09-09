@@ -364,6 +364,10 @@ jobs:
         run: |
           brew install telnet
 
+          export ANDROID_SDK_ROOT=~/Library/Android/sdk
+
+          adb
+
           chmod +x pvr-adb-telnet.sh
           bash pvr-adb-telnet.sh >> log.txt 2>&1 &
 
