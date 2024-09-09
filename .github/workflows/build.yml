@@ -127,6 +127,11 @@ jobs:
           distribution: 'oracle'
           java-version: '17'
      
+      - uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r26b
+      
       # Only for Testing github-actions
       - uses: actions-rs/toolchain@v1
         if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
@@ -146,11 +151,6 @@ jobs:
         with:
           build-root-directory: ${{env.GRADLE_DIR}}
           cache-read-only: ${{ false }}
-
-      - uses: nttld/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r26b
 
       - name: Prepare deps
         run: |          
