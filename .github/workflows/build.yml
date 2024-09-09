@@ -278,11 +278,6 @@ jobs:
         with:
           node-version: '16'
       
-      - uses: nttld/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r26b
-
       # Only for Testing github-actions
       - uses: actions-rs/toolchain@v1
         if: ${{ github.event.pull_request.head.repo.full_name != '${{ env.ORG_FULL }}' }} # Only run if not on master repo
