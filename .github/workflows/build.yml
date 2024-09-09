@@ -245,6 +245,11 @@ jobs:
       #     echo "ANDROID_NDK_ROOT=/Users/runner/Library/Android/sdk/ndk/25.2.9519653" >> $GITHUB_ENV
       #     echo $PATH
       
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: "16.0.0"
+
       - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
