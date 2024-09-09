@@ -147,6 +147,11 @@ jobs:
           build-root-directory: ${{env.GRADLE_DIR}}
           cache-read-only: ${{ false }}
 
+      - uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r26b
+
       - name: Prepare deps
         run: |          
           ls -alh
