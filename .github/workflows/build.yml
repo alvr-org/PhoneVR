@@ -334,9 +334,6 @@ jobs:
           cd code/mobile/android/PhoneVR
           chmod +x prepare-alvr-deps.sh
 
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 25088A0359807596
-          echo "deb http://ppa.launchpad.net/pipewire-debian/pipewire-upstream/ubuntu $(lsb_release -cs) main" | sudo tee -a /etc/apt/sources.list.d/pipewire-upstream.list
-          
           sudo apt update
           sudo apt install libclang-dev
 
