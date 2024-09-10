@@ -394,8 +394,6 @@ jobs:
       - name: Start PVR ADB-Telnet Server
         working-directory: ${{env.GRADLE_DIR}}/app/src/androidTest/java/viritualisres/phonevr/utils/
         run: |
-          brew install telnet
-
           export ANDROID_SDK_ROOT=~/Library/Android/sdk
 
           adb version
@@ -537,8 +535,6 @@ jobs:
         shell: bash
         working-directory: ${{env.GRADLE_DIR}}
         run: |
-          brew install gnu-sed # There are differences between default sed on MacOS and Linux (gnuSed)
-
           echo "# 📷 Screenshots of tests:" >> comment.md
           echo "" >> comment.md
 
