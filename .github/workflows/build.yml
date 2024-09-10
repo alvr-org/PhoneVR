@@ -366,7 +366,7 @@ jobs:
 
           export ANDROID_SDK_ROOT=~/Library/Android/sdk
 
-          adb
+          adb version
 
           chmod +x pvr-adb-telnet.sh
           bash pvr-adb-telnet.sh >> log.txt 2>&1 &
