@@ -282,7 +282,8 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                 CardboardDistortionRenderer_destroy(CTX.distortionRenderer);
                 CTX.distortionRenderer = nullptr;
             }
-            CTX.distortionRenderer = CardboardOpenGlEs2DistortionRenderer_create();
+            const CardboardOpenGlEsDistortionRendererConfig config{kGlTexture2D};
+            CTX.distortionRenderer = CardboardOpenGlEs2DistortionRenderer_create(&config);
 
             for (int eye = 0; eye < 2; eye++) {
                 CardboardMesh mesh;

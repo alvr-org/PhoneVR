@@ -1,0 +1,13 @@
+<resources>
+    <!-- from https://github.com/googlevr/cardboard/tree/master/hellocardboard-android/src/main/res/values to replace equalivent resources provided by GVR SDK -->
+    <color name="white_transparent">#4cFFFFFF</color>
+    <dimen name="alignment_marker_height">24mm</dimen>
+    <dimen name="alignment_marker_thickness">2dip</dimen>
+    <color name="alignment_marker_color">#b4b4b4</color>
+    <style name="UiButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/rippleable</item>
+        <item name="android:padding">9dip</item>
+    </style>
+</resources>
