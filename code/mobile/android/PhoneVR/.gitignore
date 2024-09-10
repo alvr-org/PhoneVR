@@ -12,6 +12,7 @@
 /cardboard
 /gvr-android-sdk-1.200
 /app/libraries
+/app/libraries_gvr
 
 # Android Gitignore https://github.com/github/gitignore/blob/main/Android.gitignore
 # Gradle files

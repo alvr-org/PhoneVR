@@ -19,14 +19,16 @@ import java.io.*
 import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import kotlinx.android.synthetic.main.activity_settings.*
+import viritualisres.phonevr.databinding.ActivitySettingsBinding
 
 class SettingsActivity : AppCompatActivity() {
+    private lateinit var binding: ActivitySettingsBinding
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        binding = ActivitySettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         loadPrefs()
 
         val etLogView = findViewById<TextView>(R.id.etLogView)
@@ -263,18 +265,18 @@ class SettingsActivity : AppCompatActivity() {
             val prefs = getSharedPreferences(pvrPrefsKey, Context.MODE_PRIVATE)
             val edit = prefs.edit()
             with(edit) {
-                putString(pcIpKey, pcIp.text.toString())
-                if (Util_IsVaildPort(connPort.text.toString().toInt()))
-                    putInt(connPortKey, connPort.text.toString().toInt())
-                if (Util_IsVaildPort(videoPort.text.toString().toInt()))
-                    putInt(videoPortKey, videoPort.text.toString().toInt())
-                if (Util_IsVaildPort(posePort.text.toString().toInt()))
-                    putInt(posePortKey, posePort.text.toString().toInt())
-                putInt(resMulKey, resMul.text.toString().toInt())
-                putFloat(mt2phKey, mt2ph.text.toString().replace(',', '.').toFloat())
-                putFloat(offFovKey, offFov.text.toString().replace(',', '.').toFloat())
-                putBoolean(warpKey, warp.isChecked)
-                putBoolean(debugKey, debug.isChecked)
+                putString(pcIpKey, binding.pcIp.text.toString())
+                if (Util_IsVaildPort(binding.connPort.text.toString().toInt()))
+                    putInt(connPortKey, binding.connPort.text.toString().toInt())
+                if (Util_IsVaildPort(binding.videoPort.text.toString().toInt()))
+                    putInt(videoPortKey, binding.videoPort.text.toString().toInt())
+                if (Util_IsVaildPort(binding.posePort.text.toString().toInt()))
+                    putInt(posePortKey, binding.posePort.text.toString().toInt())
+                putInt(resMulKey, binding.resMul.text.toString().toInt())
+                putFloat(mt2phKey, binding.mt2ph.text.toString().replace(',', '.').toFloat())
+                putFloat(offFovKey, binding.offFov.text.toString().replace(',', '.').toFloat())
+                putBoolean(warpKey, binding.warp.isChecked)
+                putBoolean(debugKey, binding.debug.isChecked)
                 apply()
             }
         } catch (e: Exception) {
@@ -290,15 +292,15 @@ class SettingsActivity : AppCompatActivity() {
         val fmt = "%1\$d"
         val fmt2 = "%1$.1f"
         val fmt3 = "%1$.3f"
-        pcIp.setText(prefs.getString(pcIpKey, pcIpDef))
-        connPort.setText(String.format(l, fmt, prefs.getInt(connPortKey, connPortDef)))
-        videoPort.setText(String.format(l, fmt, prefs.getInt(videoPortKey, videoPortDef)))
-        posePort.setText(String.format(l, fmt, prefs.getInt(posePortKey, posePortDef)))
-        resMul.setText(String.format(l, fmt, prefs.getInt(resMulKey, resMulDef)))
-        mt2ph.setText(String.format(l, fmt3, prefs.getFloat(mt2phKey, mt2phDef)))
-        offFov.setText(String.format(l, fmt2, prefs.getFloat(offFovKey, offFovDef)))
-        warp.isChecked = prefs.getBoolean(warpKey, warpDef)
-        debug.isChecked = prefs.getBoolean(debugKey, debugDef)
+        binding.pcIp.setText(prefs.getString(pcIpKey, pcIpDef))
+        binding.connPort.setText(String.format(l, fmt, prefs.getInt(connPortKey, connPortDef)))
+        binding.videoPort.setText(String.format(l, fmt, prefs.getInt(videoPortKey, videoPortDef)))
+        binding.posePort.setText(String.format(l, fmt, prefs.getInt(posePortKey, posePortDef)))
+        binding.resMul.setText(String.format(l, fmt, prefs.getInt(resMulKey, resMulDef)))
+        binding.mt2ph.setText(String.format(l, fmt3, prefs.getFloat(mt2phKey, mt2phDef)))
+        binding.offFov.setText(String.format(l, fmt2, prefs.getFloat(offFovKey, offFovDef)))
+        binding.warp.isChecked = prefs.getBoolean(warpKey, warpDef)
+        binding.debug.isChecked = prefs.getBoolean(debugKey, debugDef)
     }
 
     private fun Util_IsVaildPort(port: Int): Boolean {

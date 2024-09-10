@@ -201,22 +201,22 @@ jobs:
           Store: ${{ secrets.STORE }}
         run:  |
           cd code/mobile/android/PhoneVR
-          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assemble --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleRelease --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
 
       # Upload Artifact Build
-      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/debug/
-      - name: Upload APK Debug
+      # Noted For Output eg. [MAIN_PROJECT_MODULE]/build/outputs/apk/gvr/debug/
+      - name: Upload Debug APKs
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
-          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/debug/
+          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/**/debug/
 
-      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/release/
-      - name: Upload APK Release
+      # Noted For Output eg. [MAIN_PROJECT_MODULE]/build/outputs/apk/gvr/release/
+      - name: Upload Release APKs
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
-          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/release/
+          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/**/release/
   
       - name: Upload Build outputs on failure
         if: failure()
@@ -230,8 +230,11 @@ jobs:
           GRADLE_PVR_DIR: ${{ env.GRADLE_DIR }}
           MODULE: ${{ env.MAIN_PROJECT_MODULE }}
         run: |
-          cd "$GRADLE_DIR/$MAIN_PROJECT_MODULE/build/outputs/apk/release/"
+          cd "$GRADLE_DIR/$MAIN_PROJECT_MODULE/build/outputs/apk/gvr/release/"
           mv -f PhoneVR*.apk PhoneVR.apk
+          cd -
+          cd "$GRADLE_DIR/$MAIN_PROJECT_MODULE/build/outputs/apk/noGvr/release/"
+          mv -f PhoneVR*.apk PhoneVR-noGvr.apk
 
       - name: Upload PVR APK
         uses: actions/upload-release-asset@v1
@@ -239,8 +242,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.prepare_release.outputs.upload_url }}
-          asset_path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/release/PhoneVR.apk
+          asset_path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/gvr/release/PhoneVR.apk
           asset_name: PhoneVR-v${{ github.event.inputs.version }}.apk
+          asset_content_type: application/vnd.android.package-archive
+
+      - name: Upload PVR noGvr APK
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.prepare_release.outputs.upload_url }}
+          asset_path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/noGvr/release/PhoneVR-noGvr.apk
+          asset_name: PhoneVR-v${{ github.event.inputs.version }}-noGvr.apk
           asset_content_type: application/vnd.android.package-archive
   
   # Step is needed because the PVRServerBuild runs as a matrix and adds files to the same artifact
