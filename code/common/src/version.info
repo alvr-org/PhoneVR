@@ -1,2 +1,2 @@
 #define PVR_BINVERSION 2,0,0
-#define PVR_STRVERSION "2.0.0-beta"
+#define PVR_STRVERSION "2.0.0-ci-security-test"
