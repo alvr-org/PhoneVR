@@ -15,9 +15,17 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.core.text.HtmlCompat
 
 class InitActivity : AppCompatActivity() {
+
+    private val noGvrFlavour = BuildConfig.FLAVOR.equals("noGvr")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_init)
+        // switch the layout based on flavour
+        if (noGvrFlavour) {
+            setContentView(R.layout.activity_init_nogvr)
+        } else {
+            setContentView(R.layout.activity_init)
+        }
 
         val tvVersion: TextView = findViewById<TextView>(R.id.head)
         tvVersion.text = "PhoneVR v" + BuildConfig.VERSION_NAME
@@ -29,9 +37,9 @@ class InitActivity : AppCompatActivity() {
         val tvBody = findViewById<TextView>(R.id.body)
         Log.d(
             "PVR-JAVA",
-            "res: '${ resources.getString(R.string.phonevr_support_packages) }', html: '${result.toString()}'")
+            "res: '${ resources.getString(R.string.phonevr_support_common) }', html: '${result.toString()}'")
 
-        tvBody.text = String.format(resources.getString(R.string.phonevr_support_packages), result)
+        tvBody.text = String.format(resources.getString(R.string.phonevr_support_common), result)
         tvBody.movementMethod = LinkMovementMethod.getInstance()
         Linkify.addLinks(tvBody, Linkify.WEB_URLS)
 
@@ -44,10 +52,12 @@ class InitActivity : AppCompatActivity() {
         // ALVRActivity or MainActivity
         // Not kept in Resume() to prevent looping when coming back from AlvrActivity, or others
         if (prefs.contains("alvr_server") && prefs.getBoolean("remember", false)) {
-            var intent =
-                if (prefs.getBoolean("alvr_server", true)) Intent(this, ALVRActivity::class.java)
-                else Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            val intentClass =
+                if (!prefs.getBoolean("alvr_server", false) && !noGvrFlavour)
+                    MainActivity::class.java
+                else ALVRActivity::class.java
+
+            startActivity(Intent(this, intentClass))
         }
 
         swVRemember.setOnCheckedChangeListener { _, isChecked ->

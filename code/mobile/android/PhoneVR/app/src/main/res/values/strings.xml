@@ -24,8 +24,7 @@
     <string name="pick_logfile">Pick a log file to open</string>
     <string name="use_phonevr_legacy_streamer">Use PhoneVR(GoogleVR API) legacy Server</string>
     <string name="use_alvr_streamer_recommended">Use ALVR(Cardboard API) Server (recommended)</string>
-    <string name="phonevr_support_packages">PhoneVR supports two VR packages, ALVR-CardboardAPI or PhoneVR-GvrAPI. You can read more about these packages in https://github.com/PhoneVR-Developers/PhoneVR#readme. Select either one based on your setup.</string>
-    <string name="phonevr_support_packages_nogvr">PhoneVR supports two VR packages, ALVR-CardboardAPI or PhoneVR-GvrAPI. You can read more about these packages in https://github.com/PhoneVR-Developers/PhoneVR#readme. You currently have noGvr APK variant installed, so there only is ALVR-CardboardAPI available, to use PhoneVR-GvrAPI, install different APK.</string>
+    <string name="phonevr_support_common">PhoneVR supports two VR packages, ALVR-CardboardAPI or PhoneVR-GvrAPI. You can read more about these packages in https://github.com/PhoneVR-Developers/PhoneVR#readme.</string>
     <string-array name="logsFiles">
         <item>pvrlog.txt</item>
         <item>pvrDebuglog.txt</item>

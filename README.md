@@ -73,6 +73,7 @@ PhoneVR(PVR) can be used with two servers ALVR and PVRServer. ALVR Server is rec
 
 ### Common Instructions for both Servers
 * Install the Android Apk on your mobile from [`Releases`](https://github.com/PhoneVR-Developers/PhoneVR/releases/latest) page.
+  * There are two Apks on the release page, one with GoogleVR(GVR) SDK and other without GVR SDK. If you plan to use ALVR-Server only you can install `PhoneVR-vX.X.X.noGvr.apk`.
 * Make sure that "Run in Background", "Auto Start"(Restart on Crash) permissions, if exists on your device(especially Xiaomi users), are given. Also make sure that any kind of 3rd party battery saver app dosen't kill PhoneVR when in background.
 * After opening the installed app, Choose ALVR(recommended) or PhoneVR Server, according to the server you installed.
 
@@ -144,9 +145,15 @@ This Project is presently under testing. But, pull requests are welcome.
   * There are also two build flavours: gvr and noGvr. The gvr flavour is a superset of the noGvr flavour that adds support for legacy PhoneVR server with Google VR SDK (deprecated).
     * The source code of the gvr flavour is in app/src/gvr/ and app/src/main/. The code of the noGvr flavour is in app/src/noGvr/ and app/src/main/. Respectively, any shared code in app/src/main/ has to be tested with both flavours.
     * The prepare-alvr-deps.sh script, which needs to be run before building supports the optional "nogvr" argument. If you run the script without arguments, you can build both flavours. If you run the script with the "nogvr" argument, you can only build the noGvr flavour.
-  * PhoneVR is Android AVD compatible, though PhoneVR Server networking is also AVD compatible, but ALVR Server networking need some more work for simulation.
-    * PhoneVR APK when run on AVD automatically assigns 10.0.2.2 (default emu addr) to pcIP
-    * After starting the AVD Emulator, need to run "adb forward tcp:33333 tcp:33333", in terminal/cmd, this will enable PVRServer -> Android Emulator based PVRAndroidApp communication.
+  * PhoneVR is Android AVD compatible.
+    * PhoneVR Legacy Server networking
+      * PhoneVR with GVR APK when run on AVD automatically assigns 10.0.2.2 (default emu addr) to pcIP
+      * After starting the AVD Emulator, need to run `adb forward tcp:33333 tcp:33333`, in terminal/cmd, this will enable PVRServer -> Android Emulator based PVRAndroidApp communication.
+    * ALVR Server networking
+      * Similar to ALVR-Over-USB (https://github.com/alvr-org/ALVR/wiki/ALVR-wired-setup-(ALVR-over-USB))
+      * Once `ALVR Streamer (PC) Configuration` is done from the above link. Then you should, in terminal/cmd, execute
+        * `adb forward tcp:9943 tcp:9943`
+        * `adb forward tcp:9944 tcp:9944`
   
 * External Vendor Libraries used (all Headers included in respective Projects):
   * Json v3.8.0 (https://github.com/nlohmann/json) (code\windows\libs\json)

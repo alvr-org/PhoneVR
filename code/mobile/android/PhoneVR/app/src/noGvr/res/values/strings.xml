@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name" translatable="false">@string/app_name_lite</string>
+    <string name="phonevr_support_extra">You currently have noGvr APK variant installed, so there only is ALVR-CardboardAPI available.</string>
 </resources>

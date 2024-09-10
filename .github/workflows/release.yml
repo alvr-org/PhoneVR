@@ -192,7 +192,7 @@ jobs:
       - name: Build apk debug project (APK)
         run:  |
           cd code/mobile/android/PhoneVR
-          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleGvrDebug --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleDebug --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
 
       # Create APK Release
       - name: Build apk release project (APK)
@@ -201,22 +201,22 @@ jobs:
           Store: ${{ secrets.STORE }}
         run:  |
           cd code/mobile/android/PhoneVR
-          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleGvrRelease --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
+          ./gradlew :${{ env.MAIN_PROJECT_MODULE }}:assembleRelease --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
 
       # Upload Artifact Build
-      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/gvr/debug/
-      - name: Upload APK Debug
+      # Noted For Output eg. [MAIN_PROJECT_MODULE]/build/outputs/apk/gvr/debug/
+      - name: Upload Debug APKs
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
-          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/gvr/debug/
+          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/**/debug/
 
-      # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/gvr/release/
-      - name: Upload APK Release
+      # Noted For Output eg. [MAIN_PROJECT_MODULE]/build/outputs/apk/gvr/release/
+      - name: Upload Release APKs
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
-          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/gvr/release/
+          path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/**/release/
   
       - name: Upload Build outputs on failure
         if: failure()
@@ -246,7 +246,7 @@ jobs:
           asset_name: PhoneVR-v${{ github.event.inputs.version }}.apk
           asset_content_type: application/vnd.android.package-archive
 
-      - name: Upload PVR APK
+      - name: Upload PVR noGvr APK
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
