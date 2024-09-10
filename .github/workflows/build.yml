@@ -408,8 +408,8 @@ jobs:
               adb shell "logcat -b all -v color" &
               ./gradlew connectedCheck --warning-mode=all --stacktrace -Dorg.gradle.java.home=${{env.JAVA_HOME}}
               # adb logcat -b all > logcat.log
-              
-              trap 'kill $(jobs -pr)' SIGINT SIGTERM EXIT
+
+              trap 'kill $(jobs -pr)' INT TERM EXIT
 
               # adb bugreport bugreport.zip # hangs indef here
            
