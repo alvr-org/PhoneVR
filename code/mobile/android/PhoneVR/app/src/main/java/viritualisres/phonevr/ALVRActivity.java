@@ -27,6 +27,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import com.google.ar.core.ArCoreApk;
+import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
+import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 import java.util.Objects;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -39,6 +42,8 @@ public class ALVRActivity extends AppCompatActivity
     }
 
     private static final String TAG = ALVRActivity.class.getSimpleName() + "-Java";
+
+    private boolean surfaceChanged = false;
 
     // Permission request codes
     private static final int PERMISSIONS_REQUEST_CODE = 2;
@@ -105,7 +110,8 @@ public class ALVRActivity extends AppCompatActivity
         float refreshRate = display.getRefreshRate();
         Log.i(TAG, "Refresh rate: " + refreshRate);
 
-        initializeNative(width, height, refreshRate);
+        // TODO: config option for ARCore
+        initializeNative(width, height, refreshRate, true);
 
         setContentView(R.layout.activity_vr);
         glView = findViewById(R.id.surface_view);
@@ -163,6 +169,16 @@ public class ALVRActivity extends AppCompatActivity
             return;
         }
 
+        // TODO check if we actually want ARCore
+        try {
+            ArCoreApk.getInstance().requestInstall(this, true);
+        } catch (UnavailableDeviceNotCompatibleException e) {
+            Toast.makeText(this, R.string.arcore_not_supported, Toast.LENGTH_LONG).show();
+            // TODO disable ARCore toggle
+        } catch (UnavailableUserDeclinedInstallationException e) {
+            // TODO disable ARCore toggle
+        }
+
         glView.onResume();
         resumeNative();
         bMonitor.startMonitoring(this);
@@ -192,10 +208,15 @@ public class ALVRActivity extends AppCompatActivity
         @Override
         public void onSurfaceChanged(GL10 gl10, int width, int height) {
             setScreenResolutionNative(width, height);
+            surfaceChanged = true;
         }
 
         @Override
         public void onDrawFrame(GL10 gl10) {
+            if (surfaceChanged) {
+                setScreenRotationNative(getWindowManager().getDefaultDisplay().getRotation());
+                surfaceChanged = false;
+            }
             renderNative();
         }
     }
@@ -285,7 +306,7 @@ public class ALVRActivity extends AppCompatActivity
     }
 
     private native void initializeNative(
-            int screenWidth, int screenHeight, float screenRefreshRate);
+            int screenWidth, int screenHeight, float screenRefreshRate, boolean enableARCore);
 
     private native void destroyNative();
 
@@ -296,6 +317,8 @@ public class ALVRActivity extends AppCompatActivity
     private native void surfaceCreatedNative();
 
     private native void setScreenResolutionNative(int width, int height);
+
+    private native void setScreenRotationNative(int displayRotation);
 
     private native void renderNative();
 

@@ -9,7 +9,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -std=c++17 -g")
 set(ANDROID_STL c++_static)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
 
-
 set(gvr_libs_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../libraries_gvr)
 file(GLOB_RECURSE LIB_SRC
     ../../../../../../common/libs/ifaddrs/*.c

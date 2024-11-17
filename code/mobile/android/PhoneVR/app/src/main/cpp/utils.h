@@ -12,7 +12,7 @@
 
 const char LOG_TAG[] = "ALVR_PVR_NATIVE";
 
-void log(AlvrLogLevel level,
+static void log(AlvrLogLevel level,
          const char *FILE_NAME,
          unsigned int LINE_NO,
          const char *FUNC,

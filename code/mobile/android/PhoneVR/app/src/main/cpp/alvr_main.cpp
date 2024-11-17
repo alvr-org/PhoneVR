@@ -1,6 +1,8 @@
 #include "alvr_client_core.h"
+#include "arcore_c_api.h"
 #include "cardboard.h"
 #include <GLES3/gl3.h>
+#include <EGL/egl.h>
 #include <algorithm>
 #include <android/log.h>
 #include <deque>
@@ -17,6 +19,11 @@ using namespace nlohmann;
 
 uint64_t HEAD_ID = alvr_path_string_to_id("/user/head");
 
+// TODO: Make this configurable.
+// Using ARCore orientation is more accurate, but causes a ~0.5 second delay,
+// which is probably nauseating for most folks. TODO.
+bool useARCoreOrientation = false;
+
 // Note: the Cardboard SDK cannot estimate display time and an heuristic is used instead.
 const uint64_t VSYNC_QUEUE_INTERVAL_NS = 50e6;
 const float FLOOR_HEIGHT = 1.5;
@@ -25,13 +32,23 @@ const int MAXIMUM_TRACKING_FRAMES = 360;
 struct NativeContext {
     JavaVM *javaVm = nullptr;
     jobject javaContext = nullptr;
+    EGLContext eglContext = nullptr;
 
     CardboardHeadTracker *headTracker = nullptr;
     CardboardLensDistortion *lensDistortion = nullptr;
     CardboardDistortionRenderer *distortionRenderer = nullptr;
 
+    bool arcoreEnabled = false;
+    ArSession *arSession = nullptr;
+    ArFrame *arFrame = nullptr;
+    GLuint arTexture = 0;
+
+    AlvrQuat lastOrientation = {0.f, 0.f, 0.f, 0.f};
+    float lastPosition[3] = {0.f, 0.f, 0.f};
+
     int screenWidth = 0;
     int screenHeight = 0;
+    int screenRotation = 0;
 
     bool renderingParamsChanged = true;
     bool glContextRecreated = false;
@@ -107,6 +124,7 @@ AlvrFov getFov(CardboardEye eye) {
 
 AlvrPose getPose(uint64_t timestampNs) {
     AlvrPose pose = {};
+    bool returnLastPosition = false;
 
     float pos[3];
     float q[4];
@@ -114,6 +132,69 @@ AlvrPose getPose(uint64_t timestampNs) {
 
     auto inverseOrientation = AlvrQuat{q[0], q[1], q[2], q[3]};
     pose.orientation = inverseQuat(inverseOrientation);
+    if (!CTX.arcoreEnabled || (CTX.arcoreEnabled && !useARCoreOrientation)) {
+        CTX.lastOrientation = pose.orientation;
+    }
+
+    if (CTX.arcoreEnabled && CTX.arSession != nullptr) {
+        if (eglGetCurrentContext() == EGL_NO_CONTEXT) {
+            throw std::runtime_error("Failed to get EGL context in getPose.");
+            returnLastPosition = false;
+            goto out;
+        }
+
+        int ret = ArSession_update(CTX.arSession, CTX.arFrame);
+        if (ret != AR_SUCCESS) {
+            error("getPose: ArSession_update failed (%d), using last position", ret);
+            returnLastPosition = true;
+            goto out;
+        }
+
+        ArCamera *arCamera = nullptr;
+        ArFrame_acquireCamera(CTX.arSession, CTX.arFrame, &arCamera);
+
+        ArTrackingState arTrackingState;
+        ArCamera_getTrackingState(CTX.arSession, arCamera, &arTrackingState);
+        if (arTrackingState != AR_TRACKING_STATE_TRACKING) {
+            error("getPose: Camera is not tracking, using last position");
+            returnLastPosition = true;
+            ArCamera_release(arCamera);
+            goto out;
+        }
+
+        ArPose *arPose = nullptr;
+        ArPose_create(CTX.arSession, nullptr, &arPose);
+        ArCamera_getPose(CTX.arSession, arCamera, arPose);
+        // ArPose_getPoseRaw() returns a pose in {qx, qy, qz, qw, tx, ty, tz} format.
+        float arRawPose[7] = {0.f};
+        ArPose_getPoseRaw(CTX.arSession, arPose, arRawPose);
+        pose.position[0] = arRawPose[4];
+        pose.position[1] = arRawPose[5];
+        pose.position[2] = arRawPose[6];
+
+        if (useARCoreOrientation) {
+            auto inverseOrientation = AlvrQuat{arRawPose[0], arRawPose[1], arRawPose[2],
+                                               arRawPose[3]};
+            pose.orientation = inverseOrientation;
+            CTX.lastOrientation = pose.orientation;
+        }
+
+        for (int i = 0; i < 3; i++) {
+            pose.position[i] = arRawPose[i + 4];
+            CTX.lastPosition[i] = arRawPose[i + 4];
+        }
+
+        ArPose_destroy(arPose);
+        ArCamera_release(arCamera);
+    }
+
+out:
+    if (returnLastPosition) {
+        pose.orientation = CTX.lastOrientation;
+        for (int i = 0; i < 3; i++) {
+            pose.position[i] = CTX.lastPosition[i];
+        }
+    }
 
     return pose;
 }
@@ -142,6 +223,70 @@ void updateViewConfigs(uint64_t targetTimestampNs = 0) {
 void inputThread() {
     auto deadline = std::chrono::steady_clock::now();
 
+    if (CTX.arcoreEnabled) {
+        /* ARCore requires an EGL context to work. Since we're calling it from a secondary
+         * thread that is not the main GL thread, we need to provide our own context. */
+        info("inputThread: creating ARCore EGL context for input thread");
+        // 1. Initialize EGL
+        EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        if (display == EGL_NO_DISPLAY) {
+            throw std::runtime_error("Failed to get EGL display.");
+        }
+
+        if (!eglInitialize(display, nullptr, nullptr)) {
+            throw std::runtime_error("Failed to initialize EGL.");
+        }
+
+        // 2. Choose EGL configuration
+        EGLint numConfigs;
+        EGLConfig config;
+        EGLint configAttribs[] = {
+                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
+                EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+                EGL_BLUE_SIZE, 8,
+                EGL_GREEN_SIZE, 8,
+                EGL_RED_SIZE, 8,
+                EGL_ALPHA_SIZE, 8,
+                EGL_NONE
+        };
+
+        if (!eglChooseConfig(display, configAttribs, &config, 1, &numConfigs)) {
+            throw std::runtime_error("Failed to choose EGL config.");
+        }
+
+        if (numConfigs == 0) {
+            throw std::runtime_error("No suitable EGL configurations found.");
+        }
+
+        // 3. Create an offscreen (pbuffer) surface
+        EGLint pbufferAttribs[] = {
+                EGL_WIDTH, 1920,
+                EGL_HEIGHT, 1920,
+                EGL_NONE
+        };
+
+        EGLSurface surface = eglCreatePbufferSurface(display, config, pbufferAttribs);
+        if (surface == EGL_NO_SURFACE) {
+            throw std::runtime_error("Failed to create EGL pbuffer surface.");
+        }
+
+        // 4. Create an EGL context
+        EGLint contextAttribs[] = {
+                EGL_CONTEXT_CLIENT_VERSION, 3,  // OpenGL ES 3.0 context
+                EGL_NONE
+        };
+
+        EGLContext context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttribs);
+        if (context == EGL_NO_CONTEXT) {
+            throw std::runtime_error("Failed to create EGL context.");
+        }
+
+        // 5. Bind the context to the current thread
+        if (!eglMakeCurrent(display, surface, surface, context)) {
+            throw std::runtime_error("Failed to make EGL context current.");
+        }
+    }
+
     info("inputThread: thread staring...");
     while (CTX.streaming) {
 
@@ -162,7 +307,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *) {
 }
 
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initializeNative(
-    JNIEnv *env, jobject obj, jint screenWidth, jint screenHeight, jfloat refreshRate) {
+    JNIEnv *env, jobject obj, jint screenWidth, jint screenHeight, jfloat refreshRate, jboolean enableARCore) {
     CTX.javaContext = env->NewGlobalRef(obj);
 
     uint32_t viewWidth = std::max(screenWidth, screenHeight) / 2;
@@ -188,6 +333,35 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initia
 
     Cardboard_initializeAndroid(CTX.javaVm, CTX.javaContext);
     CTX.headTracker = CardboardHeadTracker_create();
+
+    CTX.arcoreEnabled = (bool) enableARCore;
+    if (CTX.arcoreEnabled) {
+        if (ArSession_create(env, CTX.javaContext, &CTX.arSession) != AR_SUCCESS) {
+            error("initializeNative: Could not create ARCore session");
+            return;
+        }
+
+        ArConfig* arConfig = nullptr;
+        ArConfig_create(CTX.arSession, &arConfig);
+
+        // Explicitly disable all unnecessary features to preserve CPU power.
+        ArConfig_setDepthMode(CTX.arSession, arConfig, AR_DEPTH_MODE_DISABLED);
+        ArConfig_setLightEstimationMode(CTX.arSession, arConfig, AR_LIGHT_ESTIMATION_MODE_DISABLED);
+        ArConfig_setPlaneFindingMode(CTX.arSession, arConfig, AR_PLANE_FINDING_MODE_HORIZONTAL_AND_VERTICAL);
+
+        // Set "latest camera image" update mode (ArSession_update returns immediately without blocking)
+        ArConfig_setUpdateMode(CTX.arSession, arConfig, AR_UPDATE_MODE_LATEST_CAMERA_IMAGE);
+
+        // TODO: Add camera config filter:
+        // https://developers.google.com/ar/develop/c/camera-configs
+
+        if (ArSession_configure(CTX.arSession, arConfig) != AR_SUCCESS) {
+            error("initializeNative: Could not configure ARCore session");
+            return;
+        }
+
+        ArFrame_create(CTX.arSession, &CTX.arFrame);
+    }
 }
 
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_destroyNative(JNIEnv *,
@@ -201,11 +375,22 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_destro
     CTX.lensDistortion = nullptr;
     CardboardDistortionRenderer_destroy(CTX.distortionRenderer);
     CTX.distortionRenderer = nullptr;
+
+    if (CTX.arcoreEnabled && CTX.arSession != nullptr) {
+        ArSession_destroy(CTX.arSession);
+        CTX.arSession = nullptr;
+
+        ArFrame_destroy(CTX.arFrame);
+        CTX.arFrame = nullptr;
+    }
 }
 
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_resumeNative(JNIEnv *,
                                                                                        jobject) {
     CardboardHeadTracker_resume(CTX.headTracker);
+    if (CTX.arcoreEnabled && CTX.arSession != nullptr) {
+        ArSession_resume(CTX.arSession);
+    }
 
     CTX.renderingParamsChanged = true;
 
@@ -248,6 +433,12 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_setScr
     CTX.renderingParamsChanged = true;
 }
 
+extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_setScreenRotationNative(
+    JNIEnv *, jobject, jint rotation) {
+    CTX.screenRotation = rotation;
+    CTX.renderingParamsChanged = true;
+}
+
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_sendBatteryLevel(
     JNIEnv *, jobject, jfloat level, jboolean plugged) {
     alvr_send_battery(HEAD_ID, level, plugged);
@@ -256,6 +447,10 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_sendBa
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *,
                                                                                        jobject) {
     try {
+        if (CTX.eglContext == nullptr) {
+            CTX.eglContext = eglGetCurrentContext();
+        }
+
         if (CTX.renderingParamsChanged) {
             info("renderingParamsChanged, processing new params");
             uint8_t *buffer;
@@ -301,6 +496,11 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
             CTX.fovArr[kLeft] = getFov(kLeft);
             CTX.fovArr[kRight] = getFov(kRight);
 
+            if (CTX.arcoreEnabled && CTX.arSession != nullptr) {
+                ArSession_setDisplayGeometry(
+                    CTX.arSession, CTX.screenRotation, CTX.screenWidth, CTX.screenHeight);
+            }
+
             info("renderingParamsChanged, updating new view configs (FOV) to alvr");
             // alvr_send_views_config(fovArr, CTX.eyeOffsets[0] - CTX.eyeOffsets[1]);
         }
@@ -340,6 +540,20 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
             const uint32_t *targetViews[2] = {(uint32_t *) &CTX.lobbyTextures[0],
                                               (uint32_t *) &CTX.lobbyTextures[1]};
             alvr_resume_opengl(CTX.screenWidth / 2, CTX.screenHeight, targetViews, 1, true);
+
+            if (CTX.arcoreEnabled && CTX.arSession != nullptr) {
+                GLuint arTextureIdArray[1];
+                glGenTextures(1, arTextureIdArray);
+                CTX.arTexture = arTextureIdArray[0];
+
+                GL(glBindTexture(GL_TEXTURE_2D, CTX.arTexture));
+                GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+                GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+                GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+                GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+
+                ArSession_setCameraTextureName(CTX.arSession, CTX.arTexture);
+            }
 
             CTX.renderingParamsChanged = false;
             CTX.glContextRecreated = false;
@@ -508,7 +722,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                 // offset head pos to Eye Position
                 offsetPosWithQuat(pose.orientation, headToEye, viewInputs[eye].pose.position);
 
-                viewInputs[eye].pose.orientation = pose.orientation;
+                viewInputs[eye].pose = pose;
                 viewInputs[eye].fov = getFov((CardboardEye) eye);
                 viewInputs[eye].swapchain_index = 0;
             }

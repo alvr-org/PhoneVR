@@ -42,4 +42,5 @@
     <string name="switch_phonevr_server">Switch PhoneVR Server</string>
     <string name="remember_choice">Remember choice</string>
     <string name="max_brightness">Max Brightness</string>
+    <string name="arcore_not_supported">Your device does not support ARCore; position tracking has been disabled</string>
 </resources>
