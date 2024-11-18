@@ -32,7 +32,6 @@ const int MAXIMUM_TRACKING_FRAMES = 360;
 struct NativeContext {
     JavaVM *javaVm = nullptr;
     jobject javaContext = nullptr;
-    EGLContext eglContext = nullptr;
 
     CardboardHeadTracker *headTracker = nullptr;
     CardboardLensDistortion *lensDistortion = nullptr;
@@ -126,13 +125,13 @@ AlvrPose getPose(uint64_t timestampNs) {
     AlvrPose pose = {};
     bool returnLastPosition = false;
 
-    float pos[3];
-    float q[4];
-    CardboardHeadTracker_getPose(CTX.headTracker, (int64_t) timestampNs, kLandscapeLeft, pos, q);
-
-    auto inverseOrientation = AlvrQuat{q[0], q[1], q[2], q[3]};
-    pose.orientation = inverseQuat(inverseOrientation);
     if (!CTX.arcoreEnabled || (CTX.arcoreEnabled && !useARCoreOrientation)) {
+        float pos[3];
+        float q[4];
+        CardboardHeadTracker_getPose(CTX.headTracker, (int64_t) timestampNs, kLandscapeLeft, pos, q);
+
+        auto inverseOrientation = AlvrQuat{q[0], q[1], q[2], q[3]};
+        pose.orientation = inverseQuat(inverseOrientation);
         CTX.lastOrientation = pose.orientation;
     }
 
@@ -166,22 +165,19 @@ AlvrPose getPose(uint64_t timestampNs) {
         ArPose_create(CTX.arSession, nullptr, &arPose);
         ArCamera_getPose(CTX.arSession, arCamera, arPose);
         // ArPose_getPoseRaw() returns a pose in {qx, qy, qz, qw, tx, ty, tz} format.
-        float arRawPose[7] = {0.f};
+        float arRawPose[7] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
         ArPose_getPoseRaw(CTX.arSession, arPose, arRawPose);
-        pose.position[0] = arRawPose[4];
-        pose.position[1] = arRawPose[5];
-        pose.position[2] = arRawPose[6];
-
-        if (useARCoreOrientation) {
-            auto inverseOrientation = AlvrQuat{arRawPose[0], arRawPose[1], arRawPose[2],
-                                               arRawPose[3]};
-            pose.orientation = inverseOrientation;
-            CTX.lastOrientation = pose.orientation;
-        }
 
         for (int i = 0; i < 3; i++) {
             pose.position[i] = arRawPose[i + 4];
             CTX.lastPosition[i] = arRawPose[i + 4];
+        }
+
+        if (useARCoreOrientation) {
+            auto orientation = AlvrQuat{arRawPose[0], arRawPose[1], arRawPose[2],
+                                               arRawPose[3]};
+            pose.orientation = orientation;
+            CTX.lastOrientation = pose.orientation;
         }
 
         ArPose_destroy(arPose);
@@ -338,6 +334,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initia
     if (CTX.arcoreEnabled) {
         if (ArSession_create(env, CTX.javaContext, &CTX.arSession) != AR_SUCCESS) {
             error("initializeNative: Could not create ARCore session");
+            CTX.arcoreEnabled = false;
             return;
         }
 
@@ -447,10 +444,6 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_sendBa
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_renderNative(JNIEnv *,
                                                                                        jobject) {
     try {
-        if (CTX.eglContext == nullptr) {
-            CTX.eglContext = eglGetCurrentContext();
-        }
-
         if (CTX.renderingParamsChanged) {
             info("renderingParamsChanged, processing new params");
             uint8_t *buffer;
