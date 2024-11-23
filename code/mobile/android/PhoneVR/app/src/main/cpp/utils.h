@@ -2,6 +2,7 @@
 #define PHONEVR_UTILS_H
 
 #include "alvr_client_core.h"
+#include "arcore_c_api.h"
 #include <GLES3/gl3.h>
 #include <android/log.h>
 #include <string>
@@ -86,5 +87,23 @@ static const char *GlErrorString(GLenum error) {
 #define GL(func)                                                                                   \
     func;                                                                                          \
     GLCheckErrors(__FILE__, __LINE__)
+
+/* Returns a pose having the translation of this pose but no rotation.
+ * The caller is responsible for freeing the original pose and the output pose.
+ * (C++ port of Pose.extractTranslation.) */
+static ArPose *ArPose_extractTranslation(ArSession *session, ArPose *in_pose) {
+    float raw_pose[7] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+    ArPose_getPoseRaw(session, in_pose, raw_pose);
+
+    raw_pose[0] = 0.f;
+    raw_pose[1] = 0.f;
+    raw_pose[2] = 0.f;
+    raw_pose[3] = 0.f;
+
+    ArPose *out_pose = nullptr;
+    ArPose_create(session, raw_pose, &out_pose);
+
+    return out_pose;
+}
 
 #endif   // PHONEVR_UTILS_H

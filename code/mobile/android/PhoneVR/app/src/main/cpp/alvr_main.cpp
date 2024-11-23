@@ -40,10 +40,13 @@ struct NativeContext {
     bool arcoreEnabled = false;
     ArSession *arSession = nullptr;
     ArFrame *arFrame = nullptr;
+    ArAnchor *arFloorAnchor = nullptr;
     GLuint arTexture = 0;
 
     AlvrQuat lastOrientation = {0.f, 0.f, 0.f, 0.f};
     float lastPosition[3] = {0.f, 0.f, 0.f};
+
+    float currentMagnetometerValues[4] = {0.f, 0.f, 0.f, 0.f};
 
     int screenWidth = 0;
     int screenHeight = 0;
@@ -163,13 +166,100 @@ AlvrPose getPose(uint64_t timestampNs) {
 
         ArPose *arPose = nullptr;
         ArPose_create(CTX.arSession, nullptr, &arPose);
-        ArCamera_getPose(CTX.arSession, arCamera, arPose);
+        ArCamera_getDisplayOrientedPose(CTX.arSession, arCamera, arPose);
         // ArPose_getPoseRaw() returns a pose in {qx, qy, qz, qw, tx, ty, tz} format.
         float arRawPose[7] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
         ArPose_getPoseRaw(CTX.arSession, arPose, arRawPose);
 
+
+        /* We use an anchor here for two things:
+         *
+         * 1. To determine floor position by finding the lowest detected plane. We do this by
+         * placing an anchor in the center position of the plane, and if it's lower than the
+         * currently placed anchor (CTX.floorAnchor), we replace it.
+         *
+         * (By default, ARCore's "world coordinates" space begins wherever the device is, but this
+         * can desync over time. Anchor position adapts to world space movement.)
+         *
+         * ~~2. To determine the rotation of world space. This allows us to improve tracking.~~
+         * nevermind, that doesn't seem to work, orientation is stuck :(
+         */
+        ArTrackableList *trackables = nullptr;
+        ArTrackableList_create(CTX.arSession, &trackables);
+        ArFrame_getUpdatedTrackables(CTX.arSession, CTX.arFrame, AR_TRACKABLE_PLANE, trackables);
+        int32_t detectedPlaneCount;
+        ArTrackableList_getSize(CTX.arSession, trackables, &detectedPlaneCount);
+
+        for (int i = 0; i < detectedPlaneCount; i++) {
+            ArTrackable* arTrackable = nullptr;
+            ArTrackableList_acquireItem(CTX.arSession, trackables, i,
+                                        &arTrackable);
+            const ArPlane *plane = ArAsPlane(arTrackable);
+            ArTrackingState planeTrackingState;
+            ArTrackable_getTrackingState(CTX.arSession, arTrackable, &planeTrackingState);
+            ArPlaneType planeType;
+            ArPlane_getType(CTX.arSession, plane, &planeType);
+            if (planeTrackingState == AR_TRACKING_STATE_TRACKING &&
+                planeType == AR_PLANE_HORIZONTAL_UPWARD_FACING) {
+                ArPose *planePose = nullptr;
+                ArPose_create(CTX.arSession, nullptr, &planePose);
+                ArPlane_getCenterPose(CTX.arSession, plane, planePose);
+
+                bool reanchor = false;
+                if (CTX.arFloorAnchor == nullptr) {
+                    reanchor = true;
+                } else {
+                    ArPose *currentFloorPose = nullptr;
+                    ArPose_create(CTX.arSession, nullptr, &currentFloorPose);
+
+                    ArAnchor_getPose(CTX.arSession, CTX.arFloorAnchor, currentFloorPose);
+                    float currentFloorPoseRaw[7] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+                    ArPose_getPoseRaw(CTX.arSession, currentFloorPose, currentFloorPoseRaw);
+
+                    float planePoseRaw[7] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+                    ArPose_getPoseRaw(CTX.arSession, planePose, planePoseRaw);
+
+                    if (planePoseRaw[5] < currentFloorPoseRaw[5]) {
+                        info("Found new plane lower than pose (current %f vs new %f), reanchoring",
+                             currentFloorPoseRaw[5], planePoseRaw[5]);
+                        reanchor = true;
+                    }
+                }
+
+                if (reanchor) {
+                    if (CTX.arFloorAnchor != nullptr) {
+                        ArAnchor_detach(CTX.arSession, CTX.arFloorAnchor);
+                        ArAnchor_release(CTX.arFloorAnchor);
+                    }
+
+                    ArPose *planePoseNoRotation = ArPose_extractTranslation(CTX.arSession,
+                                                                            planePose);
+                    ArTrackable_acquireNewAnchor(CTX.arSession, arTrackable, planePoseNoRotation,
+                                                 &CTX.arFloorAnchor);
+                    ArPose_destroy(planePoseNoRotation);
+                }
+
+                ArPose_destroy(planePose);
+            }
+        }
+
+        ArTrackableList_destroy(trackables);
+
+        float anchorRawPose[7] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+        if (CTX.arFloorAnchor != nullptr) {
+            ArPose *anchorPose = nullptr;
+            ArPose_create(CTX.arSession, nullptr, &anchorPose);
+            ArAnchor_getPose(CTX.arSession, CTX.arFloorAnchor, anchorPose);
+            ArPose_getPoseRaw(CTX.arSession, anchorPose, anchorRawPose);
+            info("anchor pose %f %f %f %f %f %f %f", anchorRawPose[0], anchorRawPose[1], anchorRawPose[2], anchorRawPose[3], anchorRawPose[4], anchorRawPose[5], anchorRawPose[6]);
+        }
+
+
+        pose.position[0] = arRawPose[4];
+        pose.position[1] = arRawPose[5] - anchorRawPose[5];
+        pose.position[2] = arRawPose[6];
+
         for (int i = 0; i < 3; i++) {
-            pose.position[i] = arRawPose[i + 4];
             CTX.lastPosition[i] = arRawPose[i + 4];
         }
 
@@ -345,6 +435,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initia
         ArConfig_setDepthMode(CTX.arSession, arConfig, AR_DEPTH_MODE_DISABLED);
         ArConfig_setLightEstimationMode(CTX.arSession, arConfig, AR_LIGHT_ESTIMATION_MODE_DISABLED);
         ArConfig_setPlaneFindingMode(CTX.arSession, arConfig, AR_PLANE_FINDING_MODE_HORIZONTAL_AND_VERTICAL);
+        ArConfig_setCloudAnchorMode(CTX.arSession, arConfig, AR_CLOUD_ANCHOR_MODE_DISABLED);
 
         // Set "latest camera image" update mode (ArSession_update returns immediately without blocking)
         ArConfig_setUpdateMode(CTX.arSession, arConfig, AR_UPDATE_MODE_LATEST_CAMERA_IMAGE);
