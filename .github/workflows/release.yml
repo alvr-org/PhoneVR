@@ -123,7 +123,7 @@ jobs:
       run: msbuild /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
 
     - name: Upload Build outputs
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
         path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
@@ -206,21 +206,21 @@ jobs:
       # Upload Artifact Build
       # Noted For Output eg. [MAIN_PROJECT_MODULE]/build/outputs/apk/gvr/debug/
       - name: Upload Debug APKs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
           path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/**/debug/
 
       # Noted For Output eg. [MAIN_PROJECT_MODULE]/build/outputs/apk/gvr/release/
       - name: Upload Release APKs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
           path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/**/release/
   
       - name: Upload Build outputs on failure
         if: failure()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: build-files
           path: ${{ env.GRADLE_DIR }}/app/.cxx/
