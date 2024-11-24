@@ -98,19 +98,28 @@ jobs:
       run: make format-check
 
     # https://github.com/actions/runner-images/issues/842#issuecomment-1495115166
-    - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
+    - name: Install MSVC 2017 (v141) and Windows 8.1 SDK for MSVS2022
       shell: powershell
       run: |
+        env
+
         $VS_BTOOLS_EXE="vs_buildtools.exe"
-        $VS_BTOOLS_URI="https://aka.ms/vs/15/release/vs_buildtools.exe"
+        $VS_BTOOLS_URI="https://aka.ms/vs/17/release/vs_buildtools.exe"
         Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
         Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
-        "--add", "Microsoft.VisualStudio.Component.VC.140", `
-        "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
-        "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
+        "--add", "Microsoft.VisualStudio.Component.VC.v141.x86.x64", `
+        "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru -nonewwindow
+
+        # 8.1 SDK is no longer available in latest github-runners and MSVS2022/2019 build tools
+        # have to download it manually like https://stackoverflow.com/a/77947878
+        
+        Invoke-WebRequest -Uri https://go.microsoft.com/fwlink/p/?LinkId=323507 -OutFile sdk81setup.exe
+        Start-Process -FilePath ./sdk81setup.exe -ArgumentList "/features +", "/q", "/norestart" -Wait -PassThru -nonewwindow
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2.0.0
+      with:
+        vs-version: '17'
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -120,7 +129,14 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
+      run: | 
+        env
+        
+        $env:VCTargetsPath="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\"
+        
+        env
+       
+        msbuild /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
 
     - name: Upload Build outputs
       uses: actions/upload-artifact@v4
