@@ -1,2 +1,2 @@
-#define PVR_BINVERSION 1,1,1
-#define PVR_STRVERSION "1.1.1-release-test"
+#define PVR_BINVERSION 1,2,1
+#define PVR_STRVERSION "1.2.1-release-test"
