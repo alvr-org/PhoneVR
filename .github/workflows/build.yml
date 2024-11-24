@@ -203,28 +203,28 @@ jobs:
       - name: Upload APK Debug
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+          name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }}-gvr-debug APK
           path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/gvr/debug/
 
       # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/gvr/release/
       - name: Upload APK Release
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+          name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }}-gvr-release APK
           path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/gvr/release/
   
       # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/noGvr/debug/
       - name: Upload APK Debug
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+          name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }}-nogvr-debug APK
           path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/noGvr/debug/
 
       # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/noGvr/release/
       - name: Upload APK Release
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+          name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }}-nogvr-release APK
           path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/noGvr/release/
 
       - name: Upload Build outputs on failure
