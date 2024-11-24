@@ -99,8 +99,8 @@ jobs:
     - name: Upload Build outputs
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
-        path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
+        name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}-${{ matrix.platform }}
+        path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}\${{ matrix.platform }}
   
   Build_APK:
     name: Build Android APK
