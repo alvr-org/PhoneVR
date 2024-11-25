@@ -36,7 +36,11 @@ jobs:
       fail-fast: false
       matrix:
         config: [Release, Debug]
-        platform: [x64, x86]
+        platform:
+          - name: x64
+            msvc-platform-name: x64
+          - name: x86
+            msvc-platform-name: Win32
     runs-on: windows-latest
 
     steps:
@@ -83,7 +87,7 @@ jobs:
       with:
         vs-version: '17'
 
-    - name: Building ${{matrix.platform}}-${{matrix.config}}
+    - name: Building ${{matrix.platform.name}}-${{matrix.config}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
@@ -94,13 +98,13 @@ jobs:
         
         env
 
-        msbuild /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
+        msbuild /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform.name}} ${{env.SOLUTION_FILE_PATH}}
 
     - name: Upload Build outputs
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}
-        path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}
+        name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}-${{ matrix.platform.name }}
+        path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}\${{ matrix.platform.msvc-platform-name }}
   
   Build_APK:
     name: Build Android APK
@@ -201,35 +205,35 @@ jobs:
       # Upload Artifact Build
       # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/gvr/debug/
       - name: Upload APK Debug
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+          name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }}-gvr-debug APK
           path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/gvr/debug/
 
       # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/gvr/release/
       - name: Upload APK Release
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+          name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }}-gvr-release APK
           path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/gvr/release/
   
       # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/noGvr/debug/
       - name: Upload APK Debug
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+          name: ${{ env.PROJECT_NAME }}-debug-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }}-nogvr-debug APK
           path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/noGvr/debug/
 
       # Noted For Output [MAIN_PROJECT_MODULE]/build/outputs/apk/noGvr/release/
       - name: Upload APK Release
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }} APK
+          name: ${{ env.PROJECT_NAME }}-${{ steps.vars.outputs.sha_short }}-${{ env.date_today }}-nogvr-release APK
           path: ${{env.GRADLE_DIR}}/${{ env.MAIN_PROJECT_MODULE }}/build/outputs/apk/noGvr/release/
 
       - name: Upload Build outputs on failure
         if: failure()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: build-files
           path: ${{ env.GRADLE_DIR }}/app/.cxx/
@@ -451,7 +455,7 @@ jobs:
             cat log.txt
 
       # build/outputs/connected_android_test_additional_output/gvrDebugAndroidTest/connected/GPlay_Pixel_2_API_30(AVD) - 11/ALVRActivityTest_saveDeviceScreenBitmap.png
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: Test results
