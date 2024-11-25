@@ -36,7 +36,11 @@ jobs:
       fail-fast: false
       matrix:
         config: [Release, Debug]
-        platform: [x64, x86]
+        platform:
+          - name: x64
+            msvc-platform-name: x64
+          - name: x86
+            msvc-platform-name: Win32
     runs-on: windows-latest
 
     steps:
@@ -83,7 +87,7 @@ jobs:
       with:
         vs-version: '17'
 
-    - name: Building ${{matrix.platform}}-${{matrix.config}}
+    - name: Building ${{matrix.platform.name}}-${{matrix.config}}
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
@@ -94,13 +98,13 @@ jobs:
         
         env
 
-        msbuild /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
+        msbuild /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform.name}} ${{env.SOLUTION_FILE_PATH}}
 
     - name: Upload Build outputs
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}-${{ matrix.platform }}
-        path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}\${{ matrix.platform }}
+        name: ${{ env.PROJECT_NAME }}-Server-${{ matrix.config }}-${{ matrix.platform.name }}
+        path: ${{ env.SOLUTION_DIR }}\${{ matrix.config }}\${{ matrix.platform.msvc-platform-name }}
   
   Build_APK:
     name: Build Android APK
