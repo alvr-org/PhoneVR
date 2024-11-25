@@ -42,4 +42,19 @@
     <string name="switch_phonevr_server">Switch PhoneVR Server</string>
     <string name="remember_choice">Remember choice</string>
     <string name="max_brightness">Max Brightness</string>
+    <string name="title_activity_passthrough_settings">PassthroughSettingsActivity</string>
+    <string name="passthrough_fraction">Passthrough fraction</string>
+    <string name="passthrough_activate">Enable passthrough</string>
+    <string name="fraction_summary">The fraction how much the passthrough should contain of the image (between 0.0 and 1.0). This depends on the FOV of the camera, for narrow FOV a lower value might be better, so that objects don\'t look to close... Play around with this value.</string>
+    <string name="set_recording_hint">Set Recording Hint</string>
+    <string name="recording_hint_summary">If set to false the passthrough may have a greater FOV, but has less FPS which may cause motion sickness.</string>
+    <string name="experimental_double_tap_detection">Experimental Double-Tap detection</string>
+    <string name="double_tap_summary">If true passthrough can be switched through double-tap.</string>
+    <string name="double_tap_configuration">Double Tap Configuration</string>
+    <string name="delay_string">Delay in ms</string>
+    <string name="lower_bound">Lower Bound</string>
+    <string name="upper_bound">Upper Bound</string>
+    <string name="double_tap_test_graph">Double Tap Test Graph</string>
+    <string name="passthrough_settings">Passthrough Settings</string>
+    <string name="passthrough">Passthrough</string>
 </resources>
