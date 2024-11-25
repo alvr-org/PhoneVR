@@ -173,7 +173,8 @@ class ALVRActivityTest : PVRInstrumentationBase() {
         try {
             // Cardboard initial load asks to scan for QR
             onView(withText("SKIP")).perform(click())
-        } catch (e: NoMatchingViewException) {
+        } catch (e: Exception) {
+            Log.d(TAG, "saveDeviceScreenBitmap: ${e.message} - 'SKIP' not found ${e.stackTrace}")
             // View is not in hierarchy - which is okay
         }
 
@@ -190,7 +191,8 @@ class ALVRActivityTest : PVRInstrumentationBase() {
             // First time going into VR mode android shows an annoying "You are in fullscreen
             // dialog"
             onView(withText("Got it")).perform(click())
-        } catch (e: NoMatchingViewException) {
+        } catch (e: Exception) {
+            Log.d(TAG, "saveDeviceScreenBitmap: ${e.message} - 'Got it' not found ${e.stackTrace}")
             // View is not in hierarchy - which is okay
         }
         takeScreenshot().writeToTestStorage("${javaClass.simpleName}_${nameRule.methodName}")
