@@ -159,10 +159,9 @@ dependencies {
 
     implementation "androidx.tracing:tracing:1.1.0"
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'junit:junit:4.12'
     androidTestImplementation "androidx.test.ext:junit-ktx:$extJUnitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.3.0'
     androidTestImplementation "androidx.test:rules:$androidXTestVersion"
     androidTestUtil "androidx.test.services:test-services:$servicesVersion"
 
