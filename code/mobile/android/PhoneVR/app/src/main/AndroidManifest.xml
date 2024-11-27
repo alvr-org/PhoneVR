@@ -75,6 +75,8 @@
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             android:launchMode="singleTop" />
+
+        <meta-data android:name="com.google.ar.core" android:value="optional" />
     </application>
 
 </manifest>
