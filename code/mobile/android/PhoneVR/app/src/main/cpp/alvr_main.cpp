@@ -49,7 +49,10 @@ struct NativeContext {
 
     AlvrDeviceMotion deviceMotion = {};
     AlvrQuat recentReprojectionRotation = {
-            0, 0, 0, 0,
+        0,
+        0,
+        0,
+        0,
     };
 
     // ALVR StreamingStarted event's config
@@ -140,16 +143,16 @@ void updateViewConfigs(uint64_t targetTimestampNs = 0) {
     CTX.deviceMotion.device_id = HEAD_ID;
     CTX.deviceMotion.pose = headPose;
 
-//    float headToEye[3] = {CTX.eyeOffsets[kLeft], 0.0, 0.0};
-//
-//    CTX.viewParams[kLeft].pose = headPose;
-//    offsetPosWithQuat(headPose.orientation, headToEye, CTX.viewParams[kLeft].pose.position);
-//    CTX.viewParams[kLeft].fov = CTX.fovArr[kLeft];
-//
-//    headToEye[0] = CTX.eyeOffsets[kRight];
-//    CTX.viewParams[kRight].pose = headPose;
-//    offsetPosWithQuat(headPose.orientation, headToEye, CTX.viewParams[kRight].pose.position);
-//    CTX.viewParams[kRight].fov = CTX.fovArr[kRight];
+    //    float headToEye[3] = {CTX.eyeOffsets[kLeft], 0.0, 0.0};
+    //
+    //    CTX.viewParams[kLeft].pose = headPose;
+    //    offsetPosWithQuat(headPose.orientation, headToEye, CTX.viewParams[kLeft].pose.position);
+    //    CTX.viewParams[kLeft].fov = CTX.fovArr[kLeft];
+    //
+    //    headToEye[0] = CTX.eyeOffsets[kRight];
+    //    CTX.viewParams[kRight].pose = headPose;
+    //    offsetPosWithQuat(headPose.orientation, headToEye, CTX.viewParams[kRight].pose.position);
+    //    CTX.viewParams[kRight].fov = CTX.fovArr[kRight];
 }
 
 void inputThread() {
@@ -161,9 +164,9 @@ void inputThread() {
         auto targetTimestampNs = GetBootTimeNano();
         updateViewConfigs(targetTimestampNs);
 
-        memcpy(&CTX.recentReprojectionRotation, &CTX.deviceMotion.pose.orientation, sizeof(AlvrQuat));
-        alvr_send_tracking(
-            targetTimestampNs, &CTX.deviceMotion, 1, nullptr, nullptr);
+        memcpy(
+            &CTX.recentReprojectionRotation, &CTX.deviceMotion.pose.orientation, sizeof(AlvrQuat));
+        alvr_send_tracking(targetTimestampNs, &CTX.deviceMotion, 1, nullptr, nullptr);
 
         deadline += std::chrono::nanoseconds((uint64_t) (1e9 / 60.f / 3));
         std::this_thread::sleep_until(deadline);
@@ -208,9 +211,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initia
     CTX.headTracker = CardboardHeadTracker_create();
 }
 
-void initialize_decoder(AlvrDecoderConfig config) {
-    alvr_create_decoder(config);
-}
+void initialize_decoder(AlvrDecoderConfig config) { alvr_create_decoder(config); }
 
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_destroyNative(JNIEnv *,
                                                                                         jobject) {
@@ -430,14 +431,21 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
 
                 render_config.enable_foveation = false;
                 if (!settings_json["video"].is_null()) {
-                    CTX.decoderConfig.force_software_decoder = settings_json["video"]["force_software_decoder"];
-                    CTX.decoderConfig.buffering_history_weight = settings_json["video"]["buffering_history_weight"];
-                    CTX.decoderConfig.max_buffering_frames = settings_json["video"]["max_buffering_frames"];
+                    CTX.decoderConfig.force_software_decoder =
+                        settings_json["video"]["force_software_decoder"];
+                    CTX.decoderConfig.buffering_history_weight =
+                        settings_json["video"]["buffering_history_weight"];
+                    CTX.decoderConfig.max_buffering_frames =
+                        settings_json["video"]["max_buffering_frames"];
 
-                    info("settings_json[video][force_software_decoder] is %s ", settings_json["video"]["force_software_decoder"].dump().c_str());
-                    info("settings_json[video][buffering_history_weight] is %s ", settings_json["video"]["buffering_history_weight"].dump().c_str());
-                    info("settings_json[video][max_buffering_frames] is %s ", settings_json["video"]["max_buffering_frames"].dump().c_str());
-                    info( "settings_json[video][mediacodec_extra_options] is %s ", settings_json["video"]["mediacodec_extra_options"].dump().c_str());
+                    info("settings_json[video][force_software_decoder] is %s ",
+                         settings_json["video"]["force_software_decoder"].dump().c_str());
+                    info("settings_json[video][buffering_history_weight] is %s ",
+                         settings_json["video"]["buffering_history_weight"].dump().c_str());
+                    info("settings_json[video][max_buffering_frames] is %s ",
+                         settings_json["video"]["max_buffering_frames"].dump().c_str());
+                    info("settings_json[video][mediacodec_extra_options] is %s ",
+                         settings_json["video"]["mediacodec_extra_options"].dump().c_str());
 
                     if (!settings_json["video"]["foveated_encoding"].is_null()) {
                         info("settings_json.video.foveated_encoding is %s",
