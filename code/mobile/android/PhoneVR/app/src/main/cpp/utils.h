@@ -34,7 +34,7 @@ void log(AlvrLogLevel level,
 
     alvr_log(level, buf);
 
-    switch (level) {
+    /*switch (level) {
     case ALVR_LOG_LEVEL_DEBUG:
         __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "%s", buf);
         break;
@@ -47,7 +47,7 @@ void log(AlvrLogLevel level,
     case ALVR_LOG_LEVEL_WARN:
         __android_log_print(ANDROID_LOG_WARN, LOG_TAG, "%s", buf);
         break;
-    }
+    }*/
 
     va_end(args);
 }

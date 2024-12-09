@@ -46,15 +46,25 @@ struct NativeContext {
 
     float eyeOffsets[2] = {0.0, 0.0};
     AlvrFov fovArr[2] = {};
-    AlvrViewParams viewParams[2] = {};
+
     AlvrDeviceMotion deviceMotion = {};
+    AlvrQuat recentReprojectionRotation = {
+            0, 0, 0, 0,
+    };
+
+    // ALVR StreamingStarted event's config
+    StreamingStarted_Body StreamingConfig;
+    AlvrDecoderConfig decoderConfig;
 
     NativeContext() {
         memset(&fovArr, 0, (sizeof(fovArr)) / sizeof(int));
-        memset(&viewParams, 0, (sizeof(viewParams)) / sizeof(int));
         memset(&deviceMotion, 0, (sizeof(deviceMotion)) / sizeof(int));
+        memset(&StreamingConfig, 0, sizeof(StreamingConfig));
+        memset(&decoderConfig, 0, sizeof(decoderConfig));
     }
 };
+
+void initialize_decoder(AlvrDecoderConfig config);
 
 NativeContext CTX = {};
 
@@ -105,7 +115,10 @@ AlvrFov getFov(CardboardEye eye) {
     return fov;
 }
 
-AlvrPose getPose(uint64_t timestampNs) {
+AlvrPose getPose(uint64_t timestampNs = 0) {
+    if (!timestampNs)
+        timestampNs = GetBootTimeNano();
+
     AlvrPose pose = {};
 
     float pos[3];
@@ -120,23 +133,23 @@ AlvrPose getPose(uint64_t timestampNs) {
 
 void updateViewConfigs(uint64_t targetTimestampNs = 0) {
     if (!targetTimestampNs)
-        targetTimestampNs = GetBootTimeNano() + alvr_get_head_prediction_offset_ns();
+        targetTimestampNs = GetBootTimeNano();
 
     AlvrPose headPose = getPose(targetTimestampNs);
 
     CTX.deviceMotion.device_id = HEAD_ID;
     CTX.deviceMotion.pose = headPose;
 
-    float headToEye[3] = {CTX.eyeOffsets[kLeft], 0.0, 0.0};
-
-    CTX.viewParams[kLeft].pose = headPose;
-    offsetPosWithQuat(headPose.orientation, headToEye, CTX.viewParams[kLeft].pose.position);
-    CTX.viewParams[kLeft].fov = CTX.fovArr[kLeft];
-
-    headToEye[0] = CTX.eyeOffsets[kRight];
-    CTX.viewParams[kRight].pose = headPose;
-    offsetPosWithQuat(headPose.orientation, headToEye, CTX.viewParams[kRight].pose.position);
-    CTX.viewParams[kRight].fov = CTX.fovArr[kRight];
+//    float headToEye[3] = {CTX.eyeOffsets[kLeft], 0.0, 0.0};
+//
+//    CTX.viewParams[kLeft].pose = headPose;
+//    offsetPosWithQuat(headPose.orientation, headToEye, CTX.viewParams[kLeft].pose.position);
+//    CTX.viewParams[kLeft].fov = CTX.fovArr[kLeft];
+//
+//    headToEye[0] = CTX.eyeOffsets[kRight];
+//    CTX.viewParams[kRight].pose = headPose;
+//    offsetPosWithQuat(headPose.orientation, headToEye, CTX.viewParams[kRight].pose.position);
+//    CTX.viewParams[kRight].fov = CTX.fovArr[kRight];
 }
 
 void inputThread() {
@@ -145,11 +158,12 @@ void inputThread() {
     info("inputThread: thread staring...");
     while (CTX.streaming) {
 
-        auto targetTimestampNs = GetBootTimeNano() + alvr_get_head_prediction_offset_ns();
+        auto targetTimestampNs = GetBootTimeNano();
         updateViewConfigs(targetTimestampNs);
 
+        memcpy(&CTX.recentReprojectionRotation, &CTX.deviceMotion.pose.orientation, sizeof(AlvrQuat));
         alvr_send_tracking(
-            targetTimestampNs, CTX.viewParams, &CTX.deviceMotion, 1, nullptr, nullptr);
+            targetTimestampNs, &CTX.deviceMotion, 1, nullptr, nullptr);
 
         deadline += std::chrono::nanoseconds((uint64_t) (1e9 / 60.f / 3));
         std::this_thread::sleep_until(deadline);
@@ -161,6 +175,10 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *) {
     return JNI_VERSION_1_6;
 }
 
+AlvrQuat getReprojectionRotationDelta() {
+    return alvr_rotation_delta(CTX.recentReprojectionRotation, getPose().orientation);
+}
+
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initializeNative(
     JNIEnv *env, jobject obj, jint screenWidth, jint screenHeight, jfloat refreshRate) {
     CTX.javaContext = env->NewGlobalRef(obj);
@@ -170,12 +188,12 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initia
 
     alvr_initialize_android_context((void *) CTX.javaVm, (void *) CTX.javaContext);
 
+    alvr_initialize_logging();
     float refreshRatesBuffer[1] = {refreshRate};
 
     AlvrClientCapabilities caps = {};
     caps.default_view_height = viewHeight;
     caps.default_view_width = viewWidth;
-    caps.external_decoder = false;
     caps.refresh_rates = refreshRatesBuffer;
     caps.refresh_rates_count = 1;
     caps.foveated_encoding =
@@ -190,9 +208,14 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_initia
     CTX.headTracker = CardboardHeadTracker_create();
 }
 
+void initialize_decoder(AlvrDecoderConfig config) {
+    alvr_create_decoder(config);
+}
+
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_destroyNative(JNIEnv *,
                                                                                         jobject) {
     alvr_destroy_opengl();
+    alvr_destroy_decoder();
     alvr_destroy();
 
     CardboardHeadTracker_destroy(CTX.headTracker);
@@ -328,18 +351,18 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                 GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
                 GL(glTexImage2D(GL_TEXTURE_2D,
                                 0,
-                                GL_RGB,
+                                GL_RGBA8,
                                 CTX.screenWidth / 2,
                                 CTX.screenHeight,
                                 0,
-                                GL_RGB,
+                                GL_RGBA,
                                 GL_UNSIGNED_BYTE,
                                 nullptr));
             }
 
             const uint32_t *targetViews[2] = {(uint32_t *) &CTX.lobbyTextures[0],
                                               (uint32_t *) &CTX.lobbyTextures[1]};
-            alvr_resume_opengl(CTX.screenWidth / 2, CTX.screenHeight, targetViews, 1, true);
+            alvr_resume_opengl(CTX.screenWidth / 2, CTX.screenHeight, targetViews, 1);
 
             CTX.renderingParamsChanged = false;
             CTX.glContextRecreated = false;
@@ -360,7 +383,7 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
             if (event.tag == ALVR_EVENT_STREAMING_STARTED) {
                 info("ALVR Poll Event: ALVR_EVENT_STREAMING_STARTED, generating and binding "
                      "textures...");
-                auto config = event.STREAMING_STARTED;
+                CTX.StreamingConfig = event.STREAMING_STARTED;
 
                 auto settings_len = alvr_get_settings_json(nullptr);
                 auto settings_buffer = std::vector<char>(settings_len);
@@ -382,8 +405,8 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                     GL(glTexImage2D(GL_TEXTURE_2D,
                                     0,
                                     GL_RGB,
-                                    config.view_width,
-                                    config.view_height,
+                                    CTX.StreamingConfig.view_width,
+                                    CTX.StreamingConfig.view_height,
                                     0,
                                     GL_RGB,
                                     GL_UNSIGNED_BYTE,
@@ -400,13 +423,22 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                 const uint32_t *textureHandles[2] = {&leftIntHandle, &rightIntHandle};
 
                 auto render_config = AlvrStreamConfig{};
-                render_config.view_resolution_width = config.view_width;
-                render_config.view_resolution_height = config.view_height;
+                render_config.view_resolution_width = CTX.StreamingConfig.view_width;
+                render_config.view_resolution_height = CTX.StreamingConfig.view_height;
                 render_config.swapchain_textures = textureHandles;
                 render_config.swapchain_length = 1;
 
                 render_config.enable_foveation = false;
                 if (!settings_json["video"].is_null()) {
+                    CTX.decoderConfig.force_software_decoder = settings_json["video"]["force_software_decoder"];
+                    CTX.decoderConfig.buffering_history_weight = settings_json["video"]["buffering_history_weight"];
+                    CTX.decoderConfig.max_buffering_frames = settings_json["video"]["max_buffering_frames"];
+
+                    info("settings_json[video][force_software_decoder] is %s ", settings_json["video"]["force_software_decoder"].dump().c_str());
+                    info("settings_json[video][buffering_history_weight] is %s ", settings_json["video"]["buffering_history_weight"].dump().c_str());
+                    info("settings_json[video][max_buffering_frames] is %s ", settings_json["video"]["max_buffering_frames"].dump().c_str());
+                    info( "settings_json[video][mediacodec_extra_options] is %s ", settings_json["video"]["mediacodec_extra_options"].dump().c_str());
+
                     if (!settings_json["video"]["foveated_encoding"].is_null()) {
                         info("settings_json.video.foveated_encoding is %s",
                              settings_json["video"]["foveated_encoding"].dump().c_str());
@@ -471,6 +503,10 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                 GL(glDeleteTextures(2, CTX.streamTextures));
                 info("ALVR Poll Event: ALVR_EVENT_STREAMING_STOPPED, Stream stopped deleted "
                      "textures.");
+            } else if (event.tag == ALVR_EVENT_DECODER_CONFIG) {
+                info("ALVR Poll Event: ALVR_EVENT_DECODER_CONFIG, ");
+                CTX.decoderConfig.codec = event.DECODER_CONFIG.codec;
+                initialize_decoder(CTX.decoderConfig);
             }
         }
 
@@ -485,43 +521,41 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
         if (CTX.streaming) {
             void *streamHardwareBuffer = nullptr;
 
-            AlvrViewParams dummyViewParams;
-            auto timestampNs = alvr_get_frame(&dummyViewParams, &streamHardwareBuffer);
+            uint64_t timestampNs;
+            alvr_get_frame(&timestampNs, &streamHardwareBuffer);
 
-            if (timestampNs == -1) {
-                return;
-            }
+            const AlvrStreamViewParams viewParams[2] = {
+                {0, getReprojectionRotationDelta(), CTX.fovArr[kLeft]},
+                {0, getReprojectionRotationDelta(), CTX.fovArr[kRight]},
+            };
 
-            uint32_t swapchainIndices[2] = {0, 0};
-            alvr_render_stream_opengl(streamHardwareBuffer, swapchainIndices);
+            alvr_render_stream_opengl(streamHardwareBuffer, viewParams);
 
             alvr_report_submit(timestampNs, 0);
 
             viewsDescs[0].texture = CTX.streamTextures[0];
             viewsDescs[1].texture = CTX.streamTextures[1];
         } else {
+            info("Getting pose for Rendering Lobby...");
             AlvrPose pose = getPose(GetBootTimeNano() + VSYNC_QUEUE_INTERVAL_NS);
 
-            AlvrViewInput viewInputs[2] = {};
+            AlvrLobbyViewParams viewInputs[2] = {};
             for (int eye = 0; eye < 2; eye++) {
                 float headToEye[3] = {CTX.eyeOffsets[eye], 0.0, 0.0};
                 // offset head pos to Eye Position
                 offsetPosWithQuat(pose.orientation, headToEye, viewInputs[eye].pose.position);
 
+                viewInputs[eye].swapchain_index = 0;
                 viewInputs[eye].pose.orientation = pose.orientation;
                 viewInputs[eye].fov = getFov((CardboardEye) eye);
-                viewInputs[eye].swapchain_index = 0;
             }
-            alvr_render_lobby_opengl(viewInputs);
+            info("Rendering Lobby...");
+            alvr_render_lobby_opengl(viewInputs, true);
 
             viewsDescs[0].texture = CTX.lobbyTextures[0];
             viewsDescs[1].texture = CTX.lobbyTextures[1];
         }
 
-        // Note: the Cardboard SDK does not support reprojection!
-        // todo: manually implement it?
-
-        // info("nativeRendered: Rendering to Display...");
         CardboardDistortionRenderer_renderEyeToDisplay(CTX.distortionRenderer,
                                                        0,
                                                        0,
@@ -530,6 +564,8 @@ extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_render
                                                        CTX.screenHeight,
                                                        &viewsDescs[0],
                                                        &viewsDescs[1]);
+
+        info("nativeRendered: Rendered to Display");
     } catch (const json::exception &e) {
         error(std::string(std::string(__FUNCTION__) + std::string(__FILE_NAME__) +
                           std::string(e.what()))
