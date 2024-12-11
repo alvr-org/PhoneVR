@@ -34,21 +34,6 @@ void log(AlvrLogLevel level,
 
     alvr_log(level, buf);
 
-    switch (level) {
-    case ALVR_LOG_LEVEL_DEBUG:
-        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "%s", buf);
-        break;
-    case ALVR_LOG_LEVEL_INFO:
-        __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "%s", buf);
-        break;
-    case ALVR_LOG_LEVEL_ERROR:
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "%s", buf);
-        break;
-    case ALVR_LOG_LEVEL_WARN:
-        __android_log_print(ANDROID_LOG_WARN, LOG_TAG, "%s", buf);
-        break;
-    }
-
     va_end(args);
 }
 
@@ -86,5 +71,37 @@ static const char *GlErrorString(GLenum error) {
 #define GL(func)                                                                                   \
     func;                                                                                          \
     GLCheckErrors(__FILE__, __LINE__)
+
+#define CASE_STR(value)                                                                            \
+    case value:                                                                                    \
+        return #value;
+const char *eglGetErrorString() {
+    EGLint error = eglGetError();
+    switch (error) {
+        CASE_STR(EGL_SUCCESS)
+        CASE_STR(EGL_NOT_INITIALIZED)
+        CASE_STR(EGL_BAD_ACCESS)
+        CASE_STR(EGL_BAD_ALLOC)
+        CASE_STR(EGL_BAD_ATTRIBUTE)
+        CASE_STR(EGL_BAD_CONTEXT)
+        CASE_STR(EGL_BAD_CONFIG)
+        CASE_STR(EGL_BAD_CURRENT_SURFACE)
+        CASE_STR(EGL_BAD_DISPLAY)
+        CASE_STR(EGL_BAD_SURFACE)
+        CASE_STR(EGL_BAD_MATCH)
+        CASE_STR(EGL_BAD_PARAMETER)
+        CASE_STR(EGL_BAD_NATIVE_PIXMAP)
+        CASE_STR(EGL_BAD_NATIVE_WINDOW)
+        CASE_STR(EGL_CONTEXT_LOST)
+    default:
+        return "Unknown";
+    }
+}
+#undef CASE_STR
+
+void makeGLContextCurrent();
+
+#define EGL_MAKE_CURRENT(func) func;
+// makeGLContextCurrent()
 
 #endif   // PHONEVR_UTILS_H

@@ -207,14 +207,21 @@ task deleteNdk(type: Delete) {
     delete "../ALVR/target/"
 }
 
+task deleteGradleJniCache(type: Delete)
+{
+    // delete merged_jni_libs
+    delete "build/intermediates/merged_jni_libs"
+}
+
 task buildClientLib {
+    dependsOn deleteGradleJniCache
     doLast {
         exec {
             workingDir '../ALVR'
             if(defaultALVRFlavour.length() > 0)
-                commandLine 'cargo', 'xtask', 'build-client-lib', '--no-stdcpp', defaultALVRFlavour
+                commandLine 'cargo', 'xtask', 'build-client-lib', '--all-targets', '--no-stdcpp', defaultALVRFlavour
             else
-                commandLine 'cargo', 'xtask', 'build-client-lib', '--no-stdcpp'
+                commandLine 'cargo', 'xtask', 'build-client-lib', '--all-targets', '--no-stdcpp'
         }
     }
 }
