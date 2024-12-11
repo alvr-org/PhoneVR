@@ -238,12 +238,11 @@ void makeGLContextCurrent() {
         CTX.cachedEglConfig = true;
     }
 
-    if (!eglMakeCurrent(CTX.eglCurrentDisplay,
-                        CTX.eglCurrentDrawSurface,
-                        CTX.eglCurrentReadSurface,
-                        CTX.eglCurrentContext)) {
-        error("eglMakeCurrent() returned error %s", eglGetErrorString());
-    }
+    GL(eglMakeCurrent(CTX.eglCurrentDisplay,
+                      CTX.eglCurrentDrawSurface,
+                      CTX.eglCurrentReadSurface,
+                      CTX.eglCurrentContext));
+    info("eglMakeCurrent() returned error %s", eglGetErrorString());
 }
 
 extern "C" JNIEXPORT void JNICALL Java_viritualisres_phonevr_ALVRActivity_destroyNative(JNIEnv *,

@@ -101,8 +101,7 @@ const char *eglGetErrorString() {
 
 void makeGLContextCurrent();
 
-#define EGL_MAKE_CURRENT(func)                                                                     \
-    func;                                                                                          \
-    makeGLContextCurrent()
+#define EGL_MAKE_CURRENT(func) func;
+// makeGLContextCurrent()
 
 #endif   // PHONEVR_UTILS_H
